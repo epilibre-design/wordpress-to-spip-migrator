@@ -1,0 +1,14 @@
+#SET{id_rubrique,#ENV{id,#ENV{id_wp_catlist,#ENV{id_rubrique}}}}
+<B_catlist>
+<div class="categorie-liste catlist-#GET{id_rubrique}">
+[<h3>(#ENV{titre})</h3>]
+<ul class="liste-items">
+<BOUCLE_catlist(ARTICLES){enfants #GET{id_rubrique}}{statut?}{!par date}{pagination 10}>
+<li class="item">
+	<a href="#URL_ARTICLE">#TITRE</a>
+	[(#ENV{intro,non}|in_array{#ARRAY{0,oui,1,yes}}|ou{#ENV{excerpt,non}|in_array{#ARRAY{0,oui,1,yes}}}|oui)#INTRODUCTION{#ENV{taille_intro,#ENV{excerpt_size,500}}}]
+</li>
+</BOUCLE_catlist>
+</ul>
+</div>
+</B_catlist>

@@ -1,0 +1,30 @@
+[(#REM) 
+	
+	Dans wp il est possible de ne pas avoir de rubriques=tag category
+	on dit que au moins une category existe
+
+	on gère que un nibeau de rubriques.. à aprofondir, là j'ai pas d'exemples ou ne sais pas si possible
+]
+#CACHE{0}
+<BOUCLE_joint_cat( wp_term_taxonomy ){taxonomy IN category,link_category}><BOUCLE_cat( wp_terms ){term_id}>
+<spip_rubriques>
+<id_rubrique>#TERM_ID</id_rubrique>
+<id_parent>#PARENT</id_parent>
+<titre>[(#NAME|sale_wp2spip|texte_backend)]</titre>
+<descriptif></descriptif>
+<texte>[(#DESCRIPTION|sale_wp2spip|texte_backend)]</texte>
+[(#PARENT|=={0}|?{<id_secteur>#TERM_ID</id_secteur>,<id_secteur>#PARENT</id_secteur>})]
+<maj>2010-01-01 00:00:00</maj>
+<export>oui</export>
+<id_import>0</id_import>
+<statut>publie</statut>
+<date>2010-01-01 00:00:00</date>
+<lang>fr</lang>
+<langue_choisie>non</langue_choisie>
+<extra></extra>
+<statut_tmp>publie</statut_tmp>
+<date_tmp>2010-01-01 00:00:00</date_tmp>
+</spip_rubriques>
+</BOUCLE_cat></BOUCLE_joint_cat>
+<!-- #GRAND_TOTAL rubriques -->
+</B_joint_cat>

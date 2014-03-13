@@ -1,0 +1,81 @@
+[(#REM)
+
+	voir http://www.garyc40.com/2010/04/ultimate-guide-to-roles-and-capabilities/
+
+][(#CACHE{0})][(#HTTP_HEADER{Content-type: text/xml[; charset=(#CHARSET)]})]
+<BOUCLE_users( wp_users ){tout}>
+<BOUCLE_firstname(wp_usermeta){user_id=#ID}{meta_key=first_name}>[(#SET{first_name,#META_VALUE})] </BOUCLE_firstname>
+<BOUCLE_lastname(wp_usermeta){user_id=#ID}{meta_key=last_name}>[(#SET{last_name,#META_VALUE}) ]</BOUCLE_lastname>
+<spip_auteurs>
+<id_auteur>#ID</id_auteur>[(#GET{first_name}|et{#GET{last_name}}|?{[(#SET{name,[(#GET{first_name}) ][(#GET{last_name})]})],#SET{name,#USER_NICENAME}})]
+<nom>[(#GET{name})]</nom>
+<bio></bio>
+<email>#USER_EMAIL</email>
+<nom_site></nom_site>
+<url_site>[(#USER_URL|str_replace{'http://',''}|=={''}|?{'',#USER_URL})]</url_site>
+<login>#USER_LOGIN</login>[(#SET{newpass,>[(#USER_LOGIN|concat{#ENV{date}})]})]
+<htpass>[(#GET{newpass}|generer_htpass)]</htpass>[(#SET{alea_actuel,[(#REM|creer_uniqid)]})]
+<alea_actuel>#GET{alea_actuel}</alea_actuel>[(#SET{alea_futur,[(#REM|creer_uniqid)]})]
+<alea_futur>#GET{alea_futur}</alea_futur>
+<pass>[(#GET{alea_actuel}|concat{#GET{newpass}}|md5)]</pass>
+<low_sec></low_sec><BOUCLE_cherche_statut(wp_usermeta){user_id=#ID}{meta_key=wp_capabilities}>[(#SET{statut,#META_VALUE|unserialize|array_keys|table_valeur{0}})][(#GET{statut}|=={administrator}|oui)
+<statut>0minirezo</statut>#SET{statut_ok,ok}
+][(#GET{statut}|=={editor}|oui)#SET{statut_ok,ok}
+<statut>0minirezo</statut>
+][(#REM)
+
+	administrateur resteint, passe redacteur pour l'instant
+
+][(#GET{statut}|=={author}|oui)#SET{statut_ok,ok}
+<statut>1comite</statut>
+][(#GET{statut}|=={contributor}|oui)#SET{statut_ok,ok}
+<statut>1comite</statut>
+][(#GET{statut}|=={subscriber}|oui)#SET{statut_ok,ok}
+<statut>6forum</statut>
+][(#GET{statut_ok}|!={ok}|oui)
+<statut>6forum</statut>
+][(#GET{statut}|=={administrator}|?{<webmestre>oui</webmestre>,<webmestre>non</webmestre>})]</BOUCLE_cherche_statut>
+<maj>#USER_REGISTERED</maj>
+<pgp></pgp>
+<en_ligne></en_ligne>
+<imessage></imessage>
+<messagerie></messagerie>
+<prefs></prefs>
+<cookie_oubli></cookie_oubli>
+<source>spip</source>
+<lang></lang>
+<extra></extra>
+</spip_auteurs>
+</BOUCLE_users>#SET{compte_users,#TOTAL_BOUCLE}</B_users>
+<BOUCLE_auteur(AUTEURS){id_auteur=#SESSION{id_auteur}}{tout}><spip_auteurs>
+<id_auteur>[(#GET{compte_users}|plus{1})]</id_auteur>
+<nom>#NOM</nom>
+<bio>#BIO</bio>
+<email>#EMAIL</email>
+<nom_site>#NOM_SITE</nom_site>
+<url_site>#URL_SITE</url_site>
+<login>#LOGIN</login>
+<pass>#PASS</pass>
+<low_sec>#LOW_SEC</low_sec>
+<statut>#STATUT</statut>
+<webmestre>oui</webmestre>
+<maj>#MAJ</maj>
+<pgp>#PGP</pgp>
+<htpass>#HTPASS</htpass>
+<en_ligne>#EN_LIGNE</en_ligne>
+<imessage>#IMESSAGE</imessage>
+<messagerie>#MESSAGERIE</messagerie>
+<alea_actuel>#ALEA_ACTUEL</alea_actuel>
+<alea_futur>#ALEA_FUTUR</alea_futur>
+<prefs>#PREFS</prefs>
+<cookie_oubli>#COOKIE_OUBLI</cookie_oubli>
+<source>spip</source>
+<lang>#LANG</lang>
+<extra></extra>
+</spip_auteurs>
+</BOUCLE_auteur>
+<BOUCLE_users_tout( wp_users ){tout}><BOUCLE_qui( wp_posts){post_author=#ID}{post_status=publish}>
+<spip_auteurs_articles>
+<id_auteur>#POST_AUTHOR</id_auteur>
+<id_article>#ID</id_article>
+</spip_auteurs_articles></BOUCLE_qui></BOUCLE_users_tout>

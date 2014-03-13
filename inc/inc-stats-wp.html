@@ -1,0 +1,147 @@
+[(#REM) 
+	
+	Statistiques de la base wordpress, prefixe assumé des tables Wordpress wp_ sur la même base!
+
+]
+<ul>
+	<li>
+		[(#REM)
+			ARTICLES publiés
+		]
+		<label><:ecrire:info_articles_2:></label>
+		<BOUCLE_post_publish( wp_posts ){post_status=publish}{post_parent=0}{post_type=post}> </BOUCLE_post_publish>
+		#SET{total_posts,#TOTAL_BOUCLE}
+		<p><:wp2spip:info_nombre_posts{nb=#GET{total_posts}}:></p>
+		</B_post_publish>
+		<BOUCLE_pages( wp_posts ){post_status=publish}{post_type=page}> </BOUCLE_pages>
+		#SET{total_pages,#TOTAL_BOUCLE}
+		<p><:wp2spip:info_nombre_pages{nb=#GET{total_pages}}:></p>
+		</B_pages>
+	</li>
+	#SET{nb_event,0}
+	<B_evenements>
+	<li>
+		[(#REM)
+			Evenements
+		]
+		<label><:wp2spip:label_evenements:></label>
+		<BOUCLE_evenements( wp_ec3_schedule )>
+		<BOUCLE_post( wp_posts ){id=#POST_ID}>  #SET{nb_event,#GET{nb_event}|plus{1}} </BOUCLE_post>
+		</BOUCLE_evenements>
+		<p><:wp2spip:info_nombre_evenements{nb=#GET{nb_event}}:></p>
+	</li>
+	</B_evenements>
+	<li>
+		[(#REM)
+			documents et documents orfelins
+		]
+		<label><:spip:info_documents:></label>
+		#SET{docs_orphelins,0}
+		<BOUCLE_post_documents( wp_posts ){post_type=attachment}>
+		[(#POST_PARENT|=={0}|oui) #SET{docs_orphelins,#GET{docs_orphelins}|plus{1}}]
+		</BOUCLE_post_documents>
+		#SET{total_documents,#TOTAL_BOUCLE}
+		<p><:wp2spip:info_nombre_documents{nb=#GET{total_documents}}:></p>
+		<p><:wp2spip:info_nombre_documents_orphelins{nb=#GET{docs_orphelins}}:></p>
+		</B_post_documents>
+	</li>
+	<li>
+		[(#REM)
+			mots clef en tout inclues les catégories
+			WP: cat 1 par défaut pour les posts non classés
+		]
+		<label><:spip:icone_mots_cles:></label>
+		<BOUCLE_tags( wp_terms ){tout}> </BOUCLE_tags>
+		<p>[(#TOTAL_BOUCLE|singulier_ou_pluriel{wp2spip:tag,wp2spip:tags})]</p>
+		</B_tags>
+		<p><span class="erreur_message"><:wp2spip:erreur_aucun_tag:></span></p>
+		<//B_tags>
+		[(#REM)
+			Liste les rubriques des mots clef en WP tout est tag
+		]
+		<BOUCLE_mots( wp_term_taxonomy ){taxonomy!=category}> </BOUCLE_mots>
+		<p>[(#TOTAL_BOUCLE|singulier_ou_pluriel{wp2spip:mot,wp2spip:mots})]</p>
+		</B_mots>
+		<p><span class="erreur_message"><:wp2spip:info_erreur_aucun_mot:></span></p>
+		<//B_mots>
+	</li>
+	<li>
+		[(#REM)
+			Les RUBRIQUES 
+		]
+		<label><:ecrire:info_rubriques:></label>
+		#SET{count_cat,0}
+		<BOUCLE_joint_cat( wp_term_taxonomy ){taxonomy IN category,link_category}>
+		<BOUCLE_cat( wp_terms ){term_id}>#SET{count_cat,#GET{count_cat}|plus{1}} </BOUCLE_cat>
+		</BOUCLE_joint_cat>
+		[(#GET{count_cat}|=={0}|oui)
+			<p><span class="erreur_message"><:wp2spip:info_erreur_aucune_rubrique:></span></p>]
+		[(#GET{count_cat}|=={0}|non)
+			<p>[(#GET{count_cat}|singulier_ou_pluriel{spip:info_rubriques_un,spip:info_rubriques_nb})]</p>]
+		</B_joint_cat>
+		<p><span class="erreur_message"><:wp2spip:info_erreur_aucune_rubrique:></span></p>
+		<//B_joint_cat>
+	</li>
+	<li>
+		[(#REM) 
+			on liste les auteurs wp
+		]
+		<label><:ecrire:info_auteurs:></label>
+		#SET{liste_restreint_redac,#ARRAY}
+		<BOUCLE_users_wp( wp_users ){tout}>
+		<BOUCLE_cherche_statut(wp_usermeta){user_id=#ID}{meta_key=wp_capabilities}>
+		#SET{tab_wp,#META_VALUE|explode{'"'}}
+		</BOUCLE_cherche_statut>
+		[(#REM) 
+			liste les admins restreint,
+			il seront des redacteur pour le moment je trouve pas leur rubrique wp
+		]
+		[(#GET{tab_wp}|table_valeur{1}|=={author}|oui)
+		#SET{liste_restreint_redac,#GET{liste_restreint_redac}|push{#ID}}]
+		</BOUCLE_users_wp>
+		<p>[(#TOTAL_BOUCLE)] Users</p>
+		</B_users_wp>
+		pas d'users pas normal
+		<//B_users_wp>
+		<B_new_redac>
+		<p>
+		<BOUCLE_new_redac( wp_users ){id IN #GET{liste_restreint_radac}}>
+		[id:#ID user login: #USER_LOGIN]
+		</BOUCLE_new_redac>
+		-admin wp restreint = rédacteurs SPIP, précisez leur statut après l'import
+		</p>
+		</B_new_redac>
+	</li>
+	<li>
+		[(#REM) 
+			les posts
+		]
+		#SET{fils_valide,0}
+		#SET{fils_attente,0}
+		#SET{fils_spam,0}
+		<BOUCLE_fils( wp_comments ){tout}>
+		[(#COMMENT_APPROVED|=={1}|oui)
+			#SET{fils_valide,#GET{fils_valide}|plus{1}}]
+		[(#COMMENT_APPROVED|=={0}|oui)
+			#SET{fils_attente,#GET{fils_attente}|plus{1}}]
+		[(#COMMENT_APPROVED|=={spam}|oui)
+			#SET{fils_spam,#GET{fils_spam}|plus{1}}]
+		</BOUCLE_fils>
+		<label><:ecrire:info_liens_syndiques_3|ucfirst:></label>
+		<p>
+			#TOTAL_BOUCLE forums<br />
+			[(#GET{fils_valide})] validés<br />
+			[(#GET{fils_attente})] en attente<br/>
+			[(#GET{fils_spam})] spams non importés<br/>
+		</p>
+	</B_fils>
+	<BOUCLE_sites(wp_links){tout}> </BOUCLE_sites>
+	<li>
+		[(#REM)
+			les sites
+		]
+		<label><:ecrire:info_sites|ucfirst:></label>
+		<p>[(#TOTAL_BOUCLE|singulier_ou_pluriel{<:spip:info_sites_un:>,<:spip:info_sites_nb:>})]</p>
+	</li>
+	</B_sites>
+</ul>

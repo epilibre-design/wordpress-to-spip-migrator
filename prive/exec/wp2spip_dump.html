@@ -1,0 +1,31 @@
+#CACHE{0}
+<!--#hierarchie-->
+<ul id="chemin">
+	<li><a href="#URL_ECRIRE"><:info_racine_site:></a> &gt; </li>
+	<li><:wp2spip:titre_page_migration:></li>
+</ul>
+<!--/#hierarchie-->
+
+<h1 class="grostitre"><:wp2spip:titre_page_migration:></h1>
+
+[(#SESSION{webmestre}|=={oui}|oui)
+[(#EVAL{_DIR_DUMP}|concat{wp2spip.xml}|file_exists|oui)
+	<p>
+		<:wp2spip:message_conversion_ok:>
+	</p>
+	<p>
+		<:wp2spip:message_aller_maintenance{url=#URL_ECRIRE{admin_tech}}:>
+	</p>
+	#BOITE_OUVRIR{'',important notice}
+	<:wp2spip:message_attention_import:>
+	#BOITE_FERMER]
+[(#EVAL{_DIR_DUMP}|concat{wp2spip.xml}|file_exists|non)
+	#BOITE_OUVRIR{'','error'}
+	<:wp2spip:erreur_fichier_non_cree:>
+	#BOITE_FERMER]
+]
+[(#SESSION{webmestre}|=={oui}|non)
+	#BOITE_OUVRIR{'','error'}
+	<:wp2spip:erreur_non_webmestre:>
+	#BOITE_FERMER
+]

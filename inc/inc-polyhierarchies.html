@@ -1,0 +1,17 @@
+[(#REM)
+	polyhierarchie  si des articles ont plusieurs rubriques
+]#CACHE{0}
+<BOUCLE_polyhierarchie( wp_posts ){post_status=publish}{post_type=post}>
+#SET{les_tags,#ARRAY}
+<BOUCLE_posts_tags( wp_term_relationships ){object_id=#ID}>
+#SET{les_tags,#GET{les_tags}|push{#TERM_TAXONOMY_ID}}
+</BOUCLE_posts_tags>
+<BOUCLE_autres_cat( wp_term_taxonomy term_id.wp_terms){term_taxonomy_id IN #GET{les_tags}}{taxonomy=category}>
+[(#COMPTEUR_BOUCLE|>{1}|oui)
+<spip_rubriques_liens>
+<id_parent>#TERM_ID</id_parent>
+<id_objet>#ID</d_objet>
+ <objet>article</objet>
+</spip_rubriques_liens>]
+</BOUCLE_autres_cat>
+</BOUCLE_polyhierarchie>

@@ -1,0 +1,29 @@
+[(#REM) les sites
+
+en option ds wp #LINK_IMAGE  n'est pas traité comme logo du site]
+#CACHE{0}
+<BOUCLE_sites(wp_links){tout}>
+<spip_syndic>
+<id_syndic>#LINK_ID</id_syndic>
+<BOUCLE_liens( wp_term_relationships ){object_id=#LINK_ID}>
+<BOUCLE_lien_cat( wp_term_taxonomy term_id.wp_terms){term_taxonomy_id}{0,1}>
+<id_rubrique>#TERM_ID</id_rubrique>
+<id_secteur>#TERM_ID</id_secteur>
+</BOUCLE_lien_cat></BOUCLE_liens>
+<nom_site>[(#LINK_NAME|sale_wp2spip|texte_backend)]</nom_site>
+<url_site>#LINK_URL</url_site>
+<url_syndic>#LINK_RSS</url_syndic>
+<descriptif>[(#LINK_DESCRIPTION|sale_wp2spip|texte_backend)] </descriptif>
+<maj>#DATE</maj>
+[(#LINK_RSS|?{<syndication>oui</syndication>,<syndication>non</syndication>})]
+[(#LINK_VISIBLE|=={Y}|?{<statut>publie</statut>,<statut>prop</statut>})]
+<date>#LINK_UPDATED</date>
+<date_syndic>#DATE</date_syndic>
+<date_index>#DATE</date_index>
+<extra></extra>
+<moderation>non</moderation>
+<miroir>non</miroir>
+<oubli>non</oubli>
+<resume>oui</resume>
+</spip_syndic>
+</BOUCLE_sites>

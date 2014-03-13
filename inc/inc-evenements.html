@@ -1,0 +1,20 @@
+[(#REM)
+
+	on va chercher que les posts wp publiés seront des articles publiés,
+
+]
+#CACHE{0}
+<BOUCLE_events( wp_ec3_schedule )>
+<B_post>
+<spip_evenements>
+<id_evenement>#SCHED_ID</id_evenement>
+<date_debut>#START</date_debut>
+<date_fin>#START</date_fin>
+<BOUCLE_post( wp_posts ){id=#POST_ID}>
+<id_article>#ID</id_article>
+<titre>[(#POST_TITLE|sale_wp2spip)]</titre>
+</BOUCLE_post>
+<horaire>[(#ALL_DAY|=={1}|?{oui,non})]</horaire>
+</spip_evenements>
+</B_post>
+</BOUCLE_events>

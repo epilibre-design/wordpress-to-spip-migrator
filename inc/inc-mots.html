@@ -1,0 +1,33 @@
+[(#REM) on prends tous les mots clef même si ils ne sont pas reliés,
+
+on gère pas les titres en double si existants, on importe à l'identique
+on crée un groupe tags wp danslequel on mets tout
+
+]
+#CACHE{0}
+<spip_groupes_mots>
+<id_groupe>1</id_groupe>
+<titre>tags WP</titre>
+<descriptif></descriptif>
+<texte>imports des tags de WP ici</texte>
+<unseul>non</unseul>
+<obligatoire>non</obligatoire>
+<tables_liees>articles</tables_liees>
+<minirezo>oui</minirezo>
+<comite>oui</comite>
+<forum>oui</forum>
+<maj>#ENV{date}</maj>
+</spip_groupes_mots>
+
+<BOUCLE_joint_cat_m( wp_term_taxonomy term_id.wp_terms){taxonomy=post_tag}>
+ <spip_mots>
+<id_mot>#TERM_ID</id_mot>
+<titre>[(#NAME|sale_wp2spip)]</titre>
+<descriptif>[(#_joint_ca_mt:DESCRIPTION|sale_wp2spip)]</descriptif>
+<texte></texte>
+<id_groupe>1</id_groupe>
+<type>tags</type>
+<extra></extra>
+<maj>#ENV{date}</maj>
+</spip_mots>
+</BOUCLE_joint_cat_m>

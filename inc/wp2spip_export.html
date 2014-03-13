@@ -1,0 +1,27 @@
+#CACHE{0}
+[(#HTTP_HEADER{Content-type: text/xml[; charset=(#CHARSET)]})]<?xml 
+version="1.0"[ encoding="(#CHARSET)"]?>
+
+<SPIP
+	version="#SPIP_VERSION"
+	version_base="#EVAL{$GLOBALS['spip_version_base']}"
+	version_archive="1.3"
+	adresse_site="#URL_SITE_SPIP"
+	dir_img="#EVAL{_DIR_IMG}"
+	dir_logos="#EVAL{_DIR_IMG}"
+>
+[(#INCLURE{fond=inc/inc-rubriques}|trim)]
+[(#INCLURE{fond=inc/inc-articles}|trim)]
+[(#INCLURE{fond=inc/inc-pages}|trim)]
+[(#INCLURE{fond=inc/inc-mots}|trim)]
+[(#INCLURE{fond=inc/inc-polyhierarchies}|trim)]
+[(#INCLURE{fond=inc/inc-evenements}|trim)]
+[(#INCLURE{fond=inc/inc-liens-mots}|trim)]
+[(#INCLURE{fond=inc/inc-forums}|trim)]
+[(#INCLURE{fond=inc/inc-docs}|trim)]
+[(#INCLURE{fond=inc/inc-liens-docs}|trim)]
+[(#INCLURE{fond=inc/inc-sites}|trim)]
+[(#INCLURE{fond=inc/inc-types-docs}|trim)]
+[(#INCLURE{fond=inc/inc-auteurs}|trim)]
+[(#INCLURE{fond=inc/inc-metas}|trim)]
+</SPIP>

@@ -1,0 +1,18 @@
+[(#REM) 
+
+	import_all de spip gère bien les xml des objets manquants sauf ceci
+
+]
+#CACHE{0}
+<BOUCLE_types_doc(TYPES_DOCUMENTS){par extension}>
+<spip_types_documents>
+<extension>#EXTENSION</extension>
+<titre>#TITRE</titre>
+<descriptif>#DESCRIPTIF</descriptif>
+<mime_type>#MIME_TYPE</mime_type>
+<inclus>#INCLUS</inclus>
+<upload>#UPLOAD</upload>
+<maj>#MAJ</maj>
+<media>#MEDIA</media>
+</spip_types_documents>
+</BOUCLE_types_doc>

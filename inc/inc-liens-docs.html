@@ -1,0 +1,10 @@
+[(#REM) voir comment on gère vu=oui]
+#CACHE{0}
+<BOUCLE_liens_documents( wp_posts ){post_type=attachment}{post_status=inherit}{post_parent>0}>
+<spip_documents_liens>
+<id_document>#ID</id_document>
+<id_objet>#POST_PARENT</id_objet>
+<objet>article</objet>
+<vu>oui</vu>
+</spip_documents_liens>
+</BOUCLE_liens_documents>

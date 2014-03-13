@@ -1,0 +1,49 @@
+[(#REM) 
+
+	Ajoute les pages wp comme article au sens PAGES UNIQUES
+	si le plugin est actif, le statut des articles est 'publié' et ils sont des pages uniques
+	sinon les articles ont statut 'proposé à la publication', visibles et éditables (id_rubrique=-1)
+
+	Les pages wp multiniveaux:
+		l'id de l'article parent d'un article est stocké dans le champs #EXTRA, okazou 
+
+	A faire? 
+	-* une noisette xml pour le plugin menus qui propose de composer un menu avec les pages uniques et leur hierarchie
+
+]#CACHE{0}
+
+[(#PLUGIN{pages}|oui)
+	#SET{pages,oui}
+]
+<BOUCLE_pages( wp_posts ){post_status=publish}{post_type=page}>
+<spip_articles>
+<id_article>#ID</id_article>
+<surtitre></surtitre>
+<titre>[(#POST_TITLE|sale_wp2spip|texte_backend)]</titre>
+<soustitre></soustitre>
+<id_rubrique>-1</id_rubrique>
+<descriptif></descriptif>
+<chapo></chapo>
+<texte>[(#POST_CONTENT|sale_wp2spip|replace{'<code>',' '}|replace{'</code>',' '}|replace{'&amp;','&'}|replace{'&','&amp;'}|replace{'<','&lt;'}|replace{'>','&gt;'})]</texte>
+<ps></ps>
+<date>#POST_DATE</date>
+[(#GET{pages}|=={oui}|?{<statut>publie</statut>,<statut>prop</statut>})]
+<id_secteur>0</id_secteur>
+<maj>#POST_MODIFIED</maj>
+<export>oui</export>
+<date_redac>#POST_DATE</date_redac>
+<visites>0</visites>
+<referers>0</referers>
+<popularite>0</popularite>
+<accepter_forum>pos</accepter_forum>
+<date_modif>#POST_MODIFIED</date_modif>
+<lang>fr</lang>
+<langue_choisie>non</langue_choisie>
+<id_trad>0</id_trad>
+<extra>#POST_PARENT</extra>
+<id_version>0</id_version>
+<nom_site></nom_site>
+<url_site></url_site>
+<page>page_wp</page>
+</spip_articles>
+</BOUCLE_pages>

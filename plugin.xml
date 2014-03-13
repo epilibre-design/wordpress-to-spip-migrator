@@ -1,0 +1,47 @@
+<plugin>
+
+	<nom>Wordpress2SPIP</nom>
+	<icon>wp2spip.png</icon>
+	<categorie>divers</categorie>
+	<auteur>[Daniel Anic->http://www.anic.fr]</auteur>
+	<version>0.3.2</version>
+
+	<etat>test</etat>
+
+	<description>Importer un blog Wordpress dans un site SPIP local vide.
+
+{{{Mode d'emploi}}}
+-* installer un SPIP à côté de Wordpress sur le serveur ;
+-* configurer selon vos besoins, l'utilisation des mots clefs des documents joints aux articles, les forums ;
+-* installer le plugin comme d'habitude ;
+-* installer les plugins optionnels ([voir doc->http://www.spip-contrib.net/Wordpress-2-SPIP]) ;
+-* menu 'configuration / migration depuis wordpress' lancer la conversion ;
+-* depuis le menu 'configuration / maintenance du site' restaurer le fichier wp2spip.xml ({{Si l'import se fige}}rafraîchissez la page) ;
+-* si vous refaites la manipulation, repartez toujours depuis un site spip vierge.
+-* une fois la base importée, se reconnecter avec son compte webmestre SPIP, et pour les auteurs Wordpress, ils doivent simplement recréer leur mot de passe via la page de login avec 'mot de passe perdu' ;
+-* Choisisez les rubriques des articles proposés à la publication (les pages importées) et publiez les ;
+-* Choisisez les rubriques (depuis edition auteurs) des admins restreints signalés et devenus rédacteurs ;
+	
+http://contrib.spip.net/Wordpress-2-SPIP
+	</description>
+	<prefix>wp2spip</prefix>
+
+	<lien>http://contrib.spip.net/Wordpress-2-SPIP</lien>
+	<necessite id="SPIP" version="[2.1.0;2.1.99]" />
+	<utilise id="pages" version="[0.3.7;]" />
+	<utilise id="polyhier" version="[1.0.0;]" />
+	<bouton id="wp2spip" parent="bando_administration">
+		<icone>wp2spip.png</icone>
+		<url>wp2spip</url>
+		<titre>Migration depuis Wordpress</titre>
+	</bouton>
+
+	<bouton id="wp2spip" parent="configuration">
+		<icone>wp2spip.png</icone>
+		<titre>wp2spip:titre_page_migration</titre>
+	</bouton>
+	<bouton id="wp2spip_fin" parent="configuration">
+		<icone>wp2spip.png</icone>
+		<titre>wp2spip:titre_post_import</titre>
+	</bouton>
+</plugin>

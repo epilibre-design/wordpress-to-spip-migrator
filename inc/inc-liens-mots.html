@@ -1,0 +1,8 @@
+[(#REM) on fait les liens que sur les articles, on verra sur exemple plus tard si d'autres objets sont liés]
+#CACHE{0}
+<BOUCLE_post_tags( wp_term_taxonomy term_taxonomy_id.wp_term_relationships ){taxonomy=post_tag}>
+<spip_mots_articles>
+<id_mot>#TERM_ID</id_mot>
+<id_article>#OBJECT_ID</id_article>
+</spip_mots_articles>
+</BOUCLE_post_tags>

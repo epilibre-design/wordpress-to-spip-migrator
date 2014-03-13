@@ -1,0 +1,35 @@
+#CACHE{0}
+[(#REM) 
+	Revoir le test si site spip vide
+]
+<!--#hierarchie-->
+<ul id="chemin">
+	<li><a href="#URL_ECRIRE"><:info_racine_site:></a> &gt; </li>
+	<li><:wp2spip:titre_page_migration:></li>
+</ul>
+<!--/#hierarchie-->
+
+<h1 class="grostitre"><:wp2spip:titre_page_migration:></h1>
+
+<div class="formulaire_spip">
+	[(#SESSION{webmestre}|=={oui}|non)
+	<p class="erreur_message">
+		<:wp2spip:erreur_non_webmestre:>
+	</p>]
+	
+	<ul>
+		<li class="fieldset">
+			<h3 class="legend"><:wp2spip:titre_contenu_base:></h3>
+			<INCLURE{fond=inc/inc-stats-wp} />
+		</li>
+	</ul>
+	<BOUCLE_test(ARTICLES){tout}> </BOUCLE_test>
+	<div class="notice">
+	<p><:wp2spip:message_notice_site_vide:></p>
+	</div>
+	</B_test>
+	[(#SESSION{webmestre}|=={oui}|oui)
+	<div class="boutons">
+		[(#BOUTON_ACTION{<:wp2spip:label_generer_fichier:>, #URL_ACTION_AUTEUR{wp2spip,1,#URL_ECRIRE{wp2spip_dump}},'submit',<:wp2spip:alerte_generation_fichier:>})]
+	</div>]
+</div>

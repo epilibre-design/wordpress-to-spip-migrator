@@ -1,0 +1,35 @@
+[(#REM)
+
+	on va chercher que les Metas du site :
+	
+	- Le nom du blog
+	- l'adresse du webmestre
+	- la description du blog
+]
+#CACHE{0}
+<BOUCLE_blogname( wp_options ){option_name=blogname}>
+<spip_meta>
+<nom>nom_site</nom>
+<valeur>[(#OPTION_VALUE|sale_wp2spip)]</valeur>
+<impt>oui</impt>
+<maj>#ENV{date}</maj>
+</spip_meta>
+</BOUCLE_blogname>
+
+<BOUCLE_email_webmaster( wp_options ){option_name=admin_email}>
+<spip_meta>
+<nom>email_webmaster</nom>
+<valeur>#OPTION_VALUE</valeur>
+<impt>oui</impt>
+<maj>#ENV{date}</maj>
+</spip_meta>
+</BOUCLE_email_webmaster>
+
+<BOUCLE_blogdescription( wp_options ){option_name=blogdescription}>
+<spip_meta>
+<nom>descriptif_site</nom>
+<valeur>[(#OPTION_VALUE|sale_wp2spip)]</valeur>
+<impt>oui</impt>
+<maj>#ENV{date}</maj>
+</spip_meta>
+</BOUCLE_blogdescription>

@@ -1,0 +1,150 @@
+<!--#hierarchie-->
+<ul id="chemin">
+	<li><a href="#URL_ECRIRE"><:info_racine_site:></a> &gt; </li>
+	<li><:wp2spip:titre_page_migration:></li>
+</ul>
+<!--/#hierarchie-->
+
+<h1 class="grostitre"><:wp2spip:titre_post_import:></h1>
+
+<p class="explication"><:wp2spip:explication_post_import:></p>
+
+#SET{url_wordpress,''}
+<BOUCLE_url_wordpress(wp_options){option_name = siteurl}>
+#SET{url_wordpress,#OPTION_VALUE}
+</BOUCLE_url_wordpress>
+
+<B_articles_documents>
+<div class="cadre cadre-r">
+	<div class="cadre_padding">
+	<h2>#GRAND_TOTAL (wp-content)</h2>
+	<ul class="liste-items">
+		<BOUCLE_articles_documents(ARTICLES){texte == \/wp-content}{pagination 20}>
+		<li class="item"><a href="[(#ID_ARTICLE|generer_url_entite{article})]">#TITRE</a></li>
+		</BOUCLE_articles_documents>
+	</ul>
+	<p class="boutons">[(#BOUTON_ACTION{<:wp2spip:bouton_recuperer_documents:>,#URL_ACTION_AUTEUR{wp2spip_documents_internes,1,#SELF}})]</p>
+	</div>
+</div>
+</B_articles_documents>
+
+<div class="cadre cadre-r">
+	<div class="cadre_padding">
+
+<B_inexistants>
+	<div class="error">
+		Les posts suivants n'existent pas ou plus :
+	<BOUCLE_inexistants(POUR){tableau #CONFIG{wp_posts_disparus}}{', '}>#VALEUR</BOUCLE_inexistants>
+	</div>
+</B_inexistants>
+
+<B_articles_liens>
+	<h2>#GRAND_TOTAL (../?page_id=%)</h2>
+	<ul class="liste-items">
+		<BOUCLE_articles_liens(ARTICLES){texte LIKE %->../?page_id=%}{pagination 20}>
+		<li class="item"><a href="[(#ID_ARTICLE|generer_url_entite{article})]">#TITRE</a></li>
+		</BOUCLE_articles_liens>
+	</ul>
+	<p class="boutons">[(#BOUTON_ACTION{<:wp2spip:bouton_reparer_liens_internes:>,#URL_ACTION_AUTEUR{wp2spip_liens_internes,1,#SELF}})]</p>
+</B_articles_liens>
+
+<B_articles_liens_page_id>
+	<h2>#GRAND_TOTAL (/?page_id=%)</h2>
+	<ul class="liste-items">
+		<BOUCLE_articles_liens_page_id(ARTICLES){texte LIKE %->/?page_id=%}{pagination 20}>
+		<li class="item"><a href="[(#ID_ARTICLE|generer_url_entite{article})]">#TITRE</a></li>
+		</BOUCLE_articles_liens_page_id>
+	</ul>
+	<p class="boutons">[(#BOUTON_ACTION{<:wp2spip:bouton_reparer_liens_internes:>,#URL_ACTION_AUTEUR{wp2spip_liens_internes,1,#SELF}})]</p>
+</B_articles_liens_page_id>
+
+<B_articles_liens_url_page_id>
+	<h2>#GRAND_TOTAL ([(#GET{url_wordpress})]/?page_id=%)</h2>
+	<ul class="liste-items">
+		<BOUCLE_articles_liens_url_page_id(ARTICLES){texte == ->[.]*#GET{url_wordpress}/\?pa*g*e*_*i*d*=\d*}{pagination 20}>
+			<li class="item"><a href="[(#ID_ARTICLE|generer_url_entite{article})]">#TITRE</a></li>
+		</BOUCLE_articles_liens_url_page_id>
+	</ul>
+	<p class="boutons">[(#BOUTON_ACTION{<:wp2spip:bouton_reparer_liens_internes:>,#URL_ACTION_AUTEUR{wp2spip_liens_internes,1,#SELF}})]</p>
+</B_articles_liens_url_page_id>
+
+<B_articles_liens_p_rel>
+	<h2>#GRAND_TOTAL (/?p=XX)</h2>
+	<ul class="liste-items">
+		<BOUCLE_articles_liens_p_rel(ARTICLES){texte LIKE %->/?p=%}{pagination 20}>
+		<li class="item"><a href="[(#ID_ARTICLE|generer_url_entite{article})]">#TITRE</a></li>
+		</BOUCLE_articles_liens_p_rel>
+	</ul>
+	<p class="boutons">[(#BOUTON_ACTION{<:wp2spip:bouton_reparer_liens_internes:>,#URL_ACTION_AUTEUR{wp2spip_liens_internes,1,#SELF}})]</p>
+</B_articles_liens_p_rel>
+
+<B_articles_liens_p>
+	<h2>#GRAND_TOTAL (../?p=XX)</h2>
+	<ul class="liste-items">
+		<BOUCLE_articles_liens_p(ARTICLES){texte LIKE %->../?p=%}{pagination 20}>
+		<li class="item"><a href="#URL_ARTICLE">#TITRE</a></li>
+		</BOUCLE_articles_liens_p>
+	</ul>
+	<p class="boutons">[(#BOUTON_ACTION{<:wp2spip:bouton_reparer_liens_internes:>,#URL_ACTION_AUTEUR{wp2spip_liens_internes,1,#SELF}})]</p>
+</B_articles_liens_p>
+
+<B_articles_catlist>
+	<h2>#GRAND_TOTAL ([catlist ...])</h2>
+	<ul class="liste-items">
+		<BOUCLE_articles_catlist(ARTICLES){texte == \\[catlist.*\\]}{pagination 20}>
+		<li class="item"><a href="#URL_ARTICLE">#TITRE</a></li>
+		</BOUCLE_articles_catlist>
+	</ul>
+	<p class="boutons">[(#BOUTON_ACTION{<:wp2spip:bouton_reparer_catlist:>,#URL_ACTION_AUTEUR{wp2spip_html,catlist,#SELF}})]</p>
+</B_articles_catlist>
+
+<B_articles_dl>
+	<h2>#GRAND_TOTAL (div.*dl...)</h2>
+	<ul class="liste-items">
+		<BOUCLE_articles_dl(ARTICLES){texte ==div.*dl.*dt.*/dt.*/dl.*/div}{pagination 20}>
+		<li class="item"><a href="#URL_ARTICLE">#TITRE</a></li>
+		</BOUCLE_articles_dl>
+	</ul>
+	<p class="boutons">[(#BOUTON_ACTION{<:wp2spip:bouton_reparer_dl:>,#URL_ACTION_AUTEUR{wp2spip_html,dls,#SELF}})]</p>
+</B_articles_dl>
+
+<B_articles_spans>
+	<h2>#GRAND_TOTAL (span.*/span)</h2>
+	<ul class="liste-items">
+		<BOUCLE_articles_spans(ARTICLES){texte ==span.*/span}{pagination 20}>
+		<li class="item"><a href="#URL_ARTICLE">#TITRE</a></li>
+		</BOUCLE_articles_spans>
+	</ul>
+	<p class="boutons">[(#BOUTON_ACTION{<:wp2spip:bouton_reparer_span:>,#URL_ACTION_AUTEUR{wp2spip_html,spans,#SELF}})]</p>
+</B_articles_spans>
+
+<B_articles_font>
+	<h2>#GRAND_TOTAL (font.*/font)</h2>
+	<ul class="liste-items">
+		<BOUCLE_articles_font(ARTICLES){texte ==font.*/font}{pagination 20}>
+		<li class="item"><a href="#URL_ARTICLE">#TITRE</a></li>
+		</BOUCLE_articles_font>
+	</ul>
+	<p class="boutons">[(#BOUTON_ACTION{<:wp2spip:bouton_reparer_font:>,#URL_ACTION_AUTEUR{wp2spip_html,font,#SELF}})]</p>
+</B_articles_font>
+
+<B_articles_accolades>
+	<h2>#GRAND_TOTAL (accolades vides)</h2>
+	<ul class="liste-items">
+		<BOUCLE_articles_accolades(ARTICLES){texte == \{+ +\}+}{pagination 20}>
+		<li class="item"><a href="#URL_ARTICLE">#TITRE</a></li>
+		</BOUCLE_articles_accolades>
+	</ul>
+	<p class="boutons">[(#BOUTON_ACTION{<:wp2spip:bouton_reparer_accolades:>,#URL_ACTION_AUTEUR{wp2spip_html,accolades_vides,#SELF}})]</p>
+</B_articles_accolades>
+
+<B_articles_sauts>
+	<h2>#GRAND_TOTAL (sauts de ligne vides)</h2>
+	<ul class="liste-items">
+		<BOUCLE_articles_sauts(ARTICLES){texte == \n\n\n+}{pagination 20}>
+		<li class="item"><a href="#URL_ARTICLE">#TITRE</a></li>
+		</BOUCLE_articles_sauts>
+	</ul>
+	<p class="boutons">[(#BOUTON_ACTION{<:wp2spip:bouton_reparer_sauts:>,#URL_ACTION_AUTEUR{wp2spip_html,sauts,#SELF}})]</p>
+</B_articles_sauts>
+</div>
