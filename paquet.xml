@@ -1,0 +1,22 @@
+<paquet
+	prefix="wp2spip"
+	categorie="divers"
+	version="0.3.2"
+	etat="test"
+	compatibilite="[3.0.0;3.1.99]"
+	logo="wp2spip.png"
+	documentation="http://contrib.spip.net/Wordpress-2-SPIP"
+>	
+
+	<nom>Wordpress2SPIP</nom>
+	<!-- Importer un blog Wordpress dans un site SPIP local vide -->
+
+	<auteur lien="http://www.anic.fr">Daniel Anic</auteur>
+
+	<necessite nom="dump_xml" />
+	<utilise nom="pages" compatibilite="[0.3.7;[" />
+	<utilise nom="polyhier" compatibilite="[1.0.0;[" />
+
+	<menu nom="wp2spip" titre="wp2spip:titre_page_migration" parent="configuration" icone="wp2spip.png" />
+	<menu nom="wp2spip_fin" titre="wp2spip:titre_post_import" parent="configuration" icone="wp2spip.png" />
+</paquet>
