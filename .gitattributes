@@ -26,9 +26,9 @@ inc/wp2spip_export_fonctions.php -text
 lang/paquet-wp2spip_fr.php -text
 lang/wp2spip_fr.php -text
 modeles/wp_catlist.html -text
-/paquet-migration.sh -text
 /paquet.xml -text
 prive/exec/wp2spip.html -text
 prive/exec/wp2spip_dump.html -text
 prive/exec/wp2spip_fin.html -text
-/wp2spip.png -text
+prive/themes/spip/images/wp2spip-16.png -text
+prive/themes/spip/images/wp2spip.png -text

@@ -4,7 +4,7 @@
 	version="0.3.2"
 	etat="test"
 	compatibilite="[3.0.0;3.1.99]"
-	logo="wp2spip.png"
+	logo="prive/themes/spip/images/wp2spip.png"
 	documentation="http://contrib.spip.net/Wordpress-2-SPIP"
 >	
 
@@ -17,6 +17,6 @@
 	<utilise nom="pages" compatibilite="[0.3.7;[" />
 	<utilise nom="polyhier" compatibilite="[1.0.0;[" />
 
-	<menu nom="wp2spip" titre="wp2spip:titre_page_migration" parent="configuration" icone="wp2spip.png" />
-	<menu nom="wp2spip_fin" titre="wp2spip:titre_post_import" parent="configuration" icone="wp2spip.png" />
+	<menu nom="wp2spip" titre="wp2spip:titre_page_migration" parent="menu_configuration" icone="images/wp2spip-16.png" />
+	<menu nom="wp2spip_fin" titre="wp2spip:titre_post_import" parent="menu_configuration" icone="images/wp2spip-16.png" />
 </paquet>
