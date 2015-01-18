@@ -1,7 +1,7 @@
 <paquet
 	prefix="wp2spip"
 	categorie="divers"
-	version="0.3.2"
+	version="0.3.3"
 	etat="test"
 	compatibilite="[3.0.0;3.1.99]"
 	logo="prive/themes/spip/images/wp2spip.png"
