@@ -24,6 +24,7 @@ inc/simple_html_dom.php -text
 inc/wp2spip_export.html -text
 inc/wp2spip_export_fonctions.php -text
 lang/paquet-wp2spip_fr.php -text
+lang/wp2spip.xml -text
 lang/wp2spip_fr.php -text
 modeles/wp_catlist.html -text
 /paquet.xml -text
