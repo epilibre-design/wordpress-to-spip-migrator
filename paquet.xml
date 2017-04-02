@@ -5,7 +5,7 @@
 	etat="test"
 	compatibilite="[3.0.0;3.1.*]"
 	logo="prive/themes/spip/images/wp2spip.png"
-	documentation="http://contrib.spip.net/Wordpress-2-SPIP"
+	documentation="https://contrib.spip.net/Wordpress-2-SPIP"
 >
 
 	<nom>Wordpress2SPIP</nom>
