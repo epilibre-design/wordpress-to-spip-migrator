@@ -3,7 +3,7 @@
  * Plugin wp2spip
  * Licence GPL
  * Copie colle depuis
- * http://zone.spip.org/trac/spip-zone/browser/_plugins_/sale/sale_fonctions.php
+ * https://zone.spip.org/trac/spip-zone/browser/_plugins_/sale/sale_fonctions.php
  */
 
 if (!defined("_ECRIRE_INC_VERSION")) return;
