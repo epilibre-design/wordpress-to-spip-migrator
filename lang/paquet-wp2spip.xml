@@ -1,9 +1,9 @@
 <traduction
 	module="paquet-wp2spip"
-	id="paquet-wp2spip--wp2spip-b98b3"
+	id="paquet-wp2spip--wp2spip-97274"
 	gestionnaire="salvatore"
 	url="https://trad.spip.net"
-	source="svn://zone.spip.org/spip-zone/_plugins_/wp2spip/trunk/lang"
+	source="https://git.spip.net/spip-contrib-extensions/wp2spip.git"
 	reference="fr">
 	<langue code="fr" url="https://trad.spip.net/tradlang_module/paquet-wp2spip?lang_cible=fr" total="2" traduits="2" relire="0" modifs="0" nouveaux="0" pourcent="100.00" />
 </traduction>
