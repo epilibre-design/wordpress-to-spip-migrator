@@ -1,9 +1,9 @@
 <traduction
 	module="wp2spip"
-	id="wp2spip--wp2spip-b98b3"
+	id="wp2spip--wp2spip-97274"
 	gestionnaire="salvatore"
 	url="https://trad.spip.net"
-	source="svn://zone.spip.org/spip-zone/_plugins_/wp2spip/trunk/lang"
+	source="https://git.spip.net/spip-contrib-extensions/wp2spip.git"
 	reference="fr">
 	<langue code="ar" url="https://trad.spip.net/tradlang_module/wp2spip?lang_cible=ar" total="28" traduits="28" relire="0" modifs="0" nouveaux="0" pourcent="100.00">
 		<traducteur nom="George" lien="https://trad.spip.net/auteur/جورج-قندلفت" />
