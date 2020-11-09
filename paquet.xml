@@ -2,6 +2,7 @@
 	prefix="wp2spip"
 	categorie="divers"
 	version="2.0.0"
+	schema="2.0.0"
 	etat="dev"
 	compatibilite="[3.2.0;3.2.*]"
 	logo="wp2spip.svg"
@@ -11,7 +12,12 @@
 	<!-- Importer un blog Wordpress dans un site SPIP local vide -->
 
 	<auteur lien="https://www.mukt.fr">Mukt</auteur>
-
+	
+	<pipeline nom="declarer_tables_objets_sql" inclure="wp2spip_pipelines.php" />
+	
+	<!-- Pipelines du plugin -->
+	<pipeline nom="w2spip_traitements" action="" />
+	
 	<necessite nom="sale" compatibilite="[0.1.5;]" />
 	<necessite nom="pages" compatibilite="[1.5.3;[" />
 	<necessite nom="polyhier" compatibilite="[3.6.14;[" />
