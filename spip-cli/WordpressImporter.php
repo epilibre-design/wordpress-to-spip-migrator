@@ -13,6 +13,7 @@ class WordpressImporter extends Command {
 	public $dir_wordpress = null;
 	public $wp_version = null;
 	public $base = 'wordpress';
+	public $update = false;
 	
 	protected function configure() {
 		$this
@@ -43,6 +44,12 @@ class WordpressImporter extends Command {
 				InputOption::VALUE_OPTIONAL,
 				'Affiche la version du Wordpress et les traitements disponibles.'
 			)
+			->addOption(
+				'update',
+				'u',
+				InputOption::VALUE_NONE,
+				'Met à jour les contenus déjà migrés avec la version du Wordpress. Peut être utile si le site Wordpress continue d’évoluer.'
+			)
 		;
 	}
 
@@ -66,6 +73,9 @@ class WordpressImporter extends Command {
 			include_once $this->dir_wordpress . 'wp-includes/version.php';
 			$this->wp_version = $wp_version;
 			
+			// Est-ce qu'on doit mettre à jourles choses déjà migrées ?
+			$this->update = $input->getOption('update');
+			
 			$traitements_disponibles = array(
 				'importer_auteurs',
 				'importer_categories',
@@ -77,7 +87,8 @@ class WordpressImporter extends Command {
 			
 			// Infos
 			$output->writeln(array(
-				'<info>C’est parti pour importer ce Wordpress :</info>',
+				'<info>C’est parti pour importer ce Wordpress !</info>',
+				'* <comment>'. ($this->update ? 'Les contenus déjà migrés seront mis à jour.' : 'Les contenus déjà migrés ne seront pas ré-importés.') .'</comment>',
 				'* <comment>Version</comment> : ' . $this->wp_version,
 				'* <comment>Base</comment> : ' . $this->base,
 				'* <comment>Fichiers</comment> : ' . $this->dir_wordpress,
@@ -128,7 +139,7 @@ class WordpressImporter extends Command {
 		}
 		// Sinon rien, on peut pas faire cette opération
 		else {
-			$this->output->writeln("\n<error>Aucune fonction implémentée pour le traitement « $traitement ».</error>");
+			$this->output->writeln("\n<error>Aucune fonction implémentée pour le traitement « $traitement » pour cette version {$this->wp_version}.</error>");
 		}
 		
 		// On lance le traitement trouvé
