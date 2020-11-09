@@ -7,12 +7,22 @@ if (!defined('_ECRIRE_INC_VERSION')) {
 }
 
 function wp2spip_importer_auteurs_dist($command) {
+	// S'il n'y a pas l'option update, on évite de charger pour rien les auteurs déjà migrés
+	$ids_wordpress = array(0);
+	if (
+		!$command->update
+		and $ids_wordpress = sql_allfetsel('id_wordpress', 'spip_auteurs', 'id_wordpress>0')
+	) {
+		$ids_wordpress = array_map('reset', $ids_wordpress);
+	}
+	
 	// On va chercher tous les auteurs Wordpress qui ont l'air pertinent
 	if ($wp_users = sql_allfetsel(
 		'*',
 		'wp_users',
 		array(
 			'(user_email != "" or user_nicename not like "\_%")', // à cause d'un plugin ou un hack qui peut créer des millions de lignes de faux users
+			sql_in('ID', $ids_wordpress, 'NOT'),
 		),
 		'',
 		'',
@@ -24,8 +34,9 @@ function wp2spip_importer_auteurs_dist($command) {
 		include_spip('inc/autoriser');
 		
 		$nb_users = count($wp_users);
-		$nb_ok = 0;
-		$command->output->writeln("$nb_users comptes utilisateurs trouvés");
+		$nb_import = 0;
+		$nb_maj = 0;
+		$command->output->writeln("$nb_users comptes utilisateurs à importer.");
 		
 		$progressBar = new ProgressBar($command->output, $nb_users);
 		$progressBar->setFormat('verbose');
@@ -47,7 +58,8 @@ function wp2spip_importer_auteurs_dist($command) {
 			$auteur = array(
 				'email' => $wp_user['user_email'],
 				'nom' => trim($metas['first_name'].' '.$metas['last_name']) ?: $wp_user['display_name'] ?: $wp_user['user_nicename'] ?: $wp_user['user_login'],
-				'login' => $wp_user['user_login'],
+				'login' => $wp_user['user_login'] ?: uniqid(), // Toujours login non vide pour avoir le droit de faire un rappel avec son email
+				'pass' => ' ', // Mot de passe non vide pour avoir le droit de faire un rappel
 				'url_site' => $wp_user['user_url'],
 				'id_wordpress' => $id_wordpress_user,
 			);
@@ -59,7 +71,7 @@ function wp2spip_importer_auteurs_dist($command) {
 				$wp_statut = array_keys($metas['wp_capabilities'])[0];
 			}
 			switch ($wp_statut) {
-				case 'adminitrator':
+				case 'administrator':
 					$auteur['statut'] = '0minirezo';
 					$auteur['webmestre'] = 'oui';
 					break;
@@ -80,7 +92,7 @@ function wp2spip_importer_auteurs_dist($command) {
 					break;
 			}
 			
-			// Si ça n'a pas déjà été importé
+			// Si ça n'a pas déjà été importé c'est un ajout
 			if (!$id_auteur = sql_getfetsel('id_auteur', 'spip_auteurs', 'id_wordpress = '.$id_wordpress_user)) {
 				$id_auteur = objet_inserer('auteur');
 				
@@ -88,7 +100,16 @@ function wp2spip_importer_auteurs_dist($command) {
 				autoriser_exception('instituer', 'auteur', $id_auteur, true);
 				
 				if ($ok = objet_modifier('auteur', $id_auteur, $auteur)) {
-					$nb_ok++;
+					$nb_import++;
+				}
+			}
+			// Sinon on ne met à jour que si demandé
+			elseif ($command->update) {
+				autoriser_exception('modifier', 'auteur', $id_auteur, true);
+				autoriser_exception('instituer', 'auteur', $id_auteur, true);
+				
+				if ($ok = objet_modifier('auteur', $id_auteur, $auteur)) {
+					$nb_maj++;
 				}
 			}
 			
