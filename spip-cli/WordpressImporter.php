@@ -5,11 +5,14 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Helper\ProgressBar;
 
 class WordpressImporter extends Command {
 	public $input = null;
 	public $output = null;
-	public $wp_version = '';
+	public $dir_wordpress = null;
+	public $wp_version = null;
+	public $base = 'wordpress';
 	
 	protected function configure() {
 		$this
@@ -20,6 +23,25 @@ class WordpressImporter extends Command {
 				'dir_wordpress',
 				InputArgument::REQUIRED,
 				'Chemin vers le dossier d’installation du Wordpress'
+			)
+			->addOption(
+				'base',
+				'b',
+				InputOption::VALUE_OPTIONAL,
+				'Identifiant de la base Wordpress déclarée dans SPIP',
+				'wordpress'
+			)
+			->addOption(
+				'traitements',
+				't',
+				InputOption::VALUE_OPTIONAL,
+				'Liste de traitements séparés par des virgules, si on veut ne faire que certains.'
+			)
+			->addOption(
+				'info',
+				'i',
+				InputOption::VALUE_OPTIONAL,
+				'Affiche la version du Wordpress et les traitements disponibles.'
 			)
 		;
 	}
@@ -34,22 +56,50 @@ class WordpressImporter extends Command {
 		
 		// Si on est bien dans un dossier SPIP
 		if ($spip_loaded) {
-			$dir_wordpress = rtrim($input->getArgument('dir_wordpress'), '/') . '/';
+			// Dossier sur le disque où se trouve les fichiers du Wordpress
+			$this->dir_wordpress = rtrim($input->getArgument('dir_wordpress'), '/') . '/';
+			
+			// Identifiant de la base Wordpress dans SPIP
+			$this->base = $input->getOption('base');
 			
 			// On va chercher la version de Wordpress dont il s'agit
-			include_once $dir_wordpress . 'wp-includes/version.php';
+			include_once $this->dir_wordpress . 'wp-includes/version.php';
 			$this->wp_version = $wp_version;
 			
-			$traitements = array(
+			$traitements_disponibles = array(
 				'importer_auteurs',
 				'importer_categories',
 				'importer_tags',
 				'importer_documents',
 				'importer_articles',
 			);
-			$traitements = pipeline('w2spip_traitements', $traitements);
+			$traitements_disponibles = pipeline('w2spip_traitements', $traitements_disponibles);
 			
-			foreach ($traitements as $traitement) {
+			// Infos
+			$output->writeln(array(
+				'<info>C’est parti pour importer ce Wordpress :</info>',
+				'* <comment>Version</comment> : ' . $this->wp_version,
+				'* <comment>Base</comment> : ' . $this->base,
+				'* <comment>Fichiers</comment> : ' . $this->dir_wordpress,
+				'* <comment>Traitements disponibles</comment> : ' . join(', ', $traitements_disponibles),
+				'',
+			));
+			
+			// Si on cherche juste à lire les infos, on s'arrête là
+			if ($input->hasParameterOption(array('--info', '-i'))) {
+				exit;
+			}
+			
+			// Peut-être qu'on veut lancer seulement certains traitements
+			if ($traitements_ok = $input->getOption('traitements')) {
+				$traitements_ok = array_map('trim', explode(',', $traitements_ok));
+				$traitements_ok = array_intersect($traitements_disponibles, $traitements_ok);
+			}
+			else {
+				$traitements_ok = $traitements_disponibles;
+			}
+			
+			foreach ($traitements_ok as $traitement) {
 				$this->appliquer_traitement($traitement);
 			}
 		}
@@ -78,12 +128,12 @@ class WordpressImporter extends Command {
 		}
 		// Sinon rien, on peut pas faire cette opération
 		else {
-			$this->output->writeln("<error>Aucune fonction implémentée pour le traitement « $traitement ».</error>");
+			$this->output->writeln("\n<error>Aucune fonction implémentée pour le traitement « $traitement ».</error>");
 		}
 		
 		// On lance le traitement trouvé
 		if ($fonction) {
-			$this->output->writeln("<info>Lancement du traitement « $traitement »…</info>");
+			$this->output->writeln("\n<info>Lancement du traitement « $traitement »…</info>");
 			$fonction($this);
 		}
 	}
