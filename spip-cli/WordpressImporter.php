@@ -19,7 +19,9 @@ class WordpressImporter extends Command {
 		$this
 			->setName('wordpress:importer')
 			->setDescription('Importe un site Wordpress dans un site SPIP')
-			->setHelp('spip wordpress:importer ../site_wordpress')
+			->setHelp('Pour lancer la commande, vous devez avoir préalablement ajouté la base de données du Wordpress en tant que base externe dans votre SPIP, et fournir en argument le dossier où se trouve les fichiers du Wordpress.
+
+Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est gardé et il ne sera jamais réimporté. Vous pouvez donc lancer la commande plusieurs fois sans soucis, seul les nouveaux contenus jamais importés seront migrés. Cela permet notamment de continuer à lancer la commande si le site Wordpress continue d’évoluer.')
 			->addArgument(
 				'dir_wordpress',
 				InputArgument::REQUIRED,
@@ -36,7 +38,7 @@ class WordpressImporter extends Command {
 				'traitements',
 				't',
 				InputOption::VALUE_OPTIONAL,
-				'Liste de traitements séparés par des virgules, si on veut ne faire que certains.'
+				'Liste de traitements séparés par des virgules, si on veut n’en lancer que certains.'
 			)
 			->addOption(
 				'info',
