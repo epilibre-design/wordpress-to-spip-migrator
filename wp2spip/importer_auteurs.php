@@ -96,6 +96,7 @@ function wp2spip_importer_auteurs_dist($command) {
 			if (!$id_auteur = sql_getfetsel('id_auteur', 'spip_auteurs', 'id_wordpress = '.$id_wordpress_user)) {
 				$id_auteur = objet_inserer('auteur');
 				
+				// INSUP
 				autoriser_exception('modifier', 'auteur', $id_auteur, true);
 				autoriser_exception('instituer', 'auteur', $id_auteur, true);
 				
@@ -105,6 +106,7 @@ function wp2spip_importer_auteurs_dist($command) {
 			}
 			// Sinon on ne met à jour que si demandé
 			elseif ($command->update) {
+				// INSUP
 				autoriser_exception('modifier', 'auteur', $id_auteur, true);
 				autoriser_exception('instituer', 'auteur', $id_auteur, true);
 				

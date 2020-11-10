@@ -80,8 +80,8 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 			
 			$traitements_disponibles = array(
 				'importer_auteurs',
-				'importer_categories',
-				'importer_tags',
+				'importer_rubriques',
+				'importer_mots',
 				'importer_documents',
 				'importer_articles',
 			);
