@@ -101,6 +101,9 @@ function wp2spip_importer_rubriques_dist($command) {
 			
 			$progressBar->advance();
 		}
+		
+		// Une ligne vide à la fin
+		$command->output->writeln();
 	}
 }
 
