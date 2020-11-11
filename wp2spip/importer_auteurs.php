@@ -119,6 +119,6 @@ function wp2spip_importer_auteurs_dist($command) {
 		}
 		
 		// Une ligne vide à la fin
-		$command->output->writeln();
+		$command->output->writeln('');
 	}
 }
