@@ -87,10 +87,28 @@ function wp2spip_importer_articles_dist($command) {
 			// On passe déjà sale() en premier pour y voir plus clair
 			$texte = sale($wp_post['post_content']);
 			
+			// À priori tout ce qui est dans un [caption] c'est une insertion à remplacer par un document joint
+			$pattern_captions = '\[caption[^\]]*attachment_([0-9]+)[^\]]*align="([\w]+)"(.*?)\[/caption\]';
+			if(preg_match_all("|$pattern_captions|", $texte, $matches) and is_array($matches)) {
+				foreach ($matches[0] as $cle => $caption) {
+					if (
+						$id_wordpress_doc = intval($matches[1][$cle])
+						and $id_document = sql_getfetsel('id_document', 'spip_documents', 'id_wordpress = '.intval($id_wordpress_doc))
+					) {
+						$align = 'center';
+						if (in_array($matches[2][$cle], array('alignleft', 'alignright'))) {
+							$align = str_replace('align', '', $matches[2][$cle]);
+						}
+						
+						// On remplace le shortcode [caption] complet par le doc SPIP
+						$texte = str_replace($caption, "<doc$id_document|$align>", $texte);
+					}
+				}
+			}
+			
 			// On cherche tous les liens internes et on cherche s'il s'agit d'un document qu'on a déjà importé
 			$pattern_liens = '->(' . preg_quote($url_wordpress) . "\/wp-content\/uploads\/(.*?))\]";
-			preg_match_all("|$pattern_liens|", $texte, $matches);
-			if(is_array($matches)) {
+			if(preg_match_all("|$pattern_liens|", $texte, $matches) and is_array($matches)) {
 				foreach ($matches[1] as $url) {
 					if (
 						$id_wordpress_doc = sql_getfetsel('ID', 'wp_posts', 'guid = '.sql_quote($url), '', '', '', '', $command->base)
