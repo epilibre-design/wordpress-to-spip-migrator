@@ -58,7 +58,7 @@ function wp2spip_importer_documents_dist($command) {
 				// On compose le document SPIP
 				$document = array(
 					'titre' => $wp_attachment['post_title'],
-					'descriptif' => sale(trim($wp_attachment['post_excerpt'] . "\n\n" . $wp_attachment['post_content'], "\n")),
+					'descriptif' => sale($wp_attachment['post_content'] ?: $wp_attachment['post_excerpt']),
 					'date' => $wp_attachment['post_date'],
 					'maj' => $wp_attachment['post_modified'],
 					'id_wordpress' => $id_wordpress,
