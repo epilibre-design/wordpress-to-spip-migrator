@@ -36,6 +36,7 @@ function wp2spip_importer_articles_dist($command) {
 		include_spip('inc/filtres');
 		include_spip('sale_fonctions');
 		include_spip('inc/config');
+		include_spip('action/editer_liens');
 		
 		$nb_posts = count($wp_posts);
 		$nb_import = 0;
@@ -113,6 +114,7 @@ function wp2spip_importer_articles_dist($command) {
 			);
 			
 			// Si ça n'a pas déjà été importé c'est un ajout
+			$id_article = null;
 			if (!$article_old = sql_fetsel('id_article, id_rubrique', 'spip_articles', 'id_wordpress = '.$id_wordpress)) {
 				$id_article = objet_inserer('article');
 				
@@ -120,10 +122,6 @@ function wp2spip_importer_articles_dist($command) {
 				autoriser_exception('modifier', 'rubrique', $id_article, true);
 				autoriser_exception('instituer', 'rubrique', $id_article, true);
 				autoriser_exception('publierdans', 'rubrique', $id_rubrique_principale, true);
-				
-				if ($ok = objet_modifier('article', $id_article, $article)) {
-					$nb_import++;
-				}
 			}
 			// Sinon on ne met à jour que si demandé
 			elseif ($command->update) {
@@ -134,9 +132,33 @@ function wp2spip_importer_articles_dist($command) {
 				autoriser_exception('instituer', 'rubrique', $id_article, true);
 				autoriser_exception('publierdans', 'rubrique', $id_rubrique_principale, true);
 				autoriser_exception('publierdans', 'rubrique', intval($article_old['id_rubrique']), true);
-				
+			}
+			
+			// Si on a un id_article, c'est qu'on vient d'insérer ou qu'on doit mettre à jour
+			if ($id_article) {
 				if ($ok = objet_modifier('article', $id_article, $article)) {
-					$nb_maj++;
+					$command->update ? $nb_maj++ : $nb_import++;
+				}
+				
+				// Associer les docs
+				wp2spip_importer_articles_documents($command, $id_wordpress, $id_article);
+				
+				// Ajouter l'URL libre
+				if ($wp_post['post_name']) {
+					sql_insertq(
+						'spip_urls',
+						array(
+							'type' => 'article',
+							'id_objet' => $id_article,
+							'date' => $wp_post['post_date'],
+							'url' => $wp_post['post_name'],
+						)
+					);
+				}
+				
+				// Retrouver l'auteur principal dans le SPIP et l'ajouter
+				if ($id_auteur = sql_getfetsel('id_auteur', 'spip_auteurs', 'id_wordpress='.$wp_post['post_author'])) {
+					objet_associer(array('auteur'=>$id_auteur), array('article'=>$id_article));
 				}
 			}
 			
@@ -145,5 +167,33 @@ function wp2spip_importer_articles_dist($command) {
 		
 		// Une ligne vide à la fin
 		$command->output->writeln('');
+	}
+}
+
+function wp2spip_importer_articles_documents($command, $id_wordpress, $id_article) {
+	// On va chercher tous les attachments liés à ce post
+	if ($ids_attachments = sql_allfetsel(
+		'ID',
+		'wp_posts',
+		array(
+			'post_type="attachment"',
+			'post_status="inherit"',
+			'post_parent='.$id_wordpress,
+		),
+		'',
+		'',
+		'',
+		'',
+		$command->base
+	)) {
+		$ids_attachments = array_map('reset', $ids_attachments);
+		
+		// Ensuite on va chercher tous les documents SPIP qui correspondent
+		if ($ids_documents = sql_allfetsel('id_document', 'spip_documents', sql_in('id_wordpress', $ids_attachments))) {
+			$ids_documents = array_map('reset', $ids_documents);
+			
+			// On met tout ça en lien de l'article
+			objet_associer(array('document'=>$ids_documents), array('article'=>$id_article));
+		}
 	}
 }
