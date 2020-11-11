@@ -35,16 +35,20 @@ function wp2spip_importer_articles_dist($command) {
 		include_spip('inc/autoriser');
 		include_spip('inc/filtres');
 		include_spip('sale_fonctions');
+		include_spip('inc/config');
 		
 		$nb_posts = count($wp_posts);
 		$nb_import = 0;
 		$nb_maj = 0;
 		$command->output->writeln("$nb_posts articles à importer.");
 		
-		$progressBar = new ProgressBar($command->output, $nb_users);
+		$progressBar = new ProgressBar($command->output, $nb_posts);
 		$progressBar->setFormat('verbose');
 		$progressBar->setRedrawFrequency(1);
 		$progressBar->start();
+		
+		// Récupérer l'URL de l'époque du site Wordpress (dans le SPIP on a pu le changé depuis un premier import) pour retrouver les liens et docs internes
+		$url_wordpress = sql_getfetsel('option_value', 'wp_options', 'option_name="siteurl"', '', '', '', '', $command->base);
 		
 		foreach ($wp_posts as $wp_post) {
 			$id_wordpress = intval($wp_post['ID']);
@@ -79,14 +83,28 @@ function wp2spip_importer_articles_dist($command) {
 				$id_rubrique_principale = 0;
 			}
 			
-			// Avant sale() il faut au moins transformer toutes les URL de documents avec le nouveau fichier dans IMG
+			// On passe déjà sale() en premier pour y voir plus clair
+			$texte = sale($wp_post['post_content']);
 			
+			// On cherche tous les liens internes et on cherche s'il s'agit d'un document qu'on a déjà importé
+			$pattern_liens = '->(' . preg_quote($url_wordpress) . "\/wp-content\/uploads\/(.*?))\]";
+			preg_match_all("|$pattern_liens|", $texte, $matches);
+			if(is_array($matches)) {
+				foreach ($matches[1] as $url) {
+					if (
+						$id_wordpress_doc = sql_getfetsel('ID', 'wp_posts', 'guid = '.sql_quote($url), '', '', '', '', $command->base)
+						and $id_document = sql_getfetsel('id_document', 'spip_documents', 'id_wordpress = '.intval($id_wordpress_doc))
+					) {
+						$texte = str_replace("->$url]", "->doc$id_document]", $texte);
+					}
+				}
+			}
 			
 			// On compose l'article SPIP
 			$article = array(
 				'id_rubrique' => $id_rubrique_principale,
 				'titre' => $wp_post['post_title'],
-				'texte' => sale($wp_post['post_content']),
+				'texte' => $texte,
 				'date' => $wp_post['post_date'],
 				'maj' => $wp_post['post_modified'],
 				'accepter_forum' => ($wp_post['comment_status'] == 'open') ? 'pos' : 'non',
