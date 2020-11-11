@@ -107,14 +107,22 @@ function wp2spip_importer_articles_dist($command) {
 			}
 			
 			// On cherche tous les liens internes et on cherche s'il s'agit d'un document qu'on a déjà importé
-			$pattern_liens = '->(' . preg_quote($url_wordpress) . "\/wp-content\/uploads\/(.*?))\]";
+			$pattern_liens = '\[(.*?)->(' . preg_quote($url_wordpress) . "\/wp-content\/uploads\/(.*?))\]";
 			if(preg_match_all("|$pattern_liens|", $texte, $matches) and is_array($matches)) {
-				foreach ($matches[1] as $url) {
+				foreach ($matches[2] as $cle=>$url) {
 					if (
 						$id_wordpress_doc = sql_getfetsel('ID', 'wp_posts', 'guid = '.sql_quote($url), '', '', '', '', $command->base)
 						and $id_document = sql_getfetsel('id_document', 'spip_documents', 'id_wordpress = '.intval($id_wordpress_doc))
 					) {
-						$texte = str_replace("->$url]", "->doc$id_document]", $texte);
+						// Si jamais en plus le contenu du lien est en fait une image,
+						// on considère que c'était forcément un affichage d'image (complète ou réduite peu importe) vers le doc complet
+						if (strpos($matches[1][$cle], '<img') !== false) {
+							$texte = str_replace($matches[0][$cle], "[<img$id_document>->doc$id_document]", $texte);
+						}
+						// Sinon on laisse le contenu tel quel et on remplace uniquement vers quel lien
+						else {
+							$texte = str_replace("->$url]", "->doc$id_document]", $texte);
+						}
 					}
 				}
 			}
