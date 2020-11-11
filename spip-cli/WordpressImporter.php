@@ -79,6 +79,7 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 			$this->update = $input->getOption('update');
 			
 			$traitements_disponibles = array(
+				'importer_metas',
 				'importer_auteurs',
 				'importer_rubriques',
 				'importer_mots',
