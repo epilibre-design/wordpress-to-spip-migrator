@@ -83,8 +83,9 @@ function wp2spip_importer_documents_dist($command) {
 				}
 				// Sinon on ne met à jour que si demandé
 				elseif ($command->update) {
-					// On met aussi à jour le fichier
-					$ajouter_un_document($id_document, $file, null, null, 'auto');
+					// On met aussi à jour le fichier ?
+					// On peut considérer que pour un update le fichier ne bouge pas chez WP
+					// $ajouter_un_document($id_document, $file, null, null, 'auto');
 					
 					// INSUP
 					autoriser_exception('modifier', 'document', $id_document, true);
