@@ -115,22 +115,41 @@ function wp2spip_importer_articles_dist($command) {
 			}
 			
 			// À priori tout ce qui est dans un [caption] c'est une insertion à remplacer par un document joint
-			$pattern_captions = '\[caption[^\]]*attachment_([0-9]+)[^\]]*align="([\w]+)"[^\]](?:width="([0-9]+)")?(.*?)\[/caption\]';
+			$pattern_captions = '\[caption(.*?)\[/caption\]';
 			if(preg_match_all("|$pattern_captions|s", $texte, $matches) and is_array($matches)) {
 				foreach ($matches[0] as $cle => $caption) {
 					if (
-						$id_wordpress_doc = intval($matches[1][$cle])
-						and $id_document = sql_getfetsel('id_document', 'spip_documents', 'id_wordpress = '.intval($id_wordpress_doc))
+						// Cas où on trouve direct l'identifiant WP
+						(
+							preg_match('#attachment_([0-9]+)#', $matches[1][$cle], $trouve)
+							and $id_wordpress_doc = intval($trouve[1])
+							and $id_document = sql_getfetsel('id_document', 'spip_documents', 'id_wordpress = '.intval($id_wordpress_doc))
+						)
+						// Sinon on cherche depuis une URL
+						or
+						(
+							preg_match('#src="(.*?)"#', $matches[1][$cle], $trouve)
+							and $url = $trouve[1]
+							and $lien = wp2spip_chercher_lien($url, $url_wordpress, $command->base)
+							and strpos($lien, 'document') !== false
+							and $id_document = intval(str_replace('document', '', $lien))
+						)
 					) {
 						$align = 'center';
-						if (in_array($matches[2][$cle], array('alignleft', 'alignright'))) {
-							$align = str_replace('align', '', $matches[2][$cle]);
+						if (
+							preg_match('#align="([\w]+)"#', $matches[1][$cle], $trouve)
+							and in_array($trouve[1], array('alignleft', 'alignright'))
+						) {
+							$align = str_replace('align', '', $trouve[1]);
 						}
 						
 						$doc = "<doc$id_document|$align";
 						
 						// Si jamais on a une largeur, on va l'utiliser
-						if ($width = intval($matches[3][$cle])) {
+						if (
+							preg_match('#width="([0-9]+)"#', $matches[1][$cle], $trouve)
+							and $width = intval($trouve[1])
+						) {
 							$doc .= "|width=$width";
 						}
 						
@@ -138,7 +157,7 @@ function wp2spip_importer_articles_dist($command) {
 						$doc .= '>';
 						
 						// Si jamais on trouve un lien SPIP à l'intérieur du caption
-						if (preg_match('#->(.+?)\]#', $matches[4][$cle], $trouve)) {
+						if (preg_match('#->(.+?)\]#', $matches[1][$cle], $trouve)) {
 							$lien = $trouve[1];
 							$doc = "[$doc->$lien]";
 						}
@@ -251,7 +270,7 @@ function wp2spip_chercher_lien($lien, $url_wordpress, $base='wordpress') {
 			and $id_wordpress_doc = sql_getfetsel('ID', 'wp_posts', 'guid = '.sql_quote($lien), '', '', '', '', $base)
 			and $id_document = sql_getfetsel('id_document', 'spip_documents', 'id_wordpress = '.intval($id_wordpress_doc))
 		) {
-			$lien = "doc$id_document";
+			$lien = "document$id_document";
 		}
 		// Si on trouve un id de post directement easy
 		elseif (
