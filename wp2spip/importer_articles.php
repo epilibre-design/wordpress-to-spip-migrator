@@ -149,6 +149,19 @@ function wp2spip_importer_articles_dist($command) {
 				}
 			}
 			
+			// On gère en plus le cas des images super facile à retrouver où il ya "wp-image-ID" dedans
+			$pattern_imgs = '<img[^>]*?wp-image-([0-9]+)[^>]*?>';
+			if(preg_match_all("|$pattern_imgs|s", $texte, $matches) and is_array($matches)) {
+				foreach ($matches[0] as $cle => $img) {
+					if (
+						$id_wordpress_doc = intval($matches[1][$cle])
+						and $id_document = sql_getfetsel('id_document', 'spip_documents', 'id_wordpress = '.$id_wordpress_doc)
+					) {
+						$texte = str_replace($img, "<img$id_document>", $texte);
+					}
+				}
+			}
+			
 			// On compose l'article SPIP
 			$article = array(
 				'id_rubrique' => $id_rubrique_principale,
