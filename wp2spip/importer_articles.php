@@ -93,7 +93,9 @@ function wp2spip_importer_articles_dist($command) {
 				foreach ($matches[2] as $cle=>$url) {
 					$lien = wp2spip_chercher_lien($url, $url_wordpress, $command->base);
 					
-					$texte = str_replace("->$url]", "->$lien]", $texte);
+					if ($lien != $url) {
+						$texte = str_replace("->$url]", "->$lien]", $texte);
+					}
 					
 					//~ if (
 						//~ $id_wordpress_doc = sql_getfetsel('ID', 'wp_posts', 'guid = '.sql_quote($url), '', '', '', '', $command->base)
@@ -226,20 +228,20 @@ function wp2spip_importer_articles_dist($command) {
  * @return string Retourne le lien interne au SPIP, doc123 ou article123
  */
 function wp2spip_chercher_lien($lien, $url_wordpress, $base='wordpress') {
-	$pattern_doc = preg_quote($url_wordpress) . '/wp-content/uploads/';
+	$pattern_doc = 'wp-content/uploads/';
 	
-	// Si c'est un document du site d'origine
-	if (
-		preg_match("#$pattern_doc#s", $lien)
-		and $id_wordpress_doc = sql_getfetsel('ID', 'wp_posts', 'guid = '.sql_quote($lien), '', '', '', '', $base)
-		and $id_document = sql_getfetsel('id_document', 'spip_documents', 'id_wordpress = '.intval($id_wordpress_doc))
-	) {
-		$lien = "doc$id_document";
-	}
 	// Seulement si c'est une URL relative OU qu'il y a le domaine du site dedans
-	elseif (!tester_url_absolue($lien) or strpos($lien, $url_wordpress) !== false) {
-		// Si on trouve un id de post directement easy
+	if (!tester_url_absolue($lien) or strpos($lien, $url_wordpress) !== false) {
+		// Si c'est un document du site d'origine
 		if (
+			preg_match("#$pattern_doc#s", $lien)
+			and $id_wordpress_doc = sql_getfetsel('ID', 'wp_posts', 'guid = '.sql_quote($lien), '', '', '', '', $base)
+			and $id_document = sql_getfetsel('id_document', 'spip_documents', 'id_wordpress = '.intval($id_wordpress_doc))
+		) {
+			$lien = "doc$id_document";
+		}
+		// Si on trouve un id de post directement easy
+		elseif (
 			($id_wordpress = parametre_url($lien, 'page_id') or $id_wordpress = parametre_url($lien, 'p'))
 			and $id_article = sql_getfetsel('id_article', 'spip_articles', 'id_wordpress = '.$id_wordpress)
 		) {
@@ -248,10 +250,10 @@ function wp2spip_chercher_lien($lien, $url_wordpress, $base='wordpress') {
 		// Sinon faut chercher une sorte de slug
 		elseif (
 			$chemin = parse_url($lien, PHP_URL_PATH)
-			and $slug = basename($chemin)
-			and $id_article = sql_getfetsel('id_objet', 'spip_urls', array('type="article"', 'url='.sql_quote($slug)))
+			and $slug = trim(basename($chemin), '/')
+			and $url = sql_fetsel('type, id_objet', 'spip_urls', 'url='.sql_quote($slug))
 		) {
-			$lien = "article$id_article";
+			$lien = $url['type'] . $url['id_objet'];
 		}
 	}
 	

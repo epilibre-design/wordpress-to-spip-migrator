@@ -79,11 +79,6 @@ function wp2spip_importer_documents_dist($command) {
 						// INSUP
 						autoriser_exception('modifier', 'document', $id_document, true);
 						autoriser_exception('instituer', 'document', $id_document, true);
-						
-						// On précise les vrais infos du document
-						if ($ok = objet_modifier('document', $id_document, $document)) {
-							$nb_import++;
-						}
 					}
 				}
 				// Sinon on ne met à jour que si demandé
@@ -94,9 +89,25 @@ function wp2spip_importer_documents_dist($command) {
 					// INSUP
 					autoriser_exception('modifier', 'document', $id_document, true);
 					autoriser_exception('instituer', 'document', $id_document, true);
-					
+				}
+				
+				// Si on a un id_document, c'est qu'on vient d'insérer ou qu'on doit mettre à jour
+				if ($id_document) {
 					if ($ok = objet_modifier('document', $id_document, $document)) {
-						$nb_maj++;
+						$command->update ? $nb_maj++ : $nb_import++;
+					}
+					
+					// Ajouter l'URL libre
+					if ($wp_attachment['post_name']) {
+						sql_insertq(
+							'spip_urls',
+							array(
+								'type' => 'document',
+								'id_objet' => $id_document,
+								'date' => $wp_attachment['post_date'],
+								'url' => $wp_attachment['post_name'],
+							)
+						);
 					}
 				}
 			}
