@@ -37,6 +37,8 @@ function wp2spip_importer_documents_dist($command) {
 		include_spip('inc/filtres');
 		include_spip('sale_fonctions');
 		include_spip('action/ajouter_documents');
+		include_spip('inc/distant');
+		include_spip('inc/flock');
 		$ajouter_un_document = charger_fonction('ajouter_un_document', 'action');
 		
 		$nb_attachments = count($wp_attachments);
@@ -52,8 +54,16 @@ function wp2spip_importer_documents_dist($command) {
 		foreach ($wp_attachments as $wp_attachment) {
 			$id_wordpress = intval($wp_attachment['ID']);
 			
-			// Seulement si on trouve bien le fichier dans le dossier fourni
+			// On cherche en priorité dans le dossier local
 			$chemin = $command->dir_wordpress . ltrim(parse_url($wp_attachment['guid'], PHP_URL_PATH), '/');
+			
+			// Si pas trouvé en local, on regarde si on arrive à le récupérer en ligne
+			if (!is_readable($chemin)) {
+				$guid = preg_replace_callback('/[^\x20-\x7f]/', function($match) { return urlencode($match[0]); }, $wp_attachment['guid']);
+				$chemin = _DIR_RACINE . copie_locale($guid);
+				$distant = true;
+			}
+			
 			if (is_readable($chemin)) {
 				// On compose le document SPIP
 				$document = array(
@@ -109,6 +119,12 @@ function wp2spip_importer_documents_dist($command) {
 								'url' => $wp_attachment['post_name'],
 							)
 						);
+					}
+					
+					// Si distant, on supprime la copie locale temporaire
+					if ($distant) {
+						supprimer_fichier($chemin);
+						$distant = false;
 					}
 				}
 			}
