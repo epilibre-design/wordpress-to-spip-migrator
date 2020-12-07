@@ -21,8 +21,8 @@ function wp2spip_importer_articles_dist($command) {
 		'*',
 		'wp_posts',
 		array(
-			'post_type = "post"',
-			'post_status = "publish"',
+			sql_in('post_type', array('post', 'page')),
+			//'post_status = "publish"',
 			sql_in('ID', $ids_wordpress, 'NOT'),
 		),
 		'',
@@ -54,8 +54,14 @@ function wp2spip_importer_articles_dist($command) {
 		foreach ($wp_posts as $wp_post) {
 			$id_wordpress = intval($wp_post['ID']);
 			
+			// Si c'est une page on cherche même pas
+			if ($wp_post['post_type'] == 'page') {
+				$id_rubrique_principale = -1;
+				$id_secteur = 0;
+				$page = 'wordpress_page_' . $id_wordpress;
+			}
 			// On va chercher toutes les catégories, et on prend la première comme rubrique principale
-			if ($ids_categories = sql_allfetsel(
+			elseif ($ids_categories = sql_allfetsel(
 				'term_id',
 				'wp_term_taxonomy as tax left join wp_term_relationships as rel on tax.term_taxonomy_id=rel.term_taxonomy_id',
 				array(
@@ -181,26 +187,54 @@ function wp2spip_importer_articles_dist($command) {
 				}
 			}
 			
+			// Brouillon par défaut
+			$statut = 'prepa';
+			// On essaye de faire correspondre le bon statut
+			$correspondance_statuts = array(
+				'publish' => 'publie',
+				'draft' => 'prepa',
+				'pending' => 'prop',
+				'future' => 'publie', // publié mais à une date future
+				'trash' => 'poubelle',
+			);
+			if (isset($correspondance_statuts[$wp_post['post_status']])) {
+				$statut = $correspondance_statuts[$wp_post['post_status']];
+			}
+			
 			// On compose l'article SPIP
 			$article = array(
-				'id_rubrique' => $id_rubrique_principale,
+				'id_parent' => $id_rubrique_principale,
+				'page' => $page ? $page : '',
 				'titre' => $wp_post['post_title'],
 				'texte' => $texte,
 				'date' => $wp_post['post_date'],
 				'maj' => $wp_post['post_modified'],
+				'date_modif' => $wp_post['post_modified'],
 				'accepter_forum' => ($wp_post['comment_status'] == 'open') ? 'pos' : 'non',
-				'statut' => 'publie',
+				'statut' => $statut,
 				'id_wordpress' => $id_wordpress,
 			);
+			$supplements = array(
+				'date' => $wp_post['post_date'],
+				'date_redac' => $wp_post['post_date'],
+				'maj' => $wp_post['post_modified'],
+				'date_modif' => $wp_post['post_modified'],
+			);
+			if ($page) {
+				$supplements['id_rubrique'] = -1;
+				$supplements['id_secteur'] = 0;
+			}
 			
 			// Si ça n'a pas déjà été importé c'est un ajout
 			$id_article = null;
 			if (!$article_old = sql_fetsel('id_article, id_rubrique', 'spip_articles', 'id_wordpress = '.$id_wordpress)) {
-				$id_article = objet_inserer('article');
+				$id_article = objet_inserer('article', $id_rubrique_principale);
 				
 				// INSUP
-				autoriser_exception('modifier', 'rubrique', $id_article, true);
-				autoriser_exception('instituer', 'rubrique', $id_article, true);
+				autoriser_exception('modifier', 'article', $id_article, true);
+				autoriser_exception('instituer', 'article', $id_article, true);
+				autoriser_exception('modifier', 'rubrique', $id_rubrique_principale, true);
+				autoriser_exception('instituer', 'rubrique', $id_rubrique_principale, true);
 				autoriser_exception('publierdans', 'rubrique', $id_rubrique_principale, true);
 			}
 			// Sinon on ne met à jour que si demandé
@@ -208,15 +242,22 @@ function wp2spip_importer_articles_dist($command) {
 				$id_article = intval($article_old['id_article']);
 				
 				// INSUP
-				autoriser_exception('modifier', 'rubrique', $id_article, true);
-				autoriser_exception('instituer', 'rubrique', $id_article, true);
+				autoriser_exception('modifier', 'article', $id_article, true);
+				autoriser_exception('instituer', 'article', $id_article, true);
 				autoriser_exception('publierdans', 'rubrique', $id_rubrique_principale, true);
+				autoriser_exception('modifier', 'rubrique', $id_rubrique_principale, true);
+				autoriser_exception('instituer', 'rubrique', $id_rubrique_principale, true);
 				autoriser_exception('publierdans', 'rubrique', intval($article_old['id_rubrique']), true);
+				autoriser_exception('modifier', 'rubrique', intval($article_old['id_rubrique']), true);
+				autoriser_exception('instituer', 'rubrique', intval($article_old['id_rubrique']), true);
 			}
 			
 			// Si on a un id_article, c'est qu'on vient d'insérer ou qu'on doit mettre à jour
 			if ($id_article) {
-				if ($ok = objet_modifier('article', $id_article, $article)) {
+				if (!$erreur = objet_modifier('article', $id_article, $article)) {
+					// On force la modif de certains champs qui ne sont pas pris en compte par l'API
+					sql_updateq('spip_articles', $supplements, 'id_article = '.$id_article);
+					
 					$command->update ? $nb_maj++ : $nb_import++;
 				}
 				
