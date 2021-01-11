@@ -156,7 +156,7 @@ function wp2spip_importer_articles_dist($command) {
 							preg_match('#width="([0-9]+)"#', $matches[1][$cle], $trouve)
 							and $width = intval($trouve[1])
 						) {
-							$doc .= "|width=$width";
+							$doc .= "|largeur=$width";
 						}
 						
 						// C'est fini
