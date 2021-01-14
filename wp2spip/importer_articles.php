@@ -16,7 +16,7 @@ function wp2spip_importer_articles_dist($command) {
 		$ids_wordpress = array_map('reset', $ids_wordpress);
 	}
 	
-	// On va chercher tous les auteurs Wordpress qui ont l'air pertinent
+	// On va chercher tous les articles Wordpress qui ont l'air pertinent
 	if ($wp_posts = sql_allfetsel(
 		'*',
 		'wp_posts',
@@ -167,6 +167,11 @@ function wp2spip_importer_articles_dist($command) {
 							$lien = $trouve[1];
 							$doc = "[$doc->$lien]";
 						}
+						
+						// On en profite pour mettre à jour le document lui-même avec la légende plus détaillée trouvée dans ce caption
+						$contenu_caption = preg_replace('#\[caption[^\]]*?\](.*?)\[/caption\]#', '\1', $caption);
+						$contenu_caption = supprimer_tags(preg_replace(array('#\[.*?\]#', '#\n-#'), '', sale($contenu_caption)));
+						sql_updateq('spip_documents', array('descriptif' => $contenu_caption, 'titre' => ''), 'id_document = '.$id_document);
 						
 						// On remplace le shortcode [caption] complet par le doc SPIP
 						$texte = str_replace($caption, $doc, $texte);
