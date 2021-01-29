@@ -23,7 +23,7 @@ function wp2spip_importer_documents_dist($command) {
 		array(
 			'post_type = "attachment"',
 			'post_status = "inherit"',
-			'post_parent > 0',
+			// 'post_parent > 0', // venait de l'ancienne versino mais en fait il peut y avoir des docs attachés à rien !
 			sql_in('ID', $ids_wordpress, 'NOT'),
 		),
 		'',
