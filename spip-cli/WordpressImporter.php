@@ -85,6 +85,7 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 				'importer_mots',
 				'importer_documents',
 				'importer_articles',
+				'importer_commentaires',
 			);
 			$traitements_disponibles = pipeline('w2spip_traitements', $traitements_disponibles);
 			
