@@ -53,6 +53,10 @@ function wp2spip_importer_articles_dist($command) {
 		
 		foreach ($wp_posts as $wp_post) {
 			$id_wordpress = intval($wp_post['ID']);
+
+			unset ($id_rubrique_principale) ;
+			unset ($id_secteur);
+			unset ($page);
 			
 			// Si c'est une page on cherche même pas
 			if ($wp_post['post_type'] == 'page') {
