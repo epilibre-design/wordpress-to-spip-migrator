@@ -43,10 +43,11 @@ function wp2spip_importer_metas_dist($command) {
 			ecrire_config('email_webmaster', $options['admin_email']);
 		}
 		
+		// dans Wordpress (wp-admin/options-general.php) il est indiqué Slogan du site qui est donc stocké dans blogdescription. On le met donc dans le slogan SPIP et pas le descriptif
 		if ($options['blogdescription']) {
 			$options['blogdescription'] = sale($options['blogdescription']);
-			$command->output->writeln('* <comment>Adresse du site</comment> : ' . $options['blogdescription']);
-			ecrire_config('descriptif_site', $options['blogdescription']);
+			$command->output->writeln('* <comment>Slogan du site</comment> : ' . $options['blogdescription']);
+			ecrire_config('slogan_site', $options['blogdescription']);
 		}
 	}
 	
