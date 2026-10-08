@@ -6,90 +6,135 @@ if (!defined('_ECRIRE_INC_VERSION')) {
 	return;
 }
 
-
 /**
- *  Structure de la table  wp_comments sur un WordPress 5.6.2 : 
- *  comment_ID, 
- *  comment_post_ID, 
- *  comment_author, 
- *  comment_author_email, 
- *  comment_author_url, 
- *  comment_author_IP, 
- *  comment_date, 
- *  comment_date_gmt, 
- *  comment_content, 
- *  comment_karma, 
- *  comment_approved, 
- *  comment_agent, 
- *  comment_type, 
- *  comment_parent, 
- *  user_id)
-*/
+ * Importe les commentaires Wordpress en messages de forum, en gardant les fils de discussion
+ *
+ * - commentaires approuvés => publiés, en attente => proposés ; spam, corbeille,
+ *   trackbacks et pingbacks ne sont pas importés
+ * - comment_type vide (Wordpress < 5.5) ou "comment" (Wordpress >= 5.5)
+ * - chaque message garde son id_wordpress : un nouvel import ne crée pas de doublon,
+ *   et --update met à jour les messages déjà importés
+ */
+function wp2spip_importer_commentaires_dist($command) {
+	include_spip('inc/plugin');
+	if (!test_plugin_actif('forum')) {
+		$command->output->writeln('Le plugin Forum n’est pas actif : les commentaires ne sont pas importés.');
+		return;
+	}
 
-    function wp2spip_importer_commentaires_dist($command) {
+	$correspondance_statuts = array(
+		'1' => 'publie',
+		'0' => 'prop',
+	);
 
-    // On va chercher tous les commentaires Wordpress 
-    if ($wp_comments  = sql_allfetsel(
+	$wp_comments = sql_allfetsel(
 		'*',
 		'wp_comments',
 		array(
-			sql_in('comment_approved', array('1')), // on évite de prendre les spam 
-			sql_in('comment_type', array('comment')), // on évite de prendre les trackback et pingback 
+			sql_in('comment_approved', array_keys($correspondance_statuts)),
+			sql_in('comment_type', array('', 'comment')),
 		),
 		'',
-		'',
+		'comment_ID',
 		'',
 		'',
 		$command->base
-	)) {
-		include_spip('action/editer_objet');
-		include_spip('inc/autoriser');
-		include_spip('inc/filtres');
-		include_spip('sale_fonctions');
-		include_spip('inc/config');
-		include_spip('action/editer_liens');
-		include_spip('inc/forum');
-        
-		$nb_comments = count($wp_comments);
-		$nb_import = 0;
-		$nb_maj = 0;
-		$command->output->writeln("$nb_comments commentaires à importer.");
-		
-		$progressBar = new ProgressBar($command->output, $nb_comments);
-		$progressBar->setFormat('verbose');
-		$progressBar->setRedrawFrequency(1);
-		$progressBar->start();
-		
+	);
+	if (!$wp_comments) {
+		$command->output->writeln('Aucun commentaire à importer.');
+		return;
+	}
+	$wp_comments = array_column($wp_comments, null, 'comment_ID');
 
-		foreach ($wp_comments  as $wp_comment) {
-			$comment_post_ID = intval($wp_comment['comment_post_ID']);
-            $comment_ID = intval($wp_comment['comment_ID']);
-            $id_article = intval(sql_getfetsel('id_article', 'spip_articles', 'id_wordpress = '.$comment_post_ID));
-            //$command->output->writeln("$id_article ");
-        
-            // récuperation des données
-            $set_forum = array(
-                'id_objet' => $id_article,
-                'objet' => 'article',
-               'date_heure' => $wp_comment['comment_date'],
-                'date_thread' => $wp_comment['comment_date'] ,
-                'texte' => sale($wp_comment['comment_content']),
-                'auteur' => $wp_comment['comment_author'],
-                'email_auteur' => $wp_comment['comment_author_email'],
-                'statut' => 'publie',
-            );
-        
-            // Insertion des forums
-            $id_forum = sql_insertq('spip_forum', $set_forum);
-        
-            // mise à jour de la valeur id_thread = id_forum
-            $res = sql_updateq('spip_forum', array('id_thread' => $id_forum), 'id_forum='.intval($id_forum));
-			$progressBar->advance();
+	include_spip('sale_fonctions');
 
-        }    
-        
-		// Une ligne vide à la fin
-		$command->output->writeln('');
-    }
+	// Correspondances Wordpress => SPIP déjà connues
+	$articles = array_column(sql_allfetsel('id_article, id_wordpress', 'spip_articles', 'id_wordpress > 0'), 'id_article', 'id_wordpress');
+	$auteurs = array_column(sql_allfetsel('id_auteur, id_wordpress', 'spip_auteurs', 'id_wordpress > 0'), 'id_auteur', 'id_wordpress');
+	$forums = array_column(sql_allfetsel('id_forum, id_wordpress', 'spip_forum', 'id_wordpress > 0'), 'id_forum', 'id_wordpress');
+
+	$nb_comments = count($wp_comments);
+	$nb_import = 0;
+	$nb_maj = 0;
+	$nb_sans_article = 0;
+	$command->output->writeln("$nb_comments commentaires à importer.");
+
+	$progressBar = new ProgressBar($command->output, $nb_comments);
+	$progressBar->setFormat('verbose');
+	$progressBar->setRedrawFrequency(1);
+	$progressBar->start();
+
+	// 1. Créer ou mettre à jour les messages
+	foreach ($wp_comments as $id_comment => $wp_comment) {
+		$progressBar->advance();
+
+		if (!$id_article = intval($articles[$wp_comment['comment_post_ID']] ?? 0)) {
+			$nb_sans_article++;
+			unset($wp_comments[$id_comment]);
+			continue;
+		}
+		if (isset($forums[$id_comment]) and !$command->update) {
+			continue;
+		}
+
+		$forum = array(
+			'objet' => 'article',
+			'id_objet' => $id_article,
+			'date_heure' => $wp_comment['comment_date'],
+			'texte' => sale($wp_comment['comment_content']),
+			'auteur' => $wp_comment['comment_author'],
+			'email_auteur' => $wp_comment['comment_author_email'],
+			'url_site' => $wp_comment['comment_author_url'],
+			'ip' => $wp_comment['comment_author_IP'],
+			'id_auteur' => intval($auteurs[$wp_comment['user_id']] ?? 0),
+			'statut' => $correspondance_statuts[$wp_comment['comment_approved']],
+			'id_wordpress' => intval($id_comment),
+		);
+
+		if (isset($forums[$id_comment])) {
+			sql_updateq('spip_forum', $forum, 'id_forum = ' . intval($forums[$id_comment]));
+			$nb_maj++;
+		}
+		elseif ($id_forum = sql_insertq('spip_forum', $forum)) {
+			$forums[$id_comment] = $id_forum;
+			$nb_import++;
+		}
+	}
+
+	// 2. Reconstituer les fils : id_parent = message auquel on répond, id_thread = premier message du fil
+	// (en deux temps, car une réponse peut avoir été importée avant son parent)
+	$threads = array();
+	foreach ($wp_comments as $id_comment => $wp_comment) {
+		if (!isset($forums[$id_comment])) {
+			continue;
+		}
+		$id_parent = intval($forums[$wp_comment['comment_parent']] ?? 0);
+
+		// Remonter jusqu'au premier message du fil ; un parent non importé (spam, corbeille…) fait commencer un nouveau fil
+		$racine = $id_comment;
+		$vus = array();
+		while (
+			($parent = $wp_comments[$racine]['comment_parent'] ?? 0)
+			and isset($forums[$parent])
+			and !isset($vus[$parent])
+		) {
+			$vus[$racine] = true;
+			$racine = $parent;
+		}
+		$id_thread = intval($forums[$racine]);
+
+		sql_updateq('spip_forum', array('id_parent' => $id_parent, 'id_thread' => $id_thread), 'id_forum = ' . intval($forums[$id_comment]));
+		$threads[$id_thread] = true;
+	}
+
+	// 3. date_thread = date du dernier message publié du fil, comme le fait SPIP
+	foreach (array_keys($threads) as $id_thread) {
+		$date_thread = sql_getfetsel('max(date_heure)', 'spip_forum', array('id_thread = ' . $id_thread, 'statut = "publie"'))
+			?: sql_getfetsel('max(date_heure)', 'spip_forum', 'id_thread = ' . $id_thread);
+		sql_updateq('spip_forum', array('date_thread' => $date_thread), 'id_thread = ' . $id_thread);
+	}
+
+	$command->output->writeln('');
+	$command->output->writeln("$nb_import messages importés, $nb_maj mis à jour, " . count($threads) . " fils de discussion."
+		. ($nb_sans_article ? " $nb_sans_article commentaires ignorés (contenu non importé)." : ''));
 }
-
