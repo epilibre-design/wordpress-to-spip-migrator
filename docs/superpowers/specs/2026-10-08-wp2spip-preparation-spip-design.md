@@ -24,9 +24,9 @@ outils/preparer_spip.sh --spip <dossier> --wordpress <dossier WordPress> [option
 | `--base-spip` | `sqlite`, ou `mysql:<base>` (base existante) | `sqlite` : aucune écriture dans la base du WordPress, qui reste une source figée |
 | `--base-partagee` | autorise `mysql:<base>` à être la base même du WordPress (tables SPIP à côté des tables `wp_`) | non : sans cette option, une base MySQL identique à celle du WordPress est refusée |
 | `--sql-hote`, `--sql-login` | accès MySQL de SPIP (avec `mysql:`) | ceux de `wp-config.php` |
-| variable d'environnement `WP2SPIP_SQL_PASS` | mot de passe MySQL de SPIP (avec `mysql:`) | celui de `wp-config.php` |
+| variable d'environnement `SPIP_DB_PASS` | mot de passe MySQL de SPIP (avec `mysql:`) | celui de `wp-config.php` |
 | `--admin-login`, `--admin-email` | premier administrateur SPIP | `admin` ; email `admin_email` du WordPress |
-| variable d'environnement `WP2SPIP_ADMIN_PASS` | mot de passe de l'administrateur | aléatoire, affiché au bilan |
+| variable d'environnement `SPIP_ADMIN_PASS` | mot de passe de l'administrateur | aléatoire, affiché au bilan |
 | `--adresse` | adresse du site SPIP | adresse du WordPress (`siteurl`) |
 | `--wp2spip` | `copie` du dossier de wp2spip où se trouve le script, ou `lien` symbolique (pour développer wp2spip) | `copie` |
 | `--spip-cli` | exécutable SPIP-Cli | `spip` du `PATH` |
@@ -40,7 +40,7 @@ outils/preparer_spip.sh --spip <dossier> --wordpress <dossier WordPress> [option
 Chaque étape est annoncée. Le script s'arrête à la première erreur : message, commande en cause, code `1`.
 
 1. **Contrôles préalables**
-   - SPIP-Cli exécutable, et commande `plugins:svp:telecharger` présente (sa version est contrôlée plus tard, § 3, étape 5, car elle ne fonctionne que dans un SPIP installé) ;
+   - SPIP-Cli exécutable ; `core:installer` corrigé pour lire les mots de passe dans l'environnement (§ 5) ; commande `plugins:svp:telecharger` présente (sa version est contrôlée plus tard, § 3, étape 5, car elle ne fonctionne que dans un SPIP installé) ;
    - dossier `--spip` absent ou vide ;
    - `wp-config.php` lisible ;
    - préfixe des tables WordPress `wp_`, tant que le sous-projet 6 (`--prefixe`) n'est pas fait ; sinon arrêt avec un message ;
@@ -48,7 +48,7 @@ Chaque étape est annoncée. Le script s'arrête à la première erreur : messag
    - base du WordPress lisible avec les accès de `wp-config.php`.
 2. **Lecture de `wp-config.php`** : `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST` (port éventuel séparé), `$table_prefix`, lus par expressions régulières (`php -r`), **sans exécuter le fichier** ; `siteurl` et `admin_email` lus ensuite dans `wp_options`.
 3. **Téléchargement de SPIP** : `core:telecharger spip -R <version> -d <dossier>`, puis `core:preparer --droits <droits>` dans le dossier.
-4. **Installation de SPIP** : `core:installer` avec serveur, hôte, accès, base, préfixe, administrateur et adresse ; l'administrateur y reçoit un **mot de passe jetable** aléatoire, puis son vrai mot de passe est posé par `spip php:eval`, qui le lit dans une variable d'environnement (`getenv()`) et non dans le code passé en argument.
+4. **Installation de SPIP** : `core:installer` avec serveur, hôte, login, base, préfixe, administrateur et adresse ; les deux mots de passe (MySQL de SPIP, administrateur) lui sont transmis par les variables d'environnement `SPIP_DB_PASS` et `SPIP_ADMIN_PASS`, que lit SPIP-Cli corrigé (§ 5), et jamais en argument.
 5. **Plugins**
    - contrôle de la version corrigée de `plugins:svp:telecharger` : téléchargement d'un préfixe inexistant, qui doit produire l'erreur « n'est pas référencé » ; sinon arrêt, avec un message qui indique la version requise et précise que le SPIP est déjà installé dans le dossier (à supprimer avant de relancer) ;
    - `plugins:svp:depoter <dépôt>` ;
@@ -71,17 +71,18 @@ Chaque étape est annoncée. Le script s'arrête à la première erreur : messag
 ## 5. Dépendances et sécurité
 
 - **SPIP-Cli corrigé** : `plugins:svp:telecharger` ne fonctionne qu'avec les correctifs proposés en amont (sélection du plugin, autorisation, remontée des erreurs). Le contrôle préalable vérifie la commande par un téléchargement à blanc impossible à confondre (préfixe inexistant, qui doit produire l'erreur « n'est pas référencé ») ; sinon arrêt avec un message qui indique la version requise.
-- **Mots de passe**, exposition réelle :
-  - mot de passe de la base WordPress (pour `config/wordpress.php`) et mot de passe de l'administrateur : transmis aux sous-processus par variable d'environnement, jamais en argument ; ils n'apparaissent donc pas dans la liste des processus (`ps`) ;
-  - le mot de passe de l'administrateur passé à `core:installer` est un mot de passe **jetable**, remplacé aussitôt : son exposition (argument visible par `ps` pendant l'installation) est sans conséquence ;
-  - le **mot de passe MySQL de SPIP** (avec `mysql:` seulement) n'a pas d'autre voie que l'option de `core:installer` : il est visible dans la liste des processus pendant l'installation. La documentation du script le signale ; avec `sqlite` (défaut), il n'y en a pas ;
+- **Mots de passe** : aucun ne passe en argument d'un processus, ni dans le code transmis à `php:eval` ; ils n'apparaissent donc pas dans la liste des processus (`ps`) :
+  - mot de passe MySQL de SPIP et mot de passe de l'administrateur : variables d'environnement `SPIP_DB_PASS` et `SPIP_ADMIN_PASS` de `core:installer` (SPIP-Cli corrigé, ci-dessous) ;
+  - mot de passe de la base WordPress (pour `config/wordpress.php`) : variable d'environnement `WP2SPIP_WP_PASS`, lue par `getenv()` dans le code de `php:eval` ;
   - le mot de passe de l'administrateur, quand il est généré, est affiché au bilan, et seulement là.
+- **Correctif de SPIP-Cli pour les mots de passe**, proposé en amont comme celui de `plugins:svp:telecharger`, sur le même dépôt de travail : `core:installer` lit `SPIP_DB_PASS` quand `--db-pass` n'est pas donné, et `SPIP_ADMIN_PASS` quand `--admin-pass` ne l'est pas ; l'aide des deux options mentionne la variable. Le contrôle préalable du script vérifie ce correctif dans l'aide de `core:installer` (`spip help core:installer`, qui ne demande pas de SPIP installé) ; sans lui, arrêt avant toute écriture, avec un message qui indique la version requise.
 - **Fichiers** : le script n'écrit que dans le dossier `--spip` ; le dossier WordPress n'est jamais modifié.
 
 ## 6. Validation
 
 - Préparation complète depuis un dossier vide, base **SQLite** (défaut), base **MySQL distincte**, et base **partagée** avec le WordPress (`--base-partagee`, comme les sites de test actuels), pour les WordPress 6.9 et 7.1, avec `--importer` ; puis `tests/integration/verifier_identifiants.php` à **OK**.
 - `--wp2spip lien` : `plugins/wp2spip` est un lien vers le dépôt.
-- Cas d'erreur, chacun avec code `1` et message explicite : dossier non vide, `wp-config.php` illisible, préfixe de tables autre que `wp_`, accès MySQL refusés, base MySQL identique à celle du WordPress sans `--base-partagee`, base contenant déjà des tables `spip_` (aucun fichier écrit) ; SPIP-Cli sans les correctifs (SPIP installé dans le dossier, rien écrit ailleurs, message qui le dit).
-- `ps` pendant la préparation : ni le mot de passe WordPress ni le vrai mot de passe de l'administrateur n'apparaissent dans les arguments d'un processus.
+- Cas d'erreur, chacun avec code `1` et message explicite : dossier non vide, `wp-config.php` illisible, préfixe de tables autre que `wp_`, accès MySQL refusés, base MySQL identique à celle du WordPress sans `--base-partagee`, base contenant déjà des tables `spip_` (aucun fichier écrit) ; `core:installer` sans le correctif des mots de passe (aucun fichier écrit) ; `plugins:svp:telecharger` sans son correctif (SPIP installé dans le dossier, rien écrit ailleurs, message qui le dit).
+- `ps` pendant la préparation, en MySQL : aucun des trois mots de passe (WordPress, MySQL de SPIP, administrateur) n'apparaît dans les arguments d'un processus.
+- Correctif de SPIP-Cli : `core:installer` sans `--db-pass` ni `--admin-pass`, variables posées, installe avec ces mots de passe ; option donnée, l'option l'emporte.
 - Les sites de test de `tests/integration/` peuvent ensuite être recréés avec ce script plutôt qu'à la main.
