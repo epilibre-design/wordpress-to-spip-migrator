@@ -400,6 +400,9 @@ final class PrefixeTablesTest extends WordpressTestCase
 	public function testSpipImporteDepuisUnAutrePrefixe(): void
 	{
 		ecrire_meta('wp2spip_prefixe_tables', 'wp_');
+		// ecrire_meta() ne réécrit le cache des métas qu'à son premier appel du processus : la commande, lancée
+		// dans un autre processus, le lirait sans cette méta
+		touch_meta(time() - (_META_CACHE_TIME << 1));
 		[$code, $sortie] = self::lancer("<?php\n\$table_prefix = 'wpx_';\n");
 		$this->assertSame(1, $code, $sortie);
 		$this->assertStringContainsString('Ce SPIP a été importé depuis les tables wp_ ; pour importer depuis wpx_, remettre le SPIP à zéro.', $sortie);
