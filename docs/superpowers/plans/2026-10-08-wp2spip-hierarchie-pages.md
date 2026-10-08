@@ -32,6 +32,7 @@ Le code de ce plan a été mis au point sur un prototype : SPIP 4.4.28 préparé
 4. Le critère `post_parent IN (SELECT ID FROM wp_posts WHERE post_type = "page")` fonctionne en MySQL (bases WordPress) et en SQLite (base temporaire du test « sans page enfant »). `_DIR_DB` n'est défini qu'à la première connexion SQLite : le test retombe sur `_DIR_ETC . 'bases/'`.
 5. Dépôt injoignable : `Plugins requis par le contenu Wordpress non installés (dépôt de plugins impossible à ajouter) : albums accesrestreint a2a.`, code `1`, aucun traitement lancé.
 6. Le `wp-config.php` du WordPress réel de test contient des accès refusés par le MySQL local : la préparation depuis un dossier vide passe par un miroir du WordPress dont seul le `wp-config.php` change (Task 4, Step 4).
+7. Relecture : le vérificateur compare les rangs à 1…N (des rangs 2, 3 passaient) et contrôle que les pages liées existent (un lien vers une page supprimée passait) ; écarts reproduits sur le prototype, puis OK sur un état correct. Le miroir convertit le `wp-config.php` par `preg_replace_callback()` : avec `preg_replace()`, un mot de passe `a$1b\0c` devenait `ab\0c` ; chaque constante doit être trouvée une fois.
 
 ## Environnement
 
@@ -287,7 +288,7 @@ git commit -m "Hiérarchie des pages : a2a requis par les pages enfants, traitem
 
 **Interfaces :**
 - Consumes : `wp2spip_where_pages_enfants()` (Task 1).
-- Produces : vérificateur : écarts `page <id> : sous-pages …, attendues …`, `page <id> : rangs de sous-pages en double`, `hiérarchie des pages : N pages enfants, mais a2a n’est pas actif` ; ligne `N pages enfants vérifiées` ; export : lignes `sous_page<TAB>article#wp<parent><TAB>article#wp<enfant><TAB><rang>`.
+- Produces : vérificateur : écarts `page <id> : sous-pages …, attendues …`, `page <id> : rangs de sous-pages …, attendus 1 à N`, `page <id> : absente de SPIP, mais attendue ou liée par sous_page`, `hiérarchie des pages : N pages enfants, mais a2a n’est pas actif` ; ligne `N pages enfants vérifiées` ; export : lignes `sous_page<TAB>article#wp<parent><TAB>article#wp<enfant><TAB><rang>`.
 
 - [ ] **Step 1 : contrôle de la hiérarchie**
 
@@ -302,7 +303,8 @@ et juste avant `$url_wordpress = sql_getfetsel('option_value', 'wp_options', 'op
 
 ```php
 // Hiérarchie des pages : chaque page dont le parent est une page a exactement un lien a2a sous_page
-// depuis sa page parente, et les liens d'une page parente suivent l'ordre Wordpress (menu_order, titre, ID)
+// depuis sa page parente ; les liens d'une page parente suivent l'ordre Wordpress (menu_order, titre, ID),
+// avec les rangs 1 à N ; les pages liées existent dans SPIP
 include_spip('inc/wp2spip_plugins');
 $attendus = array();
 foreach (sql_allfetsel('ID, post_parent', 'wp_posts', wp2spip_where_pages_enfants(), '', 'post_parent, menu_order, post_title, ID', '', '', $base) as $wp_page) {
@@ -316,11 +318,18 @@ if (test_plugin_actif('a2a')) {
 		$rangs[intval($lien['id_article'])][] = intval($lien['rang']);
 	}
 	foreach (array_unique(array_merge(array_keys($attendus), array_keys($trouves))) as $id_parent) {
-		if (($attendus[$id_parent] ?? array()) !== ($trouves[$id_parent] ?? array())) {
-			$echecs[] = "page $id_parent : sous-pages " . join(',', $trouves[$id_parent] ?? array()) . ', attendues ' . join(',', $attendus[$id_parent] ?? array());
+		$enfants = $trouves[$id_parent] ?? array();
+		if (($attendus[$id_parent] ?? array()) !== $enfants) {
+			$echecs[] = "page $id_parent : sous-pages " . join(',', $enfants) . ', attendues ' . join(',', $attendus[$id_parent] ?? array());
 		}
-		elseif (count(array_unique($rangs[$id_parent] ?? array())) != count($rangs[$id_parent] ?? array())) {
-			$echecs[] = "page $id_parent : rangs de sous-pages en double";
+		elseif ($rangs[$id_parent] !== range(1, count($enfants))) {
+			$echecs[] = "page $id_parent : rangs de sous-pages " . join(',', $rangs[$id_parent]) . ', attendus 1 à ' . count($enfants);
+		}
+		// Page Wordpress = article SPIP de même identifiant
+		foreach (array_merge(array($id_parent), $enfants) as $id_page) {
+			if (!sql_countsel('spip_articles', array('id_article = ' . $id_page, 'id_wordpress = ' . $id_page))) {
+				$echecs[] = "page $id_page : absente de SPIP, mais attendue ou liée par sous_page";
+			}
 		}
 	}
 }
@@ -471,7 +480,22 @@ cd "$WP2SPIP"
 
 Expected : `code 1`, `Pages enfants ou parentes absentes de SPIP, pas de lien : 1811 (parent 1809).`
 
-- [ ] **Step 7 : installation impossible, dépôt injoignable**
+- [ ] **Step 7 : le vérificateur détecte un lien vers une page absente et des rangs décalés**
+
+La page 1809 est absente depuis le Step 6. Un lien `sous_page` de 1809 vers 1811 est rétabli à la main, puis les rangs des sous-pages de 173 sont décalés d'un cran :
+
+```bash
+cd "$ESSAIS/spip-hierarchie"
+"$SPIP_CLI" php:eval 'sql_insertq("spip_articles_lies", array("id_article" => 1809, "id_article_lie" => 1811, "rang" => 1, "type_liaison" => "sous_page"));'
+"$SPIP_CLI" php:eval "include '$WP2SPIP/tests/integration/verifier_identifiants.php';" | grep "^- page"
+"$SPIP_CLI" php:eval 'sql_update("spip_articles_lies", array("rang" => "rang + 1"), "id_article = 173 and type_liaison = \"sous_page\"");'
+"$SPIP_CLI" php:eval "include '$WP2SPIP/tests/integration/verifier_identifiants.php';" | grep "^- page"
+cd "$WP2SPIP"
+```
+
+Expected : `- page 1809 : absente de SPIP, mais attendue ou liée par sous_page` (les sous-pages de 1809 sont pourtant les bonnes) ; puis, en plus, `- page 173 : rangs de sous-pages 2,3,4, attendus 1 à 3`.
+
+- [ ] **Step 8 : installation impossible, dépôt injoignable**
 
 ```bash
 remettre_hierarchie
@@ -549,7 +573,7 @@ Expected : `code 0` ; `Plugin requis : A2A (a2a), pour 18 pages enfants.` (avec,
 
 - [ ] **Step 4 : site réel, depuis un dossier vide**
 
-Si les accès MySQL du `wp-config.php` de `$WP_REEL` sont refusés en local, le script de préparation s'arrête à la lecture de la base. Monter alors un miroir du WordPress dont seul le `wp-config.php` change, avec les accès de la base externe déclarée dans `$SPIP_REEL_SQLITE` (rien n'est versionné, aucun accès n'est affiché) :
+Si les accès MySQL du `wp-config.php` de `$WP_REEL` sont refusés en local, le script de préparation s'arrête à la lecture de la base. Monter alors un miroir du WordPress dont seul le `wp-config.php` change, avec les accès de la base externe déclarée dans `$SPIP_REEL_SQLITE` (rien n'est versionné, aucun accès n'est affiché). Chaque constante (`DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`) doit être trouvée exactement une fois ; les valeurs sont insérées telles quelles (`preg_replace_callback()` : un `$1` ou un `\0` d'un mot de passe n'est pas interprété) :
 
 ```bash
 m="$ESSAIS/wp-reel-local"
@@ -563,10 +587,22 @@ php -r '
 	include $argv[1];
 	$config = file_get_contents($argv[2]);
 	foreach ($GLOBALS["acces"] as $nom => $valeur) {
-		$config = preg_replace("/define\(\s*[\x27\"]" . $nom . "[\x27\"]\s*,\s*[\x27\"][^\x27\"]*[\x27\"]\s*\)/", "define(\x27$nom\x27, " . var_export($valeur, true) . ")", $config);
+		// Remplacement par une fonction : un $1 ou un \0 du mot de passe resterait sinon interprété par preg_replace()
+		$config = preg_replace_callback(
+			"/define\(\s*[\x27\"]" . $nom . "[\x27\"]\s*,\s*[\x27\"][^\x27\"]*[\x27\"]\s*\)/",
+			fn($trouve) => "define(\x27$nom\x27, " . var_export($valeur, true) . ")",
+			$config,
+			-1,
+			$nb
+		);
+		if ($nb != 1) {
+			fwrite(STDERR, "wp-config.php : constante $nom trouvée $nb fois, une seule attendue\n");
+			exit(1);
+		}
 	}
 	file_put_contents($argv[3], $config);
-' "$SPIP_REEL_SQLITE/config/wordpress.php" "$WP_REEL/wp-config.php" "$m/wp-config.php"
+' "$SPIP_REEL_SQLITE/config/wordpress.php" "$WP_REEL/wp-config.php" "$m/wp-config.php" \
+	|| { rm -rf "$m"; echo "miroir impossible : wp-config.php non converti"; }
 ```
 
 Puis :
