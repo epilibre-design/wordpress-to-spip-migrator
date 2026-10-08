@@ -12,7 +12,7 @@ Principes :
 
 - **WordPress figé** : l'import part d'un WordPress qui ne bouge pas pendant la migration (copie du site, ou site gelé). wp2spip ne prévoit pas de suivre un WordPress qui continue d'évoluer.
 - **SPIP vierge** : le site SPIP de destination ne contient aucun contenu avant le premier import.
-- **Traitements relançables** : un nouveau passage n'importe que ce qui ne l'a pas encore été, ce qui permet de lancer un traitement seul (`--traitements`) ; il ne modifie jamais un contenu déjà importé.
+- **Traitements relançables** : un nouveau passage n'importe que ce qui ne l'a pas encore été, ce qui permet de lancer un traitement seul (`--traitements`). Les objets déjà importés (auteurs, rubriques, documents, articles, messages de forum) ne sont pas retouchés, à l'exception de trois traitements qui recalculent à chaque passage : `importer_metas` réécrit la configuration du site, `importer_polyhierarchie` réaligne les rubriques secondaires des articles et recalcule le statut des rubriques, `importer_commentaires` recalcule les fils de discussion (`id_parent`, `id_thread`, `date_thread`) des messages importés. Ces recalculs partent de WordPress, figé : ils produisent le même résultat à chaque passage.
 - **Import interrompu** (coupure, erreur) : il se refait de zéro, comme après une amélioration de wp2spip (ci-dessous). wp2spip ne prévoit pas de reprise qui compléterait les contenus laissés incomplets par l'interruption.
 - **Refaire un import** (par exemple après une amélioration de wp2spip) : remettre le SPIP à zéro, puis relancer un import complet. Il n'y a pas de mise à jour des contenus déjà importés : l'option `--update` est supprimée (§ 6, sous-projet 2).
 - **Identifiants conservés** (cible, § 6, sous-projet 1) : articles, pages, documents et rubriques SPIP reprennent l'identifiant de leur source WordPress.
@@ -39,6 +39,8 @@ Hors périmètre du cœur :
 ```
 spip wordpress:importer [options] <dir_wordpress>
 ```
+
+Options actuelles :
 
 | Argument / option | Rôle |
 |---|---|
@@ -208,7 +210,7 @@ La recherche du document à partir d'une URL (`wp2spip_chercher_document()`) :
   - « WordPress : contenus privés » ;
   - « WordPress : contenus protégés par mot de passe ».
 - Les deux zones s'appliquent au site public et sont accessibles à **tout visiteur identifié** (`autoriser_si_connexion`). Les mots de passe WordPress ne sont pas repris.
-- **C'est un choix de migration, plus large que WordPress** : dans WordPress, un contenu privé n'est visible que de son auteur et des comptes ayant la capacité `read_private_posts` (administrateurs et éditeurs) ; un contenu protégé, de quiconque connaît son mot de passe. L'ouverture à tout compte connecté a été retenue parce que les sites migrés se servent souvent des contenus privés comme d'un espace réservé à leurs membres. L'équivalent strict reste possible à la main : désactiver l'option « toute personne connectée » de la zone et y lier les administrateurs et éditeurs.
+- **C'est un choix de migration, plus large que WordPress** : dans WordPress, un contenu privé n'est visible que de son auteur et des comptes ayant la capacité `read_private_posts` (administrateurs et éditeurs) ; un contenu protégé, de quiconque connaît son mot de passe. L'ouverture à tout compte connecté a été retenue parce que les sites migrés se servent souvent des contenus privés comme d'un espace réservé à leurs membres. Une restriction plus forte reste possible à la main, par exemple désactiver l'option « toute personne connectée » de la zone et n'y lier que les administrateurs et éditeurs ; ce n'est pas l'équivalent de WordPress, une zone étant partagée par tous ses contenus : elle ne reproduit ni l'accès de chaque auteur à ses propres contenus privés, ni le mot de passe propre à chaque contenu protégé.
 - Les zones sont créées une fois, leurs identifiants gardés en configuration (`wp2spip/zones`) et réutilisés, même si elles sont renommées.
 - Un contenu déjà lié à sa zone n'est plus modifié.
 
