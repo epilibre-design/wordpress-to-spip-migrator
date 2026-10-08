@@ -21,7 +21,7 @@ function wp2spip_importer_acces_dist($command) {
 
 	// Les contenus Wordpress concernés
 	$wp_posts = sql_allfetsel(
-		'ID, post_status, post_password, post_date',
+		'ID, post_status, post_password, post_date, post_modified',
 		'wp_posts',
 		array(
 			sql_in('post_type', array('post', 'page')),
@@ -64,6 +64,8 @@ function wp2spip_importer_acces_dist($command) {
 		objet_modifier('article', $id_article, array('statut' => 'publie', 'date' => $wp_post['post_date']));
 
 		objet_associer(array('zone' => $zones[$cle]), array('article' => $id_article));
+		// objet_modifier() et objet_associer() ont remis date_modif à la date du jour
+		sql_updateq('spip_articles', array('date_modif' => $wp_post['post_modified']), 'id_article = ' . $id_article);
 		$nb_publies++;
 	}
 

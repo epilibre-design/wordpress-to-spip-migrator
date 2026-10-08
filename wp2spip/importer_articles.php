@@ -311,9 +311,6 @@ function wp2spip_importer_articles_dist($command) {
 			// Si on a un id_article, c'est qu'on vient d'insérer ou qu'on doit mettre à jour
 			if ($id_article) {
 				if (!$erreur = objet_modifier('article', $id_article, $article)) {
-					// On force la modif de certains champs qui ne sont pas pris en compte par l'API
-					sql_updateq('spip_articles', $supplements, 'id_article = '.$id_article);
-					
 					$command->update ? $nb_maj++ : $nb_import++;
 				}
 				
@@ -336,6 +333,12 @@ function wp2spip_importer_articles_dist($command) {
 				// Retrouver l'auteur principal dans le SPIP et l'ajouter
 				if ($id_auteur = sql_getfetsel('id_auteur', 'spip_auteurs', 'id_wordpress='.$wp_post['post_author'])) {
 					objet_associer(array('auteur'=>$id_auteur), array('article'=>$id_article));
+				}
+				
+				// On force la modif de certains champs qui ne sont pas pris en compte par l'API,
+				// en dernier : associer un auteur remet date_modif à la date du jour
+				if (!$erreur) {
+					sql_updateq('spip_articles', $supplements, 'id_article = '.$id_article);
 				}
 			}
 			
