@@ -1684,7 +1684,7 @@ Chacun suit le cycle de la spec (§ 6) : spec détaillée, relecture, puis plan 
 
 ### Task 17 : sous-projet 7 — tests automatisés
 
-- [ ] Spec : PHPUnit pour les fonctions pures (`wp2spip_chemin_upload`, `wp2spip_normaliser_slug`, `wp2spip_decoder_entites`, conversion des `<img>`, `[caption]`…) ; tests d'intégration bâtis sur `tests/integration/` et le contenu *Theme Unit Test*.
+- [x] Spec : `docs/superpowers/specs/2026-10-09-wp2spip-tests-automatises-design.md` (PHPUnit selon le skill `spip-testing` : `tests/unit/` sans SPIP, `tests/integration/` dans un SPIP de `vendor/` avec une base WordPress SQLite de test ; `valider.sh` et référence versionnée normalisée pour l'import complet).
 - [ ] Plan, réalisation.
 
 ### Task 18 : sous-projet 8 — extension `wp2spip_yoast`
