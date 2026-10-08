@@ -30,6 +30,12 @@ function wp2spip_importer_articles_dist($command) {
 		include_spip('sale_fonctions');
 		include_spip('inc/config');
 		include_spip('action/editer_liens');
+		include_spip('inc/wp2spip');
+		
+		// Chaque article ou page prend l'identifiant de son contenu : ils doivent tous être libres
+		if (!wp2spip_verifier_identifiants($command, 'article', array_column($wp_posts, 'ID'))) {
+			return false;
+		}
 		
 		$nb_posts = count($wp_posts);
 		$nb_import = 0;
@@ -260,7 +266,6 @@ function wp2spip_importer_articles_dist($command) {
 				'date_modif' => $wp_post['post_modified'],
 				'accepter_forum' => ($wp_post['comment_status'] == 'open') ? 'pos' : 'non',
 				'statut' => $statut,
-				'id_wordpress' => $id_wordpress,
 			);
 			$supplements = array(
 				'date' => $wp_post['post_date'],
@@ -273,52 +278,49 @@ function wp2spip_importer_articles_dist($command) {
 				$supplements['id_secteur'] = 0;
 			}
 			
-			// Si ça n'a pas déjà été importé c'est un ajout
-			$id_article = null;
-			if (!$article_old = sql_fetsel('id_article, id_rubrique', 'spip_articles', 'id_wordpress = '.$id_wordpress)) {
-				$id_article = objet_inserer('article', $id_rubrique_principale);
-				
-				// INSUP
-				autoriser_exception('modifier', 'article', $id_article, true);
-				autoriser_exception('instituer', 'article', $id_article, true);
-				autoriser_exception('modifier', 'rubrique', $id_rubrique_principale, true);
-				autoriser_exception('instituer', 'rubrique', $id_rubrique_principale, true);
-				autoriser_exception('publierdans', 'rubrique', $id_rubrique_principale, true);
+			// Créé avec l'identifiant du contenu Wordpress et son id_wordpress, en une seule insertion :
+			// aucun article n'existe sans son id_wordpress
+			$id_article = $id_wordpress;
+			if (objet_inserer('article', $id_rubrique_principale, array('id_article' => $id_article, 'id_wordpress' => $id_wordpress)) != $id_article) {
+				return wp2spip_erreur_insertion($command, 'article', $id_article);
 			}
 			
-			// Si on a un id_article, c'est qu'on vient d'insérer ou qu'on doit mettre à jour
-			if ($id_article) {
-				if (!$erreur = objet_modifier('article', $id_article, $article)) {
-					$nb_import++;
-				}
-				
-				// Associer les docs
-				wp2spip_importer_articles_documents($command, $id_wordpress, $id_article);
-				
-				// Ajouter l'URL libre
-				if ($wp_post['post_name']) {
-					sql_insertq(
-						'spip_urls',
-						array(
-							'type' => 'article',
-							'id_objet' => $id_article,
-							'date' => $wp_post['post_date'],
-							'url' => $wp_post['post_name'],
-						)
-					);
-				}
-				
-				// Retrouver l'auteur principal dans le SPIP et l'ajouter
-				if ($id_auteur = sql_getfetsel('id_auteur', 'spip_auteurs', 'id_wordpress='.$wp_post['post_author'])) {
-					objet_associer(array('auteur'=>$id_auteur), array('article'=>$id_article));
-				}
-				
-				// On force la modif de certains champs qui ne sont pas pris en compte par l'API,
-				// en dernier : associer un auteur remet date_modif à la date du jour
-				if (!$erreur) {
-					sql_updateq('spip_articles', $supplements, 'id_article = '.$id_article);
-				}
+			// INSUP
+			autoriser_exception('modifier', 'article', $id_article, true);
+			autoriser_exception('instituer', 'article', $id_article, true);
+			autoriser_exception('modifier', 'rubrique', $id_rubrique_principale, true);
+			autoriser_exception('instituer', 'rubrique', $id_rubrique_principale, true);
+			autoriser_exception('publierdans', 'rubrique', $id_rubrique_principale, true);
+			
+			if ($erreur = objet_modifier('article', $id_article, $article)) {
+				return wp2spip_erreur_modification($command, 'article', $id_article, $erreur);
 			}
+			$nb_import++;
+			
+			// Associer les docs
+			wp2spip_importer_articles_documents($command, $id_wordpress, $id_article);
+			
+			// Ajouter l'URL libre
+			if ($wp_post['post_name']) {
+				sql_insertq(
+					'spip_urls',
+					array(
+						'type' => 'article',
+						'id_objet' => $id_article,
+						'date' => $wp_post['post_date'],
+						'url' => $wp_post['post_name'],
+					)
+				);
+			}
+			
+			// Retrouver l'auteur principal dans le SPIP et l'ajouter
+			if ($id_auteur = sql_getfetsel('id_auteur', 'spip_auteurs', 'id_wordpress='.$wp_post['post_author'])) {
+				objet_associer(array('auteur'=>$id_auteur), array('article'=>$id_article));
+			}
+			
+			// On force la modif de certains champs qui ne sont pas pris en compte par l'API,
+			// en dernier : associer un auteur remet date_modif à la date du jour
+			sql_updateq('spip_articles', $supplements, 'id_article = '.$id_article);
 			
 			$progressBar->advance();
 		}
