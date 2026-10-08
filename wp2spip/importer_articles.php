@@ -31,6 +31,7 @@ function wp2spip_importer_articles_dist($command) {
 		include_spip('inc/config');
 		include_spip('action/editer_liens');
 		include_spip('inc/wp2spip');
+		include_spip('inc/wp2spip_blocs');
 		
 		// Chaque article ou page prend l'identifiant de son contenu : ils doivent tous être libres
 		if (!wp2spip_verifier_identifiants($command, 'article', array_column($wp_posts, 'ID'))) {
@@ -41,6 +42,7 @@ function wp2spip_importer_articles_dist($command) {
 		$nb_import = 0;
 		$nb_liens_absents = 0;
 		$nb_liens_non_convertis = 0;
+		$bilan_blocs = array('convertis' => array(), 'dynamiques' => array(), 'inconnus' => array(), 'medias_introuvables' => 0, 'images_retirees' => 0, 'albums' => 0);
 		$command->output->writeln("$nb_posts articles à importer.");
 		
 		$progressBar = new ProgressBar($command->output, $nb_posts);
@@ -95,8 +97,14 @@ function wp2spip_importer_articles_dist($command) {
 			
 			// TODO si pas de rubrique, il faudrait en créer une par défaut ?
 			
-			// On passe déjà sale() en premier pour y voir plus clair
-			$texte = sale($wp_post['post_content']);
+			// Les blocs de l'éditeur et les galeries sont convertis avant sale(), qui ne voit pas ce qu'ils produisent en raccourcis SPIP
+			$contexte_blocs = wp2spip_contexte_blocs($command, $wp_post, $url_wordpress);
+			$texte = wp2spip_convertir_blocs($wp_post['post_content'], $contexte_blocs);
+			$texte = wp2spip_restaurer_blocs(sale($texte), $contexte_blocs);
+			$bilan_blocs = wp2spip_cumuler_bilan_blocs($bilan_blocs, $contexte_blocs);
+			if ($command->output->isVerbose() and $contexte_blocs['bilan']['inconnus']) {
+				$command->output->writeln("\nArticle Wordpress $id_wordpress : blocs inconnus, contenu gardé : " . join(', ', array_keys($contexte_blocs['bilan']['inconnus'])));
+			}
 			
 			// On cherche tous les liens internes et on cherche s'il s'agit d'un document qu'on a déjà importé
 			$pattern_liens = '\[([^\[\]]*?)->([^\]]+)]';
@@ -297,8 +305,9 @@ function wp2spip_importer_articles_dist($command) {
 			}
 			$nb_import++;
 			
-			// Associer les docs
+			// Associer les docs, et les albums des galeries
 			wp2spip_importer_articles_documents($command, $id_wordpress, $id_article);
+			wp2spip_lier_albums($contexte_blocs, $id_article);
 			
 			// Ajouter l'URL libre
 			if ($wp_post['post_name']) {
@@ -333,6 +342,7 @@ function wp2spip_importer_articles_dist($command) {
 		if ($nb_liens_non_convertis) {
 			$command->output->writeln("$nb_liens_non_convertis liens vers des médias importés, mais placés là où SPIP n’a pas de raccourci (image de fond…), laissés tels quels (détail avec -v).");
 		}
+		wp2spip_afficher_bilan_blocs($command, $bilan_blocs);
 	}
 }
 
