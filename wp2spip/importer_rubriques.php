@@ -28,9 +28,15 @@ function wp2spip_importer_rubriques_dist($command) {
 		include_spip('inc/autoriser');
 		include_spip('inc/filtres');
 		include_spip('sale_fonctions');
+		include_spip('inc/wp2spip');
 		
 		// On arrange le tableau pour gérer la hiérarchie
 		$wp_categories = wp2spip_enfants_rubriques($wp_categories, 0);
+		
+		// Chaque rubrique prend l'identifiant de sa catégorie : ils doivent tous être libres
+		if (!wp2spip_verifier_identifiants($command, 'rubrique', array_column($wp_categories, 'id_term'))) {
+			return false;
+		}
 		
 		$nb_categories = count($wp_categories);
 		$nb_import = 0;
@@ -59,23 +65,26 @@ function wp2spip_importer_rubriques_dist($command) {
 				'confirme_deplace' => 'oui',
 				'titre' => texte_backend(sale($wp_category['titre'])),
 				'texte' => texte_backend(sale($wp_category['description'])),
-				'id_wordpress' => $id_wordpress_category,
 			);
 			
-			// Si ça n'a pas déjà été importé
-			if (!$rubrique_old = sql_fetsel('id_rubrique, id_parent', 'spip_rubriques', 'id_wordpress = '.$id_wordpress_category)) {
-				$id_rubrique = objet_inserer('rubrique', $id_parent);
-				
-				// INSUP
-				autoriser_exception('modifier', 'rubrique', $id_rubrique, true);
-				autoriser_exception('instituer', 'rubrique', $id_rubrique, true);
-				autoriser_exception('publierdans', 'rubrique', $id_parent, true);
-				autoriser_exception('creerrubriquedans', 'rubrique', $id_parent, true);
-				
-				if ($ok = objet_modifier('rubrique', $id_rubrique, $rubrique)) {
-					$nb_import++;
-				}
+			// Créée avec l'identifiant de la catégorie et son id_wordpress, en une seule insertion :
+			// aucune rubrique n'existe sans son id_wordpress
+			$id_rubrique = $id_wordpress_category;
+			if (objet_inserer('rubrique', $id_parent, array('id_rubrique' => $id_rubrique, 'id_wordpress' => $id_wordpress_category)) != $id_rubrique) {
+				return wp2spip_erreur_insertion($command, 'rubrique', $id_rubrique);
 			}
+			
+			// INSUP
+			autoriser_exception('modifier', 'rubrique', $id_rubrique, true);
+			autoriser_exception('instituer', 'rubrique', $id_rubrique, true);
+			autoriser_exception('publierdans', 'rubrique', $id_parent, true);
+			autoriser_exception('creerrubriquedans', 'rubrique', $id_parent, true);
+			
+			// objet_modifier() retourne un message d'erreur, ou une chaîne vide
+			if ($erreur = objet_modifier('rubrique', $id_rubrique, $rubrique)) {
+				return wp2spip_erreur_modification($command, 'rubrique', $id_rubrique, $erreur);
+			}
+			$nb_import++;
 			
 			$progressBar->advance();
 		}

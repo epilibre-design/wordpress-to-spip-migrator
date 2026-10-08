@@ -855,6 +855,17 @@ par :
 
 (la recherche du parent par `id_wordpress`, juste avant, reste inchangée.)
 
+Ajouté à l'exécution : propager l'échec de `objet_modifier()` dans `importer_auteurs` a fait apparaître des logins refusés par SPIP, jusque-là ignorés sans bruit (login `admin` déjà pris par l'administrateur créé à l'installation ; login de moins de 4 caractères). Avant `objet_modifier()`, le login est contrôlé par `auth_spip_verifier_login()` (inclure `auth/spip`) ; s'il est refusé, l'auteur est importé sans login, comme avant, avec un avertissement qui donne la raison :
+
+```php
+			// Login refusé par SPIP (déjà pris, souvent par l'administrateur créé à l'installation, ou trop court) :
+			// on importe l'auteur sans login, à compléter à la main
+			if ($refus = auth_spip_verifier_login($auteur['login'])) {
+				$command->output->writeln("\nLogin « {$auteur['login']} » refusé par SPIP ($refus) : l’auteur Wordpress $id_wordpress_user est importé sans login.");
+				unset($auteur['login']);
+			}
+```
+
 - [ ] **Step 4 : vérifier**
 
 Rejouer le Step 1. Expected : « 1 identifiants de rubrique déjà pris … : 1 », « Import arrêté », `code 1`, `int(1)` rubrique en base (rien n'a été créé).
