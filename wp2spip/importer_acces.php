@@ -38,6 +38,7 @@ function wp2spip_importer_acces_dist($command) {
 	include_spip('action/editer_objet');
 	include_spip('action/editer_liens');
 	include_spip('inc/autoriser');
+	include_spip('inc/wp2spip');
 
 	$zones = array();
 	$nb_publies = 0;
@@ -50,6 +51,10 @@ function wp2spip_importer_acces_dist($command) {
 		$id_article = intval($article['id_article']);
 		$cle = ($wp_post['post_status'] == 'private') ? 'prives' : 'proteges';
 		$zones[$cle] ??= wp2spip_zone_acces($cle);
+		if (!$zones[$cle]) {
+			$command->output->writeln("<error>Impossible de créer la zone d’accès « $cle ».</error>");
+			return false;
+		}
 
 		// Déjà traité lors d'un import précédent : on ne touche plus à ce qu'en a fait le site
 		if (sql_countsel('spip_zones_liens', array('id_zone = ' . $zones[$cle], 'objet = "article"', 'id_objet = ' . $id_article))) {
@@ -57,13 +62,25 @@ function wp2spip_importer_acces_dist($command) {
 			continue;
 		}
 
+		// Lier à la zone d'abord : une fois publié, le contenu doit déjà être protégé
+		objet_associer(array('zone' => $zones[$cle]), array('article' => $id_article));
+		if (!sql_countsel('spip_zones_liens', array('id_zone = ' . $zones[$cle], 'objet = "article"', 'id_objet = ' . $id_article))) {
+			$command->output->writeln("<error>Impossible de lier l’article $id_article à la zone {$zones[$cle]} : il n’est pas publié.</error>");
+			return false;
+		}
+
 		// Publier en gardant la date Wordpress (sinon SPIP mettrait la date du jour)
 		autoriser_exception('instituer', 'article', $id_article, true);
 		autoriser_exception('publierdans', 'rubrique', intval($article['id_rubrique']), true);
-		objet_modifier('article', $id_article, array('statut' => 'publie', 'date' => $wp_post['post_date']));
+		if ($erreur = objet_modifier('article', $id_article, array('statut' => 'publie', 'date' => $wp_post['post_date']))) {
+			return wp2spip_erreur_modification($command, 'article', $id_article, $erreur);
+		}
+		if (sql_getfetsel('statut', 'spip_articles', 'id_article = ' . $id_article) != 'publie') {
+			$command->output->writeln("<error>L’article $id_article n’a pas pu être publié dans sa zone.</error>");
+			return false;
+		}
 
-		objet_associer(array('zone' => $zones[$cle]), array('article' => $id_article));
-		// objet_modifier() et objet_associer() ont remis date_modif à la date du jour
+		// objet_associer() et objet_modifier() ont remis date_modif à la date du jour
 		sql_updateq('spip_articles', array('date_modif' => $wp_post['post_modified']), 'id_article = ' . $id_article);
 		$nb_publies++;
 	}

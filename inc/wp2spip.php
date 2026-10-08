@@ -28,7 +28,7 @@ function wp2spip_identifiants_occupes($objet, $ids) {
 }
 
 /**
- * Vérifie, avant de créer quoi que ce soit, que les identifiants à créer sont libres
+ * Vérifie, avant de créer le moindre objet de ce type, que les identifiants à créer sont libres
  *
  * @param WordpressImporter $command
  * @param string $objet

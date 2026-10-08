@@ -12,11 +12,11 @@ Principes :
 
 - **WordPress figé** : l'import part d'un WordPress qui ne bouge pas pendant la migration (copie du site, ou site gelé). wp2spip ne prévoit pas de suivre un WordPress qui continue d'évoluer.
 - **SPIP vierge** : le site SPIP de destination ne contient aucun contenu avant le premier import.
-- **SPIP hors ligne** : le site SPIP n'est pas accessible au public pendant l'import, et le reste jusqu'au contrôle des accès (contenus privés ou protégés, zones restreintes). Les traitements peuvent exposer un contenu entre deux étapes, par exemple `importer_acces`, qui publie un contenu avant de le lier à sa zone : cette condition écarte ce risque, et wp2spip ne cherche pas à l'éviter autrement.
+- **SPIP hors ligne** : le site SPIP n'est pas accessible au public pendant l'import, et le reste jusqu'au contrôle des accès (contenus privés ou protégés, zones restreintes). Un contenu peut être incomplet entre deux traitements (rubriques sans articles, articles sans leurs rubriques secondaires…) : cette condition évite de l'exposer ainsi. `importer_acces` lie toutefois chaque contenu à sa zone avant de le publier, si bien qu'un contenu privé ou protégé n'est jamais public, même un instant.
 - **Traitements relançables** : un nouveau passage n'importe que ce qui ne l'a pas encore été, ce qui permet de lancer un traitement seul (`--traitements`). Les objets déjà importés (auteurs, rubriques, documents, articles, messages de forum) ne sont pas retouchés, à l'exception de trois traitements qui recalculent à chaque passage : `importer_metas` réécrit la configuration du site, `importer_polyhierarchie` réaligne les rubriques secondaires des articles et recalcule le statut des rubriques, `importer_commentaires` recalcule les fils de discussion (`id_parent`, `id_thread`, `date_thread`) des messages importés. Ces recalculs partent de WordPress, figé : ils produisent le même résultat à chaque passage.
 - **Import interrompu** (coupure, erreur) : il se refait de zéro, comme après une amélioration de wp2spip (ci-dessous). wp2spip ne prévoit pas de reprise qui compléterait les contenus laissés incomplets par l'interruption.
 - **Refaire un import** (par exemple après une amélioration de wp2spip) : remettre le SPIP à zéro, puis relancer un import complet. Il n'y a pas de mise à jour des contenus déjà importés.
-- **Identifiants conservés** : articles, pages, documents et rubriques SPIP reprennent l'identifiant de leur source WordPress (§ 6, sous-projet 1). Un identifiant déjà pris dans SPIP arrête l'import avant toute création.
+- **Identifiants conservés** : articles, pages, documents et rubriques SPIP reprennent l'identifiant de leur source WordPress (§ 6, sous-projet 1). Un identifiant déjà pris dans SPIP arrête le traitement concerné avant qu'il ne crée le moindre objet de ce type, et l'import avec le code `1` ; les traitements précédents ont pu créer des objets, d'où la remise à zéro avant de relancer.
 
 Cibles :
 
@@ -132,7 +132,7 @@ Limite : l'adresse du site SPIP est écrasée par celle du WordPress, ce qui est
 - Utilisateurs de `wp_users`, sauf les comptes sans email dont l'identifiant commence par `_` (faux comptes créés en masse par certaines extensions).
 - Nom : prénom + nom (métas `first_name`, `last_name`), sinon nom affiché, sinon `user_nicename`, sinon identifiant.
 - Identifiant, email, site web repris. Les auteurs gardent la numérotation de SPIP (l'administrateur créé à l'installation porte le n° 1).
-- Un identifiant refusé par SPIP (déjà pris, souvent par l'administrateur créé à l'installation, ou trop court) est signalé, et l'auteur est importé sans identifiant de connexion, à compléter à la main.
+- Un identifiant refusé par SPIP (déjà pris, souvent par l'administrateur créé à l'installation, ou trop court) est remplacé par le premier libre parmi `login-wp`, `login-wp2`… (validé par SPIP, déterministe pour un même WordPress), ce qui garde l'accès au compte et à « mot de passe oublié » ; le login attribué est signalé dans le bilan de l'import.
 - Statut d'après le rôle WordPress (méta `wp_capabilities`) :
 
 | Rôle WordPress | Statut SPIP |
@@ -205,7 +205,7 @@ La recherche du document à partir d'une URL (`wp2spip_chercher_document()`) :
 ### 3.6 `importer_acces`
 
 - Si Accès restreint n'est pas actif : message, et les contenus privés ou protégés restent non publiés.
-- S'il est actif : chaque contenu **privé**, ou **protégé par mot de passe** et publié/programmé, est publié (date WordPress conservée) et lié à une zone :
+- S'il est actif : chaque contenu **privé**, ou **protégé par mot de passe** et publié/programmé, est lié à une zone, puis publié (date WordPress conservée) ; si l'association ou la publication échoue, le traitement s'arrête en échec :
   - « WordPress : contenus privés » ;
   - « WordPress : contenus protégés par mot de passe ».
 - Les deux zones s'appliquent au site public et sont accessibles à **tout visiteur identifié** (`autoriser_si_connexion`). Les mots de passe WordPress ne sont pas repris.
@@ -289,7 +289,7 @@ L'import WordPress télécharge les médias du contenu de test dans `wp-content/
 - WordPress 6.9 et 7.1 : résultats **identiques entre les deux versions**, aux différences d'installation près (adresse du site, date d'installation) ; 118 rubriques secondaires attendues ; fils de commentaires conformes à WordPress, sans écart de parent ; contenu protégé publié en zone avec Accès restreint, non publié sans.
 - Simulation WordPress < 5.5 (types de commentaires vides) : 30 messages, aucun écart.
 - Idempotence vérifiée pour les commentaires et les zones : un second passage ne crée rien.
-- Après les sous-projets 1 et 2 (validation avec `tests/integration/`) : sur les quatre sites, import complet en code `0` et `verifier_identifiants.php` à **OK** (identifiant SPIP = identifiant WordPress pour tous les articles, pages, rubriques et documents ; aucun lien `?p=` ou `?page_id=` vers le site d'origine laissé tel quel ; tout `[->articleN]` désigne un article existant). Site réel : SQLite = MySQL ligne à ligne. Par rapport à l'import d'avant ces sous-projets, seuls changent les titres de rubriques sans entités, le titre par défaut d'un contenu sans titre (« Nouvel article N° » + identifiant WordPress) et, pour deux contenus de même slug, celui qui reçoit l'URL (désormais toujours le plus ancien). Un identifiant déjà pris arrête l'import (code `1`) sans rien créer, pour chaque type d'objet.
+- Après les sous-projets 1 et 2 (validation avec `tests/integration/`) : sur les quatre sites, import complet en code `0` et `verifier_identifiants.php` à **OK** (identifiant SPIP = identifiant WordPress pour tous les articles, pages, rubriques et documents ; aucun lien `?p=` ou `?page_id=` vers le site d'origine laissé tel quel ; tout `[->articleN]` désigne un article existant). Site réel : SQLite = MySQL ligne à ligne. Par rapport à l'import d'avant ces sous-projets, seuls changent les titres de rubriques sans entités, le titre par défaut d'un contenu sans titre (« Nouvel article N° » + identifiant WordPress) et, pour deux contenus de même slug, celui qui reçoit l'URL (désormais toujours le plus ancien). Un identifiant déjà pris arrête l'import (code `1`) sans créer aucun objet du type concerné, pour chaque type d'objet.
 
 ### 5.3 Méthode
 

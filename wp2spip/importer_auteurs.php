@@ -59,10 +59,14 @@ function wp2spip_importer_auteurs_dist($command) {
 			);
 
 			// Login refusé par SPIP (déjà pris, souvent par l'administrateur créé à l'installation, ou trop court) :
-			// on importe l'auteur sans login, à compléter à la main
+			// on prend le premier libre parmi login-wp, login-wp2, login-wp3… pour garder l'accès au compte
 			if ($refus = auth_spip_verifier_login($auteur['login'])) {
-				$command->output->writeln("\nLogin « {$auteur['login']} » refusé par SPIP ($refus) : l’auteur Wordpress $id_wordpress_user est importé sans login.");
-				unset($auteur['login']);
+				$login = $auteur['login'] . '-wp';
+				for ($n = 2; auth_spip_verifier_login($login); $n++) {
+					$login = $auteur['login'] . "-wp$n";
+				}
+				$command->output->writeln("\nLogin « {$auteur['login']} » refusé par SPIP ($refus) : l’auteur Wordpress $id_wordpress_user reçoit le login « $login ».");
+				$auteur['login'] = $login;
 			}
 
 			// Pour les statuts

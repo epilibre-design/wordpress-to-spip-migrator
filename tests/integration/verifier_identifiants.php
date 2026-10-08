@@ -5,7 +5,9 @@
  * - articles, rubriques et documents importés : identifiant SPIP = id_wordpress ;
  * - tous les contenus et catégories Wordpress sont importés ;
  * - liens internes : chaque [->articleN] désigne un article existant, et aucun lien
- *   ?p= ou ?page_id= vers le site d'origine ne reste dans les textes.
+ *   ?p= ou ?page_id= vers le site d'origine ne reste dans les textes ;
+ * - contenus privés ou protégés : jamais publiés hors d'une zone d'Accès restreint, et,
+ *   si le plugin est actif, publiés dans leur zone.
  *
  * Usage, depuis le site SPIP (base Wordpress déclarée sous le nom "wordpress") :
  *   spip php:eval 'include "<wp2spip>/tests/integration/verifier_identifiants.php";'
@@ -37,6 +39,33 @@ $nb_spip = sql_countsel('spip_rubriques', 'id_wordpress > 0');
 if ($nb_wp != $nb_spip) {
 	$echecs[] = "rubriques : $nb_spip importées pour $nb_wp catégories Wordpress";
 }
+
+// Contenus privés ou protégés par mot de passe : jamais publiés hors d'une zone ;
+// avec Accès restreint, les privés et les protégés publiés ou programmés sont publiés dans une zone
+include_spip('inc/plugin');
+$acces = test_plugin_actif('accesrestreint');
+$restreints = sql_allfetsel(
+	'ID, post_status',
+	'wp_posts',
+	array(sql_in('post_type', array('post', 'page')), '(post_status = "private" or post_password != "")'),
+	'', '', '', '', $base
+);
+foreach ($restreints as $restreint) {
+	$id = intval($restreint['ID']);
+	$statut = sql_getfetsel('statut', 'spip_articles', 'id_article = ' . $id);
+	$en_zone = $acces ? sql_countsel('spip_zones_liens', array('objet = "article"', 'id_objet = ' . $id)) : 0;
+	if ($statut == 'publie' and !$en_zone) {
+		$echecs[] = "article $id : contenu privé ou protégé publié hors d'une zone";
+	}
+	if (
+		$acces
+		and in_array($restreint['post_status'], array('private', 'publish', 'future'))
+		and !($statut == 'publie' and $en_zone)
+	) {
+		$echecs[] = "article $id : contenu privé ou protégé non publié dans sa zone";
+	}
+}
+echo count($restreints) . " contenus privés ou protégés vérifiés" . ($acces ? '' : ' (sans Accès restreint)') . "\n";
 
 $url_wordpress = sql_getfetsel('option_value', 'wp_options', 'option_name="siteurl"', '', '', '', '', $base);
 foreach (sql_allfetsel('id_article, texte', 'spip_articles', 'id_wordpress > 0') as $article) {

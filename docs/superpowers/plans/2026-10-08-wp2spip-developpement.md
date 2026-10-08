@@ -747,7 +747,7 @@ function wp2spip_identifiants_occupes($objet, $ids) {
 }
 
 /**
- * Vérifie, avant de créer quoi que ce soit, que les identifiants à créer sont libres
+ * Vérifie, avant de créer le moindre objet de ce type, que les identifiants à créer sont libres
  *
  * @param WordpressImporter $command
  * @param string $objet
@@ -1638,6 +1638,14 @@ git commit -m "Documentation : identifiants conservés, codes de sortie, --garde
 ```
 
 Pas de push sans demande explicite.
+
+### Task 12 bis : seconde relecture de Codex (ajoutée à l'exécution)
+
+- [x] `importer_acces` : chaque contenu est lié à sa zone **avant** d'être publié, et chaque étape est contrôlée (zone créée, lien présent, statut `publie`) ; un échec arrête le traitement, si bien qu'un contenu privé ou protégé n'est jamais public, même un instant.
+- [x] `verifier_identifiants.php` : contenus privés ou protégés jamais publiés hors d'une zone, et, avec Accès restreint, publiés dans leur zone (testé : lien de zone retiré → `ECHEC`, code `1`).
+- [x] `importer_auteurs` : un login refusé par SPIP est remplacé par le premier libre parmi `login-wp`, `login-wp2`… (validé par `auth_spip_verifier_login()`), signalé dans le bilan, au lieu d'un auteur sans login (remplace le choix noté à la Task 5).
+- [x] readme et spec : un identifiant déjà pris arrête **le traitement concerné** avant qu'il ne crée un objet de ce type ; les traitements précédents ont pu créer des objets.
+- [x] Validation complète rejouée sur les quatre sites.
 
 ---
 

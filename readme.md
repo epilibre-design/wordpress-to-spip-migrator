@@ -48,9 +48,9 @@ Pour refaire un import (import interrompu, nouvelle version de wp2spip), remettr
 La commande retourne le code de sortie 1 si un traitement échoue (l'import s'arrête alors, les traitements suivants dépendant des précédents) ou si `--traitements` contient un nom inconnu, 0 sinon.
 
 ## Identifiants
-Les articles, pages, rubriques et documents SPIP reprennent l'identifiant de leur contenu Wordpress (article 42 = contenu Wordpress 42). Les liens internes (`?p=`, `?page_id=`, slug) deviennent donc des raccourcis SPIP même vers un contenu importé plus tard. L'import doit se faire dans un SPIP vierge : si un identifiant est déjà pris, la commande s'arrête avant de créer quoi que ce soit, avec le code de sortie 1.
+Les articles, pages, rubriques et documents SPIP reprennent l'identifiant de leur contenu Wordpress (article 42 = contenu Wordpress 42). Les liens internes (`?p=`, `?page_id=`, slug) deviennent donc des raccourcis SPIP même vers un contenu importé plus tard. L'import doit se faire dans un SPIP vierge : si un identifiant est déjà pris, le traitement concerné s'arrête avant de créer le moindre objet de ce type, et la commande retourne le code de sortie 1. Les traitements précédents ont pu créer des objets : remettre le SPIP à zéro avant de relancer.
 
-Les auteurs gardent la numérotation de SPIP. Un login Wordpress refusé par SPIP (déjà pris, par exemple par l'administrateur créé à l'installation, ou trop court) est signalé, et l'auteur est importé sans login.
+Les auteurs gardent la numérotation de SPIP. Un login Wordpress refusé par SPIP (déjà pris, par exemple par l'administrateur créé à l'installation, ou trop court) est remplacé par le premier login libre parmi `login-wp`, `login-wp2`… ; le login attribué est signalé dans le bilan de l'import.
 
 ## Adresse du site
 Par défaut, l'adresse du site SPIP prend celle du Wordpress. L'option `--garder-adresse` conserve celle du SPIP.
