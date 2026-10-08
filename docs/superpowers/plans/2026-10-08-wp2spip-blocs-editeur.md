@@ -17,7 +17,7 @@
 - Galerie : un album par galerie, toujours écrit `<albumN>` ; titre du contenu, suivi de « (galerie n) » s'il en a plusieurs ; statut `publie`, date du contenu ; documents dans l'ordre (`rang_lien`) ; album lié à l'article.
 - Mise en page : balise d'origine avec ses seules classes `wp-block-…` ; styles, autres classes, `aria-*`, `role`, `data-*` retirés.
 - Contenu embarqué : URL seule sur sa ligne, puis la légende.
-- Plugins requis (Albums si galerie, Accès restreint si contenu privé ou protégé, Forum si commentaire) installés **avant tout traitement, quels que soient les traitements demandés** ; un appel de `plugins:svp:telecharger` par plugin ; méta `<préfixe>_base_version` effacée après téléchargement ; une seule relance (`WP2SPIP_RELANCE=1`) ; échec : code `1`, aucun traitement, commandes à lancer à la main.
+- Plugins requis (Albums si galerie, Accès restreint si contenu privé ou protégé, Forum si commentaire) installés **avant tout traitement, quels que soient les traitements demandés** ; `plugins/auto` (`core:preparer --auto`) et dépôt standard (`plugins:svp:depoter`) préparés s'ils manquent ; un appel de `plugins:svp:telecharger` par plugin ; méta `<préfixe>_base_version` effacée après téléchargement ; une seule relance (`WP2SPIP_RELANCE=1`) ; échec : code `1`, aucun traitement, commandes à lancer à la main.
 - SPIP-Cli n'est pas modifié.
 - Ne jamais nommer le site réel de test dans les fichiers versionnés ou les messages de commit ; messages de commit sans trailer.
 - Style du code : celui de wp2spip (tabulations, `array()`, commentaires en français).
@@ -30,7 +30,7 @@ Le code de ce plan a été mis au point dans un prototype, sur des SPIP 4.4.28 p
 2. **Les plugins de `plugins-dist` sont toujours actifs en SPIP 4** : Forum ne peut pas être désactivé ; le scénario « Forum désactivé » de la spec est retiré.
 3. **`proc_open()` avec `STDOUT`** fait écrire le sous-processus au début d'un fichier de sortie redirigé, par-dessus ce qui précède : les sous-commandes héritent des descripteurs (aucun n'est passé).
 4. Couvertures à l'ancien format : texte dans le HTML propre du bloc (`<p class="wp-block-cover-text">`), pas dans un enfant. Légende d'un tableau collée à sa dernière ligne : syntaxe de tableau SPIP cassée. Le vérificateur ne peut pas interdire `style=` (blocs « HTML personnalisé », contenus classiques) ; `<!-- wp:` peut apparaître légitimement dans un bloc de code.
-5. Les SPIP de test de `tests/integration/` n'ont pas de dépôt SVP : l'import y échouerait désormais (galeries du contenu de test). Nouveaux états vierges v3, avec le dépôt.
+5. Un SPIP installé sans `outils/preparer_spip.sh` (dont ceux de `tests/integration/`) n'a ni `plugins/auto` ni dépôt : SVP refuse alors de télécharger (« Le répertoire de paquets plugins/auto/ n'est pas accessible », « Le plugin … n'est pas référencé »). L'import les prépare avec les commandes de SPIP-Cli : `core:preparer --auto` et `plugins:svp:depoter` (dépôt standard) ; ensuite, `plugins:svp:telecharger` télécharge, active et installe chaque plugin avec ses dépendances.
 
 ## Environnement
 
@@ -38,12 +38,12 @@ Variables de `tests/integration/environnement.sh` (plan général, « Environnem
 
 ---
 
-### Task 1 : références d'avant et états vierges v3 des SPIP de test
+### Task 1 : référence d'avant pour le site réel
 
 **Files :** aucun fichier versionné (sauvegardes sous `$SAUVEGARDES`).
 
 **Interfaces :**
-- Produces : `$SAUVEGARDES/export-reel-sqlite-avant-blocs.tsv` (export du site réel importé par la version actuelle) ; `$SAUVEGARDES/vierge-wp6-v3.sql.gz` et `vierge-wp7-v3.sql.gz` (états v2 plus le dépôt SVP).
+- Produces : `$SAUVEGARDES/export-reel-sqlite-avant-blocs.tsv` (export du site réel importé par la version actuelle).
 
 - [ ] **Step 1 : export du site réel avec la version actuelle**
 
@@ -57,22 +57,6 @@ cd "$WP2SPIP"
 ```
 
 Expected : `code 0`, `OK`.
-
-- [ ] **Step 2 : états vierges v3 des SPIP des WordPress 6.9 et 7.1, avec le dépôt SVP**
-
-```bash
-for n in 6 7; do
-	site=SPIP_WP$n; base=BASE_WP$n
-	"$WP2SPIP/tests/integration/remise_a_zero.sh" "${!site}" "$SAUVEGARDES/vierge-wp$n-v2.sql.gz" "${!base}"
-	# Dossier où SVP télécharge les plugins : ces sites ont été montés à la main, sans lui
-	mkdir -p "${!site}/plugins/auto"
-	(cd "${!site}" && "$SPIP_CLI" plugins:svp:depoter https://plugins.spip.net/depots/principal.xml)
-	mysqldump --no-tablespaces $MYSQL_OPTIONS "${!base}" $(mysql $MYSQL_OPTIONS -N "${!base}" -e "show tables like 'spip\\_%'") | gzip > "$SAUVEGARDES/vierge-wp$n-v3.sql.gz"
-	(cd "${!site}" && "$SPIP_CLI" php:eval 'echo sql_countsel("spip_depots"), " dépôt\n";')
-done
-```
-
-Expected : `1 dépôt` deux fois. Désormais, ces deux sites se remettent à zéro avec les états v3 (`remise_a_zero.sh` ne touche pas à `plugins/auto` : un plugin déjà téléchargé y reste, et l'import n'a plus qu'à l'activer).
 
 ---
 
@@ -144,7 +128,7 @@ git commit -m "Préparation : installer réellement les plugins téléchargés p
 - Modify : `paquet.xml`
 
 **Interfaces :**
-- Produces : `wp2spip_where_contenus_restreints(): array`, `wp2spip_where_commentaires(): array`, `wp2spip_where_galeries(): array` (conditions SQL sur `wp_posts` / `wp_comments`) ; `wp2spip_plugins_requis(string $base): array` (préfixe => `nom`, `table`, `dist`, `raison`), pipeline `wp2spip_plugins_requis` ; `wp2spip_plugin_pret(string $prefixe, array $plugin): bool` ; `wp2spip_plugin_present(string $prefixe): bool` ; `WordpressImporter::verifier_plugins(): ?int`, `echec_plugins()`, `lancer_spip_cli(array $arguments, array $environnement = array()): int`.
+- Produces : `wp2spip_where_contenus_restreints(): array`, `wp2spip_where_commentaires(): array`, `wp2spip_where_galeries(): array` (conditions SQL sur `wp_posts` / `wp_comments`) ; `wp2spip_plugins_requis(string $base): array` (préfixe => `nom`, `table`, `dist`, `raison`), pipeline `wp2spip_plugins_requis` ; `wp2spip_plugin_pret(string $prefixe, array $plugin): bool` ; `wp2spip_plugin_present(string $prefixe): bool` ; `WordpressImporter::verifier_plugins(): ?int`, `preparer_telechargement(array $manquants): ?int` (`plugins/auto` et dépôt s'ils manquent ; constante `_WP2SPIP_DEPOT_SVP`), `echec_plugins()`, `lancer_spip_cli(array $arguments, array $environnement = array()): int`.
 
 - [ ] **Step 1 : constater l'état actuel**
 
@@ -190,6 +174,11 @@ remettre_plugins() {
 
 if (!defined('_ECRIRE_INC_VERSION')) {
 	return;
+}
+
+// Dépôt de plugins déclaré par l'import quand le SPIP n'en a aucun
+if (!defined('_WP2SPIP_DEPOT_SVP')) {
+	define('_WP2SPIP_DEPOT_SVP', 'https://plugins.spip.net/depots/principal.xml');
 }
 
 /**
@@ -482,12 +471,16 @@ Dans `spip-cli/WordpressImporter.php` :
 			$this->output->writeln("<info>Plugin requis : {$plugin['nom']} ($prefixe), pour {$plugin['raison']}.</info>");
 		}
 		
+		// Pour télécharger, SVP demande le dossier plugins/auto et un dépôt : sur un SPIP qui ne les a pas
+		// (installé sans outils/preparer_spip.sh), on les prépare avec les commandes de SPIP-Cli
+		$a_telecharger = array_filter(array_keys($manquants), fn($prefixe) => !wp2spip_plugin_present($prefixe));
+		if ($a_telecharger and ($code = $this->preparer_telechargement($manquants)) !== null) {
+			return $code;
+		}
+		
 		// Un appel de plugins:svp:telecharger par plugin : dans un même appel, SPIP-Cli retente les téléchargements
 		// des plugins précédents. Son code de sortie ne dit pas si le téléchargement a réussi : le plugin est cherché sur le disque.
-		foreach ($manquants as $prefixe => $plugin) {
-			if (wp2spip_plugin_present($prefixe)) {
-				continue;
-			}
+		foreach ($a_telecharger as $prefixe) {
 			$this->lancer_spip_cli(array('plugins:svp:telecharger', $prefixe, '-y'));
 			if (!wp2spip_plugin_present($prefixe)) {
 				return $this->echec_plugins($manquants, "$prefixe absent après plugins:svp:telecharger");
@@ -508,6 +501,36 @@ Dans `spip-cli/WordpressImporter.php` :
 	}
 	
 	/**
+	 * Dossier plugins/auto et dépôt de plugins, préparés s'ils manquent
+	 *
+	 * core:preparer --auto crée plugins/auto ; il aligne aussi les droits des dossiers d'écriture de SPIP
+	 * sur ceux qu'on lui donne (ici ceux de plugins/), et crée lib/ et .htaccess s'ils manquent.
+	 *
+	 * @param array $manquants plugins requis non prêts
+	 * @return int|null null si le téléchargement est possible, sinon le code d'échec
+	 */
+	protected function preparer_telechargement(array $manquants): ?int {
+		include_spip('inc/plugin');
+		if (!is_dir(_DIR_PLUGINS_AUTO)) {
+			$droits = substr(sprintf('%o', fileperms(_DIR_PLUGINS)), -3);
+			$this->output->writeln("<info>Création de plugins/auto, où SVP télécharge les plugins (droits $droits).</info>");
+			$this->lancer_spip_cli(array('core:preparer', '--auto', '--droits', $droits));
+			clearstatcache();
+			if (!is_dir(_DIR_PLUGINS_AUTO) or !is_writable(_DIR_PLUGINS_AUTO)) {
+				return $this->echec_plugins($manquants, 'plugins/auto absent ou non accessible en écriture après core:preparer --auto');
+			}
+		}
+		if (!sql_countsel('spip_depots')) {
+			$this->output->writeln('<info>Aucun dépôt de plugins : ajout de ' . _WP2SPIP_DEPOT_SVP . '.</info>');
+			$this->lancer_spip_cli(array('plugins:svp:depoter', _WP2SPIP_DEPOT_SVP));
+			if (!sql_countsel('spip_depots')) {
+				return $this->echec_plugins($manquants, 'dépôt de plugins impossible à ajouter');
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * Échec de l'installation des plugins requis : les commandes à lancer à la main
 	 *
 	 * @param array $manquants préfixe => description (wp2spip_plugins_requis())
@@ -519,7 +542,8 @@ Dans `spip-cli/WordpressImporter.php` :
 		$lignes = array(
 			"<error>Plugins requis par le contenu Wordpress non installés ($raison) : $prefixes.</error>",
 			'Aucun traitement n’a été lancé. Pour les installer à la main, depuis le dossier du SPIP :',
-			'  spip plugins:svp:depoter https://plugins.spip.net/depots/principal.xml    (si aucun dépôt n’est déclaré)',
+			'  spip core:preparer --auto    (si plugins/auto n’existe pas)',
+			'  spip plugins:svp:depoter ' . _WP2SPIP_DEPOT_SVP . '    (si aucun dépôt n’est déclaré)',
 		);
 		foreach ($manquants as $prefixe => $plugin) {
 			if (empty($plugin['dist']) and !wp2spip_plugin_present($prefixe)) {
@@ -588,21 +612,46 @@ cd "$WP2SPIP"
 
 Expected : `code 0` ; dans l'ordre, `C’est parti…`, `Plugin requis : Albums (albums), pour 6 contenus avec une galerie.`, `Plugin requis : Accès restreint (accesrestreint), pour 1 contenus privés ou protégés.`, `Installation du plugin Albums`, `Installation du plugin Acces Restreint`, `Plugins requis installés : l’import est relancé.`, un second `C’est parti…`, puis `Lancement du traitement « importer_articles »…` ; enfin `2 2` (tables des deux plugins créées).
 
-- [ ] **Step 8 : échec simulé, dépôt SVP absent**
+- [ ] **Step 8 : échec simulé, dépôt injoignable**
+
+Sur un SPIP sans dépôt, l'import ajoute le dépôt de `_WP2SPIP_DEPOT_SVP` : une adresse inexistante, posée dans `config/mes_options.php`, fait échouer cet ajout.
 
 ```bash
 remettre_plugins
 cd "$ESSAIS/spip-plugins"
 "$SPIP_CLI" php:eval 'include_spip("inc/svp_depoter_distant"); foreach (sql_allfetsel("id_depot", "spip_depots") as $depot) { svp_supprimer_depot($depot["id_depot"]); }'
+printf "<?php\ndefine('_WP2SPIP_DEPOT_SVP', 'https://plugins.spip.net/depots/inexistant-wp2spip.xml');\n" > config/mes_options.php
 "$SPIP_CLI" --no-ansi wordpress:importer "$WP6" > "$ESSAIS/plugins-echec.log" 2>&1; echo "code $?"
 grep -c "Lancement du traitement" "$ESSAIS/plugins-echec.log"
-grep -A9 "non installés" "$ESSAIS/plugins-echec.log"
+grep -A11 "non installés" "$ESSAIS/plugins-echec.log"
+rm config/mes_options.php
 cd "$WP2SPIP"
 ```
 
-Expected : `code 1`, `0` traitement lancé, et le message : `Plugins requis par le contenu Wordpress non installés (albums absent après plugins:svp:telecharger) : albums accesrestreint.`, suivi des commandes à lancer à la main (`plugins:svp:depoter`, `plugins:svp:telecharger albums -y`, effacement de la méta, …, `plugins:activer albums accesrestreint -y`, `plugins:maj:bdd`).
+Expected : `code 1`, `0` traitement lancé, et le message : `Plugins requis par le contenu Wordpress non installés (dépôt de plugins impossible à ajouter) : albums accesrestreint.`, suivi des commandes à lancer à la main (`core:preparer --auto`, `plugins:svp:depoter …`, `plugins:svp:telecharger albums -y`, effacement de la méta, …, `plugins:activer albums accesrestreint -y`, `plugins:maj:bdd`).
 
-- [ ] **Step 9 : non-régression sur un SPIP de test (plugins déjà prêts)**
+- [ ] **Step 9 : SPIP sans `plugins/auto` ni dépôt**
+
+État des SPIP montés sans le script de préparation : plugins rangés dans `plugins/`, ni `plugins/auto` ni dépôt. Ce scénario déplace les plugins : il vient en dernier sur `$ESSAIS/spip-plugins`, que `remettre_plugins` ne sait plus remettre ensuite.
+
+```bash
+remettre_plugins
+s="$ESSAIS/spip-plugins"
+for p in sale pages polyhier; do mv "$s/plugins/auto/$p" "$s/plugins/$p"; done
+rmdir "$s/plugins/auto"
+cd "$s"
+"$SPIP_CLI" plugins:activer sale pages polyhier -y > /dev/null
+"$SPIP_CLI" php:eval 'include_spip("inc/svp_depoter_distant"); foreach (sql_allfetsel("id_depot", "spip_depots") as $depot) { svp_supprimer_depot($depot["id_depot"]); } echo sql_countsel("spip_depots"), " dépôt\n";'
+"$SPIP_CLI" --no-ansi wordpress:importer "$WP6" -t importer_articles > "$ESSAIS/plugins-sans-depot.log" 2>&1; echo "code $?"
+grep "Création de plugins/auto\|Aucun dépôt\|Installation du plugin\|relancé" "$ESSAIS/plugins-sans-depot.log" | sed 's/<[^>]*>//g'
+ls plugins/auto
+"$SPIP_CLI" php:eval 'echo count(sql_alltable("spip_albums%")), " ", count(sql_alltable("spip_zones%")), "\n";'
+cd "$WP2SPIP"
+```
+
+Expected : `0 dépôt`, `code 0` ; `Création de plugins/auto, où SVP télécharge les plugins (droits 775).`, `Aucun dépôt de plugins : ajout de https://plugins.spip.net/depots/principal.xml.`, `Installation du plugin Albums`, `Installation du plugin Acces Restreint`, `Plugins requis installés : l’import est relancé.` ; `accesrestreint albums` sous `plugins/auto` ; `2 2`.
+
+- [ ] **Step 10 : non-régression sur un SPIP de test (plugins déjà prêts)**
 
 Le SPIP du site réel en SQLite a Accès restreint et Forum ; le site réel n'a pas de galerie : rien n'est installé.
 
@@ -618,7 +667,7 @@ cd "$WP2SPIP"
 
 Expected : `code 0`, `0`, `IDENTIQUE`.
 
-- [ ] **Step 10 : commit**
+- [ ] **Step 11 : commit**
 
 ```bash
 git add inc/wp2spip_plugins.php spip-cli/WordpressImporter.php wp2spip/importer_acces.php wp2spip/importer_commentaires.php paquet.xml
@@ -1578,7 +1627,7 @@ Sur `$ESSAIS/spip-blocs` (importé à la Task 4 par la version sans conversion) 
 (cd "$ESSAIS/spip-blocs" && "$SPIP_CLI" php:eval 'echo sql_countsel("spip_articles", "texte like \"%<figure%\""), " ", sql_countsel("spip_albums"), "\n";')
 ```
 
-Expected : `10 0` (dix articles gardent des `<figure` : relevé sur le SPIP de test du WordPress 6.9, importé par la version actuelle ; aucun album).
+Expected : un nombre d'articles avec `<figure` non nul (14 dans le prototype), et `0` album.
 
 - [ ] **Step 2 : appel de la conversion**
 
@@ -1773,15 +1822,16 @@ done
 
 Expected, pour chacun : `code 0`, `2` plugins requis (Albums, Accès restreint), `OK`, `OK`.
 
-- [ ] **Step 2 : SPIP de test des WordPress 6.9 et 7.1 (états v3, dépôt SVP)**
+- [ ] **Step 2 : SPIP de test des WordPress 6.9 et 7.1**
 
-L'import y installe Albums (et Accès restreint pour le 7.1) depuis le dépôt :
+Ces SPIP, montés à la main, n'ont ni `plugins/auto` ni dépôt : le premier import les prépare (`core:preparer --auto`, qui crée aussi `.htaccess` et aligne les droits des dossiers d'écriture sur ceux de `plugins/`, et dépôt standard), puis installe Albums (et Accès restreint pour le 7.1). `remise_a_zero.sh` ne touche pas à `plugins/auto` : aux imports suivants, les plugins y sont déjà et n'ont plus qu'à être activés.
 
 ```bash
 for n in 6 7; do
 	site=SPIP_WP$n; base=BASE_WP$n; wordpress=WP$n
-	"$WP2SPIP/tests/integration/remise_a_zero.sh" "${!site}" "$SAUVEGARDES/vierge-wp$n-v3.sql.gz" "${!base}"
+	"$WP2SPIP/tests/integration/remise_a_zero.sh" "${!site}" "$SAUVEGARDES/vierge-wp$n-v2.sql.gz" "${!base}"
 	(cd "${!site}" && "$SPIP_CLI" wordpress:importer "${!wordpress}" --no-ansi > "$SAUVEGARDES/import-wp$n-blocs.log" 2>&1; echo "wp$n : code $?")
+	grep "Plugin requis\|Création de plugins/auto\|Aucun dépôt" "$SAUVEGARDES/import-wp$n-blocs.log"
 	(cd "${!site}" && "$SPIP_CLI" php:eval "include '$WP2SPIP/tests/integration/verifier_identifiants.php';" | tail -n 1)
 	(cd "${!site}" && "$SPIP_CLI" php:eval "include '$WP2SPIP/tests/integration/exporter_import.php';" > "$SAUVEGARDES/export-wp$n-blocs.tsv")
 done
@@ -1844,7 +1894,7 @@ Dans `readme.md`, juste avant `## Refaire un import` :
 Les blocs de l'éditeur Wordpress sont convertis : images en `<imgN>` avec leur alignement (la légende devient le descriptif du document), médias en `<docN>`, mise en page (colonnes, groupes, couvertures, boutons…) gardée avec ses seules classes `wp-block-…`, que le squelette peut styler, contenus embarqués en URL seule sur sa ligne (le plugin oEmbed en fait un lecteur). Chaque galerie (bloc ou raccourci `[gallery]`) devient un album du plugin Albums, inséré par `<albumN>`. Les blocs dynamiques (derniers articles, recherche…), qui n'enregistrent rien dans le contenu, sont retirés. Le bilan de `importer_articles` détaille ces conversions.
 
 ## Plugins requis
-Avant le premier traitement, l'import télécharge et active les plugins dont le contenu a besoin : Albums s'il y a une galerie, Accès restreint s'il y a des contenus privés ou protégés, Forum s'il y a des commentaires ; puis il se relance. Il faut un dépôt de plugins déclaré (`spip plugins:svp:depoter https://plugins.spip.net/depots/principal.xml`, déjà fait par `outils/preparer_spip.sh`) et SPIP-Cli avec les correctifs de `plugins:svp:telecharger`. En cas d'échec, rien n'est importé et les commandes à lancer à la main sont affichées.
+Avant le premier traitement, l'import télécharge et active les plugins dont le contenu a besoin : Albums s'il y a une galerie, Accès restreint s'il y a des contenus privés ou protégés, Forum s'il y a des commentaires ; puis il se relance. S'ils manquent, il crée le dossier `plugins/auto` (`spip core:preparer --auto`, qui aligne aussi les droits des dossiers d'écriture de SPIP sur ceux de `plugins/`) et déclare le dépôt standard `https://plugins.spip.net/depots/principal.xml` (constante `_WP2SPIP_DEPOT_SVP`, modifiable dans `mes_options.php`). Il faut SPIP-Cli avec les correctifs de `plugins:svp:telecharger`. En cas d'échec, rien n'est importé et les commandes à lancer à la main sont affichées.
 ````
 
 Et dans la section « Pour les devs », ajouter :
