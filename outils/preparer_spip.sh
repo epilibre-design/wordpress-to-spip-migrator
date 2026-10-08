@@ -226,6 +226,12 @@ for prefixe in "${plugins_svp[@]}"; do
 	grep -rqs --include=paquet.xml "prefix=\"$prefixe\"" "$spip/plugins/auto" \
 		|| erreur_plugins "plugin $prefixe absent de plugins/auto après plugins:svp:telecharger"
 done
+# SVP installe chaque plugin dans un processus qui ne connaît pas encore ses tables : la version de son schéma
+# est notée sans que ses tables soient créées. Effacée, elle fait installer le plugin par plugins:maj:bdd, dans un processus neuf.
+(
+	export PREPARER_PLUGINS="${plugins_svp[*]}"
+	spip_cli php:eval 'include_spip("inc/meta"); foreach (explode(" ", getenv("PREPARER_PLUGINS")) as $prefixe) { effacer_meta($prefixe . "_base_version"); }'
+) || erreur "effacement des versions de schéma notées par plugins:svp:telecharger"
 if [ "$mode_wp2spip" = lien ]; then
 	lancer ln -s "$WP2SPIP_DIR" "$spip/plugins/wp2spip"
 else
@@ -251,6 +257,12 @@ for prefixe in "${plugins_svp[@]}" wp2spip; do
 		|| erreur "lecture de la méta ${prefixe}_base_version impossible"
 	[ "$version" = "$schema" ] || erreur "schéma du plugin $prefixe non installé (méta ${prefixe}_base_version : « $version », attendu : $schema)"
 done
+
+# Tables et champs déclarés par les plugins actifs, mais absents de la base : la version d'un schéma peut être notée
+# sans que ses tables soient créées (plugins installés par SVP)
+tables_manquantes=$(spip_cli php:eval 'include_spip("inc/wp2spip_plugins"); echo join(", ", wp2spip_tables_manquantes());') \
+	|| erreur "contrôle des tables de la base impossible"
+[ -z "$tables_manquantes" ] || erreur "tables ou champs absents de la base après plugins:maj:bdd : $tables_manquantes"
 
 etape "Base externe du WordPress"
 (
