@@ -112,8 +112,10 @@ function wp2spip_enfants_rubriques($wp_categories=array(), $id_parent=0) {
 	
 	foreach ($wp_categories as $category) {
 		if ($category['id_parent'] == $id_parent) {
-			$enfants[$category['id_term']] = $category;
-			
+			// Ajouter à la suite et non par id_term : array_merge() renumérote les clés,
+			// et une affectation par clé écraserait une catégorie déjà rangée à cet indice
+			$enfants[] = $category;
+
 			$enfants = array_merge($enfants, wp2spip_enfants_rubriques($wp_categories, $category['id_term']));
 		}
 	}
