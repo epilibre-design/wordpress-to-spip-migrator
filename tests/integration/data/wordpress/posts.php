@@ -19,11 +19,11 @@ return array(
 	$contenu(1, 'post', 'Bonjour', 'bonjour'),
 	$contenu(555, 'post', 'Galerie', 'galerie', array('post_content' => '[gallery]')),
 	$contenu(1177, 'post', 'Alignements', 'alignements', array('post_content' => '<!-- wp:image {"id":967} --><figure class="wp-block-image"><img src="http://wordpress.test/wp-content/uploads/2013/03/image-alignment-580x300-1.jpg" alt="" class="wp-image-967"/></figure><!-- /wp:image -->')),
-	// Hiérarchie : 10 a pour enfants 12, 11, 13 (ordre, puis titre) ; 12 a pour enfant 14 ; 15 a pour parent un article
+	// Hiérarchie : 10 a pour enfants 12 (ordre 1), puis 13 et 11 (ordre 2, par titre) ; 12 a pour enfant 14 ; 15 a pour parent un article
 	$contenu(10, 'page', 'Parent', 'parent'),
-	$contenu(11, 'page', 'Enfant B', 'enfant-b', array('post_parent' => 10, 'menu_order' => 2)),
+	$contenu(11, 'page', 'Enfant C', 'enfant-c', array('post_parent' => 10, 'menu_order' => 2)),
 	$contenu(12, 'page', 'Enfant A', 'enfant-a', array('post_parent' => 10, 'menu_order' => 1)),
-	$contenu(13, 'page', 'Enfant C', 'enfant-c', array('post_parent' => 10, 'menu_order' => 2)),
+	$contenu(13, 'page', 'Enfant B', 'enfant-b', array('post_parent' => 10, 'menu_order' => 2)),
 	$contenu(14, 'page', 'Petite-fille', 'petite-fille', array('post_parent' => 12)),
 	$contenu(15, 'page', 'Sous un article', 'sous-un-article', array('post_parent' => 1)),
 	// Contenus restreints, et un brouillon

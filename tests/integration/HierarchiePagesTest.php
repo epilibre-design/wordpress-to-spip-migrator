@@ -11,7 +11,7 @@ namespace Wp2spip\Tests\Integration;
  */
 final class HierarchiePagesTest extends WordpressTestCase
 {
-	private const PAGES = array(10 => 'Parent', 11 => 'Enfant B', 12 => 'Enfant A', 13 => 'Enfant C', 14 => 'Petite-fille', 15 => 'Sous un article', 1 => 'Bonjour');
+	private const PAGES = array(10 => 'Parent', 11 => 'Enfant C', 12 => 'Enfant A', 13 => 'Enfant B', 14 => 'Petite-fille', 15 => 'Sous un article', 1 => 'Bonjour');
 
 	private mixed $types_liaisons = null;
 
@@ -61,8 +61,8 @@ final class HierarchiePagesTest extends WordpressTestCase
 	{
 		$commande = self::commande();
 		$this->assertNotFalse(wp2spip_importer_hierarchie_pages_dist($commande));
-		// Enfants de 10 : 12 (ordre 1), puis 11 et 13 (ordre 2, par titre) ; enfant de 12 : 14 ; 15 a pour parent un article
-		$this->assertSame(array(10 => array(1 => 12, 2 => 11, 3 => 13), 12 => array(1 => 14)), self::liens());
+		// Enfants de 10 : 12 (ordre 1), puis 13 et 11 (ordre 2, par titre) ; enfant de 12 : 14 ; 15 a pour parent un article
+		$this->assertSame(array(10 => array(1 => 12, 2 => 13, 3 => 11), 12 => array(1 => 14)), self::liens());
 		$this->assertStringContainsString('4 liens de sous-pages créés (a2a, type sous_page), pour 2 pages parentes.', $commande->output->fetch());
 		$this->assertSame('Sous-page (WordPress)', lire_config('a2a/types_liaisons/sous_page'));
 	}
@@ -84,7 +84,7 @@ final class HierarchiePagesTest extends WordpressTestCase
 		$commande = self::commande();
 		$this->assertFalse(wp2spip_importer_hierarchie_pages_dist($commande));
 		$this->assertStringContainsString('Pages enfants ou parentes absentes de SPIP, pas de lien : 14 (parent 12).', $commande->output->fetch());
-		$this->assertSame(array(10 => array(1 => 12, 2 => 11, 3 => 13)), self::liens());
+		$this->assertSame(array(10 => array(1 => 12, 2 => 13, 3 => 11)), self::liens());
 	}
 
 	public function testSansPageEnfant(): void

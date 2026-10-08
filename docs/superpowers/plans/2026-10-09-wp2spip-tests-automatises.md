@@ -761,7 +761,7 @@ git commit -m "SPIP de test dans vendor/ (SQLite, plugins requis, wp2spip lié) 
 - Consumes : SPIP de test (tâche 2) ; `wp2spip_importer_documents_dist()`, `wp2spip_contexte_blocs()`, `wp2spip_convertir_blocs()`, `wp2spip_restaurer_blocs()`, `wp2spip_importer_hierarchie_pages_dist()`, `wp2spip_plugins_requis()`, `wp2spip_plugin_pret()`, `wp2spip_chercher_lien()`, `wp2spip_chercher_document()`.
 - Produces : `Wp2spip\Tests\Integration\WordpressTestCase` : constantes `BASE = 'wp2spip_tests'`, `DOSSIER` ; `construireBase(string $connexion, string $prefixe = 'wp_', ?array $tables = null): void` (une fois par identifiant et par processus ; `$tables` : nom sans préfixe => lignes, sinon les fichiers de `data/wordpress`), `retirerBase(string $connexion): void`, `fichierBase(string $connexion): string`, `commande(string $connexion = self::BASE): stdClass` (`base`, `dir_wordpress`, `output` `BufferedOutput`), `importerDocuments(): void`. Les sous-projets suivants ajoutent leurs lignes dans `data/wordpress/` et leurs tests sur cette classe.
 
-Contenu du WordPress de test : articles 1 « Bonjour », 555 « Galerie » (`[gallery]`), 1177 « Alignements » ; pages 10 « Parent », enfants 12 (ordre 1), 11 et 13 (ordre 2, par titre), 14 enfant de 12, 15 enfant de l'article 1 ; 20 privé, 21 protégé par mot de passe, 22 brouillon ; médias 611, 617, 755, 756, 757 (ordre 1), 761, 770, 771 rattachés à 555, 967 et 968 à 1177, vidéo 1690 ; un commentaire approuvé et un indésirable ; adresse `http://wordpress.test`.
+Contenu du WordPress de test : articles 1 « Bonjour », 555 « Galerie » (`[gallery]`), 1177 « Alignements » ; pages 10 « Parent », enfants 12 (ordre 1), 13 « Enfant B » et 11 « Enfant C » (ordre 2, par titre), 14 enfant de 12, 15 enfant de l'article 1 ; 20 privé, 21 protégé par mot de passe, 22 brouillon ; médias 611, 617, 755, 756, 757 (ordre 1), 761, 770, 771 rattachés à 555, 967 et 968 à 1177, vidéo 1690 ; un commentaire approuvé et un indésirable ; adresse `http://wordpress.test`.
 
 - [ ] **Step 1 : schéma et données**
 
@@ -887,11 +887,11 @@ return array(
 	$contenu(1, 'post', 'Bonjour', 'bonjour'),
 	$contenu(555, 'post', 'Galerie', 'galerie', array('post_content' => '[gallery]')),
 	$contenu(1177, 'post', 'Alignements', 'alignements', array('post_content' => '<!-- wp:image {"id":967} --><figure class="wp-block-image"><img src="http://wordpress.test/wp-content/uploads/2013/03/image-alignment-580x300-1.jpg" alt="" class="wp-image-967"/></figure><!-- /wp:image -->')),
-	// Hiérarchie : 10 a pour enfants 12, 11, 13 (ordre, puis titre) ; 12 a pour enfant 14 ; 15 a pour parent un article
+	// Hiérarchie : 10 a pour enfants 12 (ordre 1), puis 13 et 11 (ordre 2, par titre) ; 12 a pour enfant 14 ; 15 a pour parent un article
 	$contenu(10, 'page', 'Parent', 'parent'),
-	$contenu(11, 'page', 'Enfant B', 'enfant-b', array('post_parent' => 10, 'menu_order' => 2)),
+	$contenu(11, 'page', 'Enfant C', 'enfant-c', array('post_parent' => 10, 'menu_order' => 2)),
 	$contenu(12, 'page', 'Enfant A', 'enfant-a', array('post_parent' => 10, 'menu_order' => 1)),
-	$contenu(13, 'page', 'Enfant C', 'enfant-c', array('post_parent' => 10, 'menu_order' => 2)),
+	$contenu(13, 'page', 'Enfant B', 'enfant-b', array('post_parent' => 10, 'menu_order' => 2)),
 	$contenu(14, 'page', 'Petite-fille', 'petite-fille', array('post_parent' => 12)),
 	$contenu(15, 'page', 'Sous un article', 'sous-un-article', array('post_parent' => 1)),
 	// Contenus restreints, et un brouillon
@@ -1408,7 +1408,7 @@ namespace Wp2spip\Tests\Integration;
  */
 final class HierarchiePagesTest extends WordpressTestCase
 {
-	private const PAGES = array(10 => 'Parent', 11 => 'Enfant B', 12 => 'Enfant A', 13 => 'Enfant C', 14 => 'Petite-fille', 15 => 'Sous un article', 1 => 'Bonjour');
+	private const PAGES = array(10 => 'Parent', 11 => 'Enfant C', 12 => 'Enfant A', 13 => 'Enfant B', 14 => 'Petite-fille', 15 => 'Sous un article', 1 => 'Bonjour');
 
 	private mixed $types_liaisons = null;
 
@@ -1458,8 +1458,8 @@ final class HierarchiePagesTest extends WordpressTestCase
 	{
 		$commande = self::commande();
 		$this->assertNotFalse(wp2spip_importer_hierarchie_pages_dist($commande));
-		// Enfants de 10 : 12 (ordre 1), puis 11 et 13 (ordre 2, par titre) ; enfant de 12 : 14 ; 15 a pour parent un article
-		$this->assertSame(array(10 => array(1 => 12, 2 => 11, 3 => 13), 12 => array(1 => 14)), self::liens());
+		// Enfants de 10 : 12 (ordre 1), puis 13 et 11 (ordre 2, par titre) ; enfant de 12 : 14 ; 15 a pour parent un article
+		$this->assertSame(array(10 => array(1 => 12, 2 => 13, 3 => 11), 12 => array(1 => 14)), self::liens());
 		$this->assertStringContainsString('4 liens de sous-pages créés (a2a, type sous_page), pour 2 pages parentes.', $commande->output->fetch());
 		$this->assertSame('Sous-page (WordPress)', lire_config('a2a/types_liaisons/sous_page'));
 	}
@@ -1481,7 +1481,7 @@ final class HierarchiePagesTest extends WordpressTestCase
 		$commande = self::commande();
 		$this->assertFalse(wp2spip_importer_hierarchie_pages_dist($commande));
 		$this->assertStringContainsString('Pages enfants ou parentes absentes de SPIP, pas de lien : 14 (parent 12).', $commande->output->fetch());
-		$this->assertSame(array(10 => array(1 => 12, 2 => 11, 3 => 13)), self::liens());
+		$this->assertSame(array(10 => array(1 => 12, 2 => 13, 3 => 11)), self::liens());
 	}
 
 	public function testSansPageEnfant(): void
@@ -1686,7 +1686,7 @@ Expected: `0 0 prop` (aucun album ni article restant, documents non publiés).
 
 Dans `wp2spip/importer_hierarchie_pages.php`, remplacer l'ordre `'post_parent, menu_order, post_title, ID'` par `'post_parent, menu_order, ID'`.
 Run: `composer tests-integration`
-Expected: échec de `HierarchiePagesTest::testLiensDansLOrdreWordpress` (rangs 11 et 13 inversés : `2 => 11, 3 => 13` attendus). Annuler (`git checkout wp2spip/importer_hierarchie_pages.php`), relancer : OK.
+Expected: échec de `HierarchiePagesTest::testLiensDansLOrdreWordpress` (rangs 13 et 11 inversés : `2 => 13, 3 => 11` attendus). Annuler (`git checkout wp2spip/importer_hierarchie_pages.php`), relancer : OK.
 
 - [ ] **Step 9 : commit**
 
