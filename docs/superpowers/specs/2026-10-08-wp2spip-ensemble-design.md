@@ -12,9 +12,10 @@ Principes :
 
 - **WordPress figé** : l'import part d'un WordPress qui ne bouge pas pendant la migration (copie du site, ou site gelé). wp2spip ne prévoit pas de suivre un WordPress qui continue d'évoluer.
 - **SPIP vierge** : le site SPIP de destination ne contient aucun contenu avant le premier import.
+- **SPIP hors ligne** : le site SPIP n'est pas accessible au public pendant l'import, et le reste jusqu'au contrôle des accès (contenus privés ou protégés, zones restreintes). Les traitements peuvent exposer un contenu entre deux étapes, par exemple `importer_acces`, qui publie un contenu avant de le lier à sa zone : cette condition écarte ce risque, et wp2spip ne cherche pas à l'éviter autrement.
 - **Traitements relançables** : un nouveau passage n'importe que ce qui ne l'a pas encore été, ce qui permet de lancer un traitement seul (`--traitements`). Les objets déjà importés (auteurs, rubriques, documents, articles, messages de forum) ne sont pas retouchés, à l'exception de trois traitements qui recalculent à chaque passage : `importer_metas` réécrit la configuration du site, `importer_polyhierarchie` réaligne les rubriques secondaires des articles et recalcule le statut des rubriques, `importer_commentaires` recalcule les fils de discussion (`id_parent`, `id_thread`, `date_thread`) des messages importés. Ces recalculs partent de WordPress, figé : ils produisent le même résultat à chaque passage.
 - **Import interrompu** (coupure, erreur) : il se refait de zéro, comme après une amélioration de wp2spip (ci-dessous). wp2spip ne prévoit pas de reprise qui compléterait les contenus laissés incomplets par l'interruption.
-- **Refaire un import** (par exemple après une amélioration de wp2spip) : remettre le SPIP à zéro, puis relancer un import complet. Il n'y a pas de mise à jour des contenus déjà importés : l'option `--update` est supprimée (§ 6, sous-projet 2).
+- **Refaire un import** (par exemple après une amélioration de wp2spip) : remettre le SPIP à zéro, puis relancer un import complet. Il n'y a pas de mise à jour des contenus déjà importés.
 - **Identifiants conservés** (cible, § 6, sous-projet 1) : articles, pages, documents et rubriques SPIP reprennent l'identifiant de leur source WordPress.
 
 Cibles :
@@ -48,7 +49,6 @@ Options actuelles :
 | `-b, --base` | identifiant de la base WordPress déclarée dans SPIP comme base externe (défaut : `wordpress`) |
 | `-t, --traitements` | liste de traitements à lancer, séparés par des virgules (défaut : tous) |
 | `-i, --info` | affiche la version de WordPress et les traitements disponibles, sans rien importer |
-| `-u, --update` | **supprimée** (§ 6, sous-projet 2) ; elle réappliquait les traitements aux contenus déjà importés |
 | `-v` | détail des anomalies par contenu (liens vers des médias non convertis…) |
 
 **Code de sortie, comportement actuel** : `1` si la commande n'est pas lancée depuis un site SPIP ou si `wp-includes/version.php` est introuvable ; `0` dans tous les autres cas. Le code `0` ne garantit donc pas un import complet :
