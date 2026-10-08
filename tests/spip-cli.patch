@@ -1,0 +1,57 @@
+diff --git a/src/Command/PluginsSvpTelecharger.php b/src/Command/PluginsSvpTelecharger.php
+index 8e74cee..4bac939 100644
+--- a/src/Command/PluginsSvpTelecharger.php
++++ b/src/Command/PluginsSvpTelecharger.php
+@@ -20,12 +20,15 @@ class PluginsSvpTelecharger extends PluginsActiver
+
+         foreach ($prefixes as $prefix) {
+             $this->io->comment("Plugin en cours d'installation : " . $prefix);
+-            $infos = $decideur->infos_courtes('UPPER(pl.prefixe) = LOWER("' . strtoupper($prefix) . '")');
++            $infos = $decideur->infos_courtes('UPPER(pl.prefixe) = UPPER("' . $prefix . '")');
+             if (empty($infos['i'])) {
+                 $this->io->error('Le plugin ' . $prefix . " n'est pas référencé");
+                 continue;
+             }
+-            $a_installer[key($infos['i'])] = 'geton';
++            // $a_installer doit repartir de zéro à chaque préfixe : sinon il accumule
++            // les plugins des tours précédents, verifier_dependances() replanifie leur
++            // installation déjà faite, et l'actionneur échoue sur « Impossible de déballer ».
++            $a_installer = [key($infos['i']) => 'geton'];
+             $decideur->erreur_sur_maj_introuvable = false;
+             $res = $decideur->verifier_dependances($a_installer);
+
+@@ -52,9 +55,33 @@ class PluginsSvpTelecharger extends PluginsActiver
+             $actionneur->verrouiller();
+             $actionneur->sauver_actions();
+
++            // Le type d'autorisation est normalisé deux fois sur ce chemin :
++            // autoriser() normalise « _plugins » en « plugins », puis passe ce type
++            // déjà normalisé à autoriser_exception() qui le normalise une seconde fois
++            // en « plugin » (singulier). La vérification de l'exception porte donc sur
++            // « plugin » alors que le garde-fou préalable porte sur « plugins ».
++            // Les deux formes sont nécessaires pour que l'exception soit réellement prise
++            // en compte par action/teleporter.php.
+             autoriser_exception('ajouter', '_plugins', '*');
++            autoriser_exception('ajouter', '_plugin', '*');
++
++            // one_action() renvoie la description de l'action *avant* son exécution :
++            // c'est la dernière entrée de $actionneur->done qui porte le résultat, et les
++            // messages d'erreur sont empilés dans $actionneur->err.
++            $nb_erreurs = count($actionneur->err);
+             while ($res = $actionneur->one_action()) {
+-                $this->io->comment($res['n'] . ' action réalisée : ' . $res['todo']);
++                $derniere_action = $actionneur->done ? $actionneur->done[array_key_last($actionneur->done)] : [];
++
++                if (!empty($derniere_action['done'])) {
++                    $this->io->comment($res['n'] . ' action réalisée : ' . $res['todo']);
++                    continue;
++                }
++
++                $this->io->error($res['n'] . ' action en échec : ' . $res['todo']);
++                foreach (array_slice($actionneur->err, $nb_erreurs) as $erreur) {
++                    $this->io->error($erreur);
++                }
++                $nb_erreurs = count($actionneur->err);
+             }
+
+             $actionneur->deverrouiller();

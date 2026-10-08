@@ -142,8 +142,9 @@ code=$?
 resultat "MySQL distincte, WordPress 7.1 : code 0 (code $code, journal $ESSAIS/mysql.log)" $?
 plugins_prets "$spip"
 resultat "MySQL distincte : plugins sous plugins/auto et actifs" $?
-[ -f "$spip/plugins/wp2spip/paquet.xml" ] && [ ! -L "$spip/plugins/wp2spip" ] && [ ! -e "$spip/plugins/wp2spip/tests" ]
-resultat "MySQL distincte : wp2spip copié, sans tests/" $?
+[ -f "$spip/plugins/wp2spip/paquet.xml" ] && [ ! -L "$spip/plugins/wp2spip" ] \
+	&& [ -z "$(cd "$spip/plugins/wp2spip" && ls -d tests vendor scripts composer.json composer.lock phpunit.xml .phpunit.cache 2>/dev/null)" ]
+resultat "MySQL distincte : wp2spip copié, sans tests/, vendor/, scripts/ ni fichiers de Composer et PHPUnit" $?
 admin_authentifie "$spip" "$pass_admin" && ! admin_authentifie "$spip" adminadmin
 resultat "MySQL distincte : administrateur authentifié avec le mot de passe de SPIP_ADMIN_PASS, pas avec adminadmin" $?
 import_verifie "$spip"

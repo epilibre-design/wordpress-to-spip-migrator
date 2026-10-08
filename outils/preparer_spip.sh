@@ -235,9 +235,10 @@ done
 if [ "$mode_wp2spip" = lien ]; then
 	lancer ln -s "$WP2SPIP_DIR" "$spip/plugins/wp2spip"
 else
-	# Ni .git, ni docs, ni tests (tests/integration/environnement.sh contient des accès locaux)
+	# Ni .git, ni docs, ni tests (tests/integration/environnement.sh contient des accès locaux), ni outillage des tests
 	mkdir "$spip/plugins/wp2spip"
-	tar -C "$WP2SPIP_DIR" --exclude=./.git --exclude=./docs --exclude=./tests -cf - . \
+	tar -C "$WP2SPIP_DIR" --exclude=./.git --exclude=./docs --exclude=./tests --exclude=./vendor --exclude=./scripts \
+		--exclude=./composer.json --exclude=./composer.lock --exclude=./phpunit.xml --exclude=./.phpunit.cache -cf - . \
 		| tar -C "$spip/plugins/wp2spip" -xf - || erreur "copie de wp2spip dans plugins/wp2spip"
 fi
 lancer spip_cli plugins:activer "${plugins_svp[@]}" wp2spip -y
