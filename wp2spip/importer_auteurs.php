@@ -19,7 +19,7 @@ function wp2spip_importer_auteurs_dist($command) {
 			sql_in('ID', $ids_wordpress, 'NOT'),
 		),
 		'',
-		'',
+		'ID',
 		'',
 		'',
 		$command->base

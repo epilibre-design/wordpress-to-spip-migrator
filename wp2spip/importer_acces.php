@@ -28,7 +28,7 @@ function wp2spip_importer_acces_dist($command) {
 			'(post_status = "private" or (post_password != "" and ' . sql_in('post_status', array('publish', 'future')) . '))',
 		),
 		'',
-		'',
+		'ID',
 		'',
 		'',
 		$command->base

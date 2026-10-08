@@ -16,11 +16,10 @@ function wp2spip_importer_articles_dist($command) {
 		'wp_posts',
 		array(
 			sql_in('post_type', array('post', 'page')),
-			//'post_status = "publish"',
 			sql_in('ID', $ids_wordpress, 'NOT'),
 		),
 		'',
-		'',
+		'ID',
 		'',
 		'',
 		$command->base
@@ -458,7 +457,7 @@ function wp2spip_index_medias($base = 'wordpress') {
 	$index[$base] = array();
 
 	// Le guid, souvent l'URL d'origine du fichier
-	foreach (sql_allfetsel('ID, guid', 'wp_posts', 'post_type = "attachment"', '', '', '', '', $base) as $media) {
+	foreach (sql_allfetsel('ID, guid', 'wp_posts', 'post_type = "attachment"', '', 'ID', '', '', $base) as $media) {
 		if ($chemin = wp2spip_chemin_upload($media['guid'])) {
 			$index[$base][$chemin] = intval($media['ID']);
 		}
@@ -469,7 +468,7 @@ function wp2spip_index_medias($base = 'wordpress') {
 		'wp_postmeta',
 		sql_in('meta_key', array('_wp_attached_file', '_wp_attachment_metadata', '_wp_attachment_backup_sizes')),
 		'',
-		'',
+		'meta_id',
 		'',
 		'',
 		$base
@@ -538,7 +537,7 @@ function wp2spip_importer_articles_documents($command, $id_wordpress, $id_articl
 			'post_parent='.$id_wordpress,
 		),
 		'',
-		'',
+		'ID',
 		'',
 		'',
 		$command->base

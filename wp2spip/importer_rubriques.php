@@ -19,7 +19,7 @@ function wp2spip_importer_rubriques_dist($command) {
 			sql_in('term.term_id', $ids_wordpress, 'NOT'),
 		),
 		'',
-		'',
+		'term.term_id',
 		'',
 		'',
 		$command->base
