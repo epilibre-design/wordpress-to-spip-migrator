@@ -39,6 +39,15 @@ $nb_spip = sql_countsel('spip_rubriques', 'id_wordpress > 0');
 if ($nb_wp != $nb_spip) {
 	$echecs[] = "rubriques : $nb_spip importées pour $nb_wp catégories Wordpress";
 }
+// Médias : ceux que importer_documents sélectionne (pièces jointes au statut inherit), comparés par identifiant
+$ids_wp = array_map('intval', array_column(sql_allfetsel('ID', 'wp_posts', array('post_type = "attachment"', 'post_status = "inherit"'), '', '', '', '', $base), 'ID'));
+$ids_spip = array_map('intval', array_column(sql_allfetsel('id_wordpress', 'spip_documents', 'id_wordpress > 0'), 'id_wordpress'));
+if ($manquants = array_diff($ids_wp, $ids_spip)) {
+	$echecs[] = 'documents : ' . count($manquants) . ' médias Wordpress non importés (' . join(', ', array_slice($manquants, 0, 10)) . (count($manquants) > 10 ? '…' : '') . ')';
+}
+if ($en_trop = array_diff($ids_spip, $ids_wp)) {
+	$echecs[] = 'documents : ' . count($en_trop) . ' documents sans média Wordpress correspondant (' . join(', ', array_slice($en_trop, 0, 10)) . (count($en_trop) > 10 ? '…' : '') . ')';
+}
 
 // Contenus privés ou protégés par mot de passe : jamais publiés hors d'une zone ;
 // avec Accès restreint, les privés et les protégés publiés ou programmés sont publiés dans une zone
