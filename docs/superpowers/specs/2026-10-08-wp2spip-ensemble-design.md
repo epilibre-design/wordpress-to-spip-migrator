@@ -309,7 +309,7 @@ Chaque sous-projet aura sa propre spec, puis son plan de réalisation.
 | 2 | Corrections et fiabilité — **réalisé** | cœur | codes de sortie conformes au comportement cible (§ 2.1) : `importer_mots` retiré de la liste par défaut, noms inconnus de `--traitements` refusés, échec d'un traitement signalé ; contenus lus dans l'ordre de leur identifiant WordPress (`ORDER BY`), pour un traitement reproductible ; titres et textes de rubriques sans entités HTML ; option pour ne pas écraser l'adresse du site ; pipeline renommé `wp2spip_traitements`, l'ancien nom restant appelé pour compatibilité ; suppression de l'option `--update` et des branches de mise à jour dans les traitements ; readme mis à jour (WordPress figé, refaire un import = remise à zéro puis import complet) |
 | 11 | Préparation d'un SPIP (réalisé **avant** le 3) — **réalisé** | outil | script `outils/preparer_spip.sh` qui télécharge et installe SPIP, ses plugins et wp2spip, déclare la base WordPress, puis peut lancer l'import, en s'appuyant sur les commandes actuelles de SPIP-Cli et en contrôlant le résultat de chaque étape (spec `2026-10-08-wp2spip-preparation-spip-design.md`) ; médias de nouveau importés sur SPIP 4.4.28 (medias 4.4.15 refusait tous les fichiers en ligne de commande) |
 | 3 | Balisage des blocs de l'éditeur — **réalisé** | cœur | nettoyer `<figure>`, `<figcaption>`, classes `wp-block-*` et commentaires de blocs, en gardant les légendes ; galeries vers des documents |
-| 4 | Hiérarchie des pages | cœur | conserver la structure des pages parentes et enfants (décision ouverte, § 7) |
+| 4 | Hiérarchie des pages | cœur | conserver la structure des pages parentes et enfants : liens a2a `sous_page` entre pages uniques, a2a installé par l'import (spec `2026-10-08-wp2spip-hierarchie-pages-design.md`) |
 | 5 | Étiquettes | cœur | `importer_mots` : `post_tag` → mots-clés d'un groupe dédié, liés aux articles |
 | 6 | Préfixe des tables | cœur | option `--prefixe` (défaut `wp_`), y compris pour la méta des rôles (`<prefixe>capabilities`) |
 | 7 | Tests automatisés | cœur | tests PHPUnit des fonctions de conversion, et tests d'intégration sur le contenu *Theme Unit Test* |
@@ -319,6 +319,6 @@ Chaque sous-projet aura sa propre spec, puis son plan de réalisation.
 
 ## 7. Questions ouvertes
 
-1. **Hiérarchie des pages** (sous-projet 4) : rattacher chaque page à la rubrique équivalente (quand l'arbre des catégories reproduit celui des pages), ou créer une rubrique par page parente, ou garder des pages uniques avec un lien vers leur parent ?
+1. **Hiérarchie des pages** (sous-projet 4) : décidé — les pages restent des pages uniques, liées par des liens a2a de type `sous_page` (page parente → page enfant, dans l'ordre WordPress) ; a2a est installé par l'import quand il y a des pages enfants ; wp2spip ne fournit pas de squelette (spec `2026-10-08-wp2spip-hierarchie-pages-design.md`).
 2. **Ordre de priorité** de la feuille de route.
 3. **Branche principale** : décidé — `compat-spip-4.4` devient la branche principale du dépôt (branche par défaut), sans fusion dans `master` ; le dépôt d'origine, abandonné, ne reçoit pas de demande de fusion. Reste ouverte : la publication d'une version 3.0.0.

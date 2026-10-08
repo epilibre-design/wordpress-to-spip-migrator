@@ -1667,8 +1667,9 @@ Chacun suit le cycle de la spec (§ 6) : spec détaillée, relecture, puis plan 
 
 ### Task 14 : sous-projet 4 — hiérarchie des pages
 
-- [ ] Décision préalable (spec § 7) : pages enfants → rubrique dédiée, ou pages uniques à plat avec un lien vers la page parente, ou autre.
-- [ ] Spec, plan, réalisation ; validation : les 13 pages enfants du contenu de test retrouvent leur parent.
+- [x] Décision préalable (spec § 7) : pages uniques liées par a2a (type `sous_page`, parent → enfant, ordre WordPress), a2a installé par l'import si besoin ; pas de squelette fourni.
+- [x] Spec : `docs/superpowers/specs/2026-10-08-wp2spip-hierarchie-pages-design.md`.
+- [ ] Plan, réalisation ; validation : les 13 pages enfants du contenu de test et les 18 du site réel retrouvent leur parent, dans l'ordre WordPress.
 
 ### Task 15 : sous-projet 5 — étiquettes (`importer_mots`)
 
