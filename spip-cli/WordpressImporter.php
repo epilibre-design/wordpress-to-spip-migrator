@@ -13,6 +13,7 @@ class WordpressImporter extends Command {
 	public $dir_wordpress = null;
 	public $wp_version = null;
 	public $base = 'wordpress';
+	public $garder_adresse = false;
 	
 	protected function configure(): void {
 		$this
@@ -45,6 +46,12 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 				InputOption::VALUE_OPTIONAL,
 				'Affiche la version du Wordpress et les traitements disponibles.'
 			)
+			->addOption(
+				'garder-adresse',
+				null,
+				InputOption::VALUE_NONE,
+				'Ne pas remplacer l’adresse du site SPIP par celle du Wordpress.'
+			)
 		;
 	}
 
@@ -67,6 +74,9 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 		
 		// Identifiant de la base Wordpress dans SPIP
 		$this->base = $input->getOption('base');
+		
+		// Garder l'adresse du site SPIP (import dans un site déjà à sa future adresse)
+		$this->garder_adresse = $input->getOption('garder-adresse');
 		
 		// On va chercher la version de Wordpress dont il s'agit
 		$fichier_version = $this->dir_wordpress . 'wp-includes/version.php';

@@ -29,8 +29,13 @@ function wp2spip_importer_metas_dist($command) {
 		}
 		
 		if (!empty($options['siteurl'])) {
-			$command->output->writeln('* <comment>Adresse du site</comment> : ' . $options['siteurl']);
-			ecrire_config('adresse_site', $options['siteurl']);
+			if ($command->garder_adresse) {
+				$command->output->writeln('* <comment>Adresse du site</comment> : conservée (' . lire_config('adresse_site') . ')');
+			}
+			else {
+				$command->output->writeln('* <comment>Adresse du site</comment> : ' . $options['siteurl']);
+				ecrire_config('adresse_site', $options['siteurl']);
+			}
 		}
 		
 		if (!empty($options['blogname'])) {
