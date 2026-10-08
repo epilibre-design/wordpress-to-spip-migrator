@@ -89,7 +89,15 @@ function wp2spip_importer_documents_dist($command) {
 				if (objet_inserer('document', null, array('id_document' => $id_document, 'id_wordpress' => $id_wordpress)) != $id_document) {
 					return wp2spip_erreur_insertion($command, 'document', $id_document);
 				}
-				$retour = $ajouter_un_document($id_document, $file, null, null, 'auto');
+				// ajouter_un_document() de SPIP 4.4 récent vérifie autoriser('joindredocument') : en ligne de commande, sans
+				// auteur connecté, tous les fichiers seraient refusés. Document joint à aucun objet : type vide, identifiant
+				// null (que autoriser() cherche sous la clé '', d'où l'exception générique '*'), levée aussitôt après
+				autoriser_exception('joindredocument', '', '*', true);
+				try {
+					$retour = $ajouter_un_document($id_document, $file, null, null, 'auto');
+				} finally {
+					autoriser_exception('joindredocument', '', '*', false);
+				}
 				
 				// Fichier refusé (type non autorisé, taille…) : pas de document vide
 				if (intval($retour) !== $id_document) {

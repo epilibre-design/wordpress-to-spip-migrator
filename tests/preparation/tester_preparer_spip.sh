@@ -68,3 +68,109 @@ if [ "${1:-}" != --complet ]; then
 	[ "$echecs" -eq 0 ]
 	exit
 fi
+
+# Préparations complètes
+
+# sale, pages et polyhier sous plugins/auto ; ces trois plugins et wp2spip actifs
+plugins_prets() { # plugins_prets <dossier SPIP>
+	local prefixe actifs
+	actifs=$(cd "$1" && "$SPIP_CLI" --no-ansi plugins:lister --short --raw --no-dist) || return 1
+	for prefixe in sale pages polyhier; do
+		grep -rqs --include=paquet.xml "prefix=\"$prefixe\"" "$1/plugins/auto" || return 1
+	done
+	for prefixe in sale pages polyhier wp2spip; do
+		grep -qx "[[:space:]]*$prefixe" <<<"$actifs" || return 1
+	done
+}
+
+# L'administrateur s'authentifie-t-il avec ce mot de passe ?
+admin_authentifie() { # admin_authentifie <dossier SPIP> <mot de passe>
+	local reponse
+	reponse=$(cd "$1" && ESSAI_PASS=$2 "$SPIP_CLI" php:eval 'include_spip("auth/spip"); echo auth_spip_dist("admin", getenv("ESSAI_PASS")) ? "oui" : "non";')
+	[ "$reponse" = oui ]
+}
+
+# Vérificateur de l'import à OK
+import_verifie() { # import_verifie <dossier SPIP>
+	# php:eval peut retourner 0 sur une page d'erreur de SPIP : la dernière ligne doit être OK
+	(cd "$1" && "$SPIP_CLI" php:eval "include '$WP2SPIP/tests/integration/verifier_identifiants.php';") >"$ESSAIS/verification.txt" 2>&1 \
+		&& [ "$(tail -n 1 "$ESSAIS/verification.txt")" = OK ]
+}
+
+# Vide la base jetable des essais : toutes ses tables
+vider_base_essais() {
+	local tables
+	tables=$(mysql $MYSQL_OPTIONS -N "$BASE_PREP_MYSQL" -e "show tables" | paste -sd, -)
+	[ -z "$tables" ] || mysql $MYSQL_OPTIONS "$BASE_PREP_MYSQL" -e "drop table $tables"
+}
+
+# Plugin introuvable sur le dépôt : arrêt après l'installation de SPIP, avec un message qui le dit
+spip="$ESSAIS/spip-plugin-introuvable"
+rm -rf "$spip"
+PREPARER_SPIP_PLUGINS_SVP="sale prefixe_inexistant_wp2spip" "$preparer" --spip "$spip" --wordpress "$WP6" --spip-cli "$SPIP_CLI" >"$ESSAIS/plugin-introuvable.log" 2>&1
+code=$?
+[ "$code" -eq 1 ] && grep -qF "Le SPIP est déjà installé dans $spip" "$ESSAIS/plugin-introuvable.log" && [ -f "$spip/config/connect.php" ]
+resultat "plugin introuvable : code 1, SPIP installé et signalé (code $code)" $?
+rm -rf "$spip"
+
+# SQLite, WordPress 6.9, dossier vide existant, wp2spip en lien, mot de passe généré
+spip="$ESSAIS/spip-sqlite"
+rm -rf "$spip" && mkdir -p "$spip"
+"$preparer" --spip "$spip" --wordpress "$WP6" --spip-cli "$SPIP_CLI" --wp2spip lien --importer >"$ESSAIS/sqlite.log" 2>&1
+code=$?
+[ "$code" -eq 0 ]
+resultat "SQLite, WordPress 6.9 : code 0 (code $code, journal $ESSAIS/sqlite.log)" $?
+plugins_prets "$spip"
+resultat "SQLite : plugins sous plugins/auto et actifs" $?
+[ "$(readlink "$spip/plugins/wp2spip")" = "$WP2SPIP" ]
+resultat "SQLite : plugins/wp2spip est un lien vers le dépôt" $?
+pass_genere=$(sed -n 's/^Mot de passe : \(.*\) (généré)$/\1/p' "$ESSAIS/sqlite.log")
+[ -n "$pass_genere" ] && admin_authentifie "$spip" "$pass_genere" && ! admin_authentifie "$spip" adminadmin
+resultat "SQLite : administrateur authentifié avec le mot de passe généré, affiché au bilan, pas avec adminadmin" $?
+import_verifie "$spip"
+reussi=$?
+resultat "SQLite : vérificateur à OK ($(tail -1 "$ESSAIS/verification.txt"))" "$reussi"
+
+# MySQL distincte, WordPress 7.1, wp2spip copié, mot de passe choisi par SPIP_ADMIN_PASS
+spip="$ESSAIS/spip-mysql"
+rm -rf "$spip"
+vider_base_essais
+pass_admin="Admin-$RANDOM-$RANDOM"
+SPIP_ADMIN_PASS=$pass_admin "$preparer" --spip "$spip" --wordpress "$WP7" --spip-cli "$SPIP_CLI" --base-spip "mysql:$BASE_PREP_MYSQL" --importer >"$ESSAIS/mysql.log" 2>&1
+code=$?
+[ "$code" -eq 0 ]
+resultat "MySQL distincte, WordPress 7.1 : code 0 (code $code, journal $ESSAIS/mysql.log)" $?
+plugins_prets "$spip"
+resultat "MySQL distincte : plugins sous plugins/auto et actifs" $?
+[ -f "$spip/plugins/wp2spip/paquet.xml" ] && [ ! -L "$spip/plugins/wp2spip" ] && [ ! -e "$spip/plugins/wp2spip/tests" ]
+resultat "MySQL distincte : wp2spip copié, sans tests/" $?
+admin_authentifie "$spip" "$pass_admin" && ! admin_authentifie "$spip" adminadmin
+resultat "MySQL distincte : administrateur authentifié avec le mot de passe de SPIP_ADMIN_PASS, pas avec adminadmin" $?
+import_verifie "$spip"
+reussi=$?
+resultat "MySQL distincte : vérificateur à OK ($(tail -1 "$ESSAIS/verification.txt"))" "$reussi"
+
+# Base partagée (comme les sites de test), sur une copie jetable du WordPress 6.9 : ses tables wp_ copiées
+# dans $BASE_PREP_MYSQL, et un dossier WordPress dont wp-config.php désigne cette base (fichiers en liens)
+spip="$ESSAIS/spip-partagee"
+wordpress="$ESSAIS/wp6-jetable"
+rm -rf "$spip"
+vider_base_essais
+tables_wp=$(mysql $MYSQL_OPTIONS -N "$BASE_WP6" -e "show tables like 'wp\\_%'")
+mysqldump $MYSQL_OPTIONS --no-tablespaces "$BASE_WP6" $tables_wp | mysql $MYSQL_OPTIONS "$BASE_PREP_MYSQL"
+resultat "base partagée : tables du WordPress 6.9 copiées dans $BASE_PREP_MYSQL" $?
+faux_wordpress "$wordpress" "s/define( *'DB_NAME', *'[^']*' *)/define( 'DB_NAME', '$BASE_PREP_MYSQL' )/"
+ln -s "$WP6/wp-includes" "$wordpress/wp-includes"
+ln -s "$WP6/wp-content" "$wordpress/wp-content"
+"$preparer" --spip "$spip" --wordpress "$wordpress" --spip-cli "$SPIP_CLI" --base-spip "mysql:$BASE_PREP_MYSQL" --base-partagee --importer >"$ESSAIS/partagee.log" 2>&1
+code=$?
+[ "$code" -eq 0 ]
+resultat "base partagée, WordPress 6.9 : code 0 (code $code, journal $ESSAIS/partagee.log)" $?
+plugins_prets "$spip"
+resultat "base partagée : plugins sous plugins/auto et actifs" $?
+import_verifie "$spip"
+reussi=$?
+resultat "base partagée : vérificateur à OK ($(tail -1 "$ESSAIS/verification.txt"))" "$reussi"
+
+echo "$echecs échec(s)"
+[ "$echecs" -eq 0 ]
