@@ -1656,7 +1656,8 @@ Chacun suit le cycle de la spec (§ 6) : spec détaillée, relecture, puis plan 
 ### Task 12 ter : sous-projet 11 — préparation d'un SPIP (avant le 3)
 
 - [x] Spec : `docs/superpowers/specs/2026-10-08-wp2spip-preparation-spip-design.md` (script shell, options + `wp-config.php`, téléchargement, installation, plugins, base externe, import).
-- [ ] Plan, réalisation ; validation : préparation depuis un dossier vide en MySQL et en SQLite pour WP 6.9 et 7.1, avec `--importer`, puis vérificateur à OK.
+- [x] Plan : `docs/superpowers/plans/2026-10-08-wp2spip-preparation-spip.md` (SPIP-Cli actuel, sans nouveau correctif ; contrôles après chaque étape).
+- [ ] Réalisation ; validation : préparation depuis un dossier vide en MySQL et en SQLite pour WP 6.9 et 7.1, avec `--importer`, puis vérificateur à OK.
 
 ### Task 13 : sous-projet 3 — balisage des blocs de l'éditeur
 
