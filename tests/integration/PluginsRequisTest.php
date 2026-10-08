@@ -27,7 +27,9 @@ final class PluginsRequisTest extends WordpressTestCase
 	public function testPluginsPrets(): void
 	{
 		include_spip('inc/wp2spip_plugins');
-		foreach (wp2spip_plugins_requis(self::BASE) as $prefixe => $plugin) {
+		$requis = wp2spip_plugins_requis(self::BASE);
+		$this->assertNotEmpty($requis);
+		foreach ($requis as $prefixe => $plugin) {
 			$this->assertTrue(wp2spip_plugin_pret($prefixe, $plugin), "$prefixe prêt");
 		}
 	}

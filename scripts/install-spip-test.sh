@@ -49,7 +49,9 @@ if ! grep -q 'UPPER(pl.prefixe) = UPPER' "$fichier_svp"; then
 fi
 
 # 3. Plugins, un appel de plugins:svp:telecharger par plugin ; la méta de schéma notée par SVP sans les tables est effacée
-if ! spip php:eval 'echo sql_countsel("spip_depots");' | grep -qv '^0$'; then
+# Sortie capturée avant le test : grep -q quitte tôt, et pipefail ferait échouer le tube (SIGPIPE) de façon aléatoire
+nb_depots=$(spip php:eval 'echo sql_countsel("spip_depots");')
+if [ "${nb_depots:-0}" = 0 ]; then
 	spip plugins:svp:depoter "$depot"
 fi
 for prefixe in $plugins; do
