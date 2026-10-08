@@ -49,7 +49,7 @@ Exporter d'abord `WP2SPIP`, puis `source "$WP2SPIP/tests/integration/environneme
 **Interfaces :**
 - Produces : les médias que `importer_documents` sélectionne (`wp_posts` de type `attachment` au statut `inherit`) comparés, par identifiant, aux `spip_documents` importés (`id_wordpress`) : échec `documents : N médias Wordpress non importés (…)` ou `documents : N documents sans média Wordpress correspondant (…)`, avec les dix premiers identifiants.
 
-- [ ] **Step 1 : relever l'état actuel**
+- [x] **Step 1 : relever l'état actuel**
 
 Sur les quatre sites de test, tous les médias sont aujourd'hui importés (relevé du prototype : 1612 / 1612 pour le site réel, 37 / 37 pour les WordPress 6.9 et 7.1 ; toutes leurs pièces jointes sont au statut `inherit`) :
 
@@ -62,7 +62,7 @@ done
 
 Expected : quatre lignes `N / N`. Un site remis à zéro sans être réimporté affiche `0 / N` : le réimporter d'abord (plan général, Task 12 Step 3).
 
-- [ ] **Step 2 : ajouter la comparaison**
+- [x] **Step 2 : ajouter la comparaison**
 
 Dans `tests/integration/verifier_identifiants.php`, juste après le bloc qui se termine par `$echecs[] = "rubriques : $nb_spip importées pour $nb_wp catégories Wordpress";` et son `}` :
 
@@ -78,7 +78,7 @@ if ($en_trop = array_diff($ids_spip, $ids_wp)) {
 }
 ```
 
-- [ ] **Step 3 : vérifier sur les quatre sites**
+- [x] **Step 3 : vérifier sur les quatre sites**
 
 ```bash
 for s in "$SPIP_REEL_SQLITE" "$SPIP_REEL_MYSQL" "$SPIP_WP6" "$SPIP_WP7"; do
@@ -88,7 +88,7 @@ done
 
 Expected : `OK` quatre fois.
 
-- [ ] **Step 4 : commit**
+- [x] **Step 4 : commit**
 
 ```bash
 git add tests/integration/verifier_identifiants.php
@@ -108,7 +108,7 @@ git commit -m "Vérificateur : comparer, par identifiant, les documents importé
 **Interfaces :**
 - Produces : `outils/lire_wp_config.php <wp-config.php>` écrit `NOM=valeur` suivi d'un caractère nul pour `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `table_prefix` (code `1` si le fichier est illisible ou qu'une valeur manque) ; `outils/preparer_spip.sh` (options de la spec § 2, variables `SPIP_DB_PASS`, `SPIP_ADMIN_PASS`, et `PREPARER_SPIP_PLUGINS_SVP` réservée aux tests), qui écrit au bilan `Mot de passe : <mot de passe> (généré)` quand il le génère ; `tests/preparation/tester_preparer_spip.sh [--complet]`, qui affiche `ok    …` ou `ECHEC …` par cas, puis `N échec(s)`, code `0` si aucun échec.
 
-- [ ] **Step 1 : variables d'environnement des tests**
+- [x] **Step 1 : variables d'environnement des tests**
 
 À la fin de `tests/integration/environnement.exemple.sh` :
 
@@ -122,7 +122,7 @@ export BASE_PREP_MYSQL=base_jetable
 
 Reporter ces deux lignes, avec les valeurs de la machine, dans `tests/integration/environnement.sh` (non versionné) ; `ESSAIS` hors de tout dépôt, par exemple à côté de `$SAUVEGARDES`.
 
-- [ ] **Step 2 : écrire les tests des cas d'erreur**
+- [x] **Step 2 : écrire les tests des cas d'erreur**
 
 `tests/preparation/tester_preparer_spip.sh` :
 
@@ -201,12 +201,12 @@ fi
 
 Puis `chmod +x tests/preparation/tester_preparer_spip.sh`.
 
-- [ ] **Step 3 : lancer les tests, qui échouent**
+- [x] **Step 3 : lancer les tests, qui échouent**
 
 Run : `tests/preparation/tester_preparer_spip.sh`
 Expected : `ECHEC` sur chaque cas (`outils/preparer_spip.sh` n'existe pas : code 127), puis `9 échec(s)`, code `1`.
 
-- [ ] **Step 4 : lecteur de `wp-config.php`**
+- [x] **Step 4 : lecteur de `wp-config.php`**
 
 `outils/lire_wp_config.php` :
 
@@ -264,7 +264,7 @@ foreach (array_merge($attendus, array('table_prefix')) as $nom) {
 }
 ```
 
-- [ ] **Step 5 : vérifier le lecteur**
+- [x] **Step 5 : vérifier le lecteur**
 
 ```bash
 cat > "$ESSAIS/wp-config-essai.php" <<'EOF'
@@ -283,7 +283,7 @@ rm "$ESSAIS/wp-config-essai.php"
 
 Expected : `DB_NAME=ba'se`, `DB_USER=u"x`, `DB_PASSWORD=`, `DB_HOST=h:3307`, `table_prefix=abc_` (la définition commentée est ignorée) ; puis `Impossible de lire …` et `code 1`.
 
-- [ ] **Step 6 : script de préparation**
+- [x] **Step 6 : script de préparation**
 
 `outils/preparer_spip.sh` :
 
@@ -578,14 +578,14 @@ exit "$code"
 
 Puis `chmod +x outils/preparer_spip.sh`.
 
-- [ ] **Step 7 : lancer les tests**
+- [x] **Step 7 : lancer les tests**
 
 Run : `tests/preparation/tester_preparer_spip.sh`
 Expected : neuf lignes `ok    …` (dossier non vide, option inconnue, `wp-config.php` illisible, préfixe autre que `wp_`, accès MySQL refusés, base du WordPress sans `--base-partagee`, base contenant des tables `spip_`, WordPress sur un port sans `--sql-hote`, SPIP-Cli introuvable), puis `0 échec(s)`, code `0`, en quelques secondes. Le cas « accès MySQL refusés » montre aussi le message `ERROR 1045` du client `mysql` : c'est attendu.
 
 Vérifier aussi l'aide : `outils/preparer_spip.sh --help` affiche l'usage, les options et les deux variables d'environnement, code `0`.
 
-- [ ] **Step 8 : commit**
+- [x] **Step 8 : commit**
 
 ```bash
 git add outils/lire_wp_config.php outils/preparer_spip.sh tests/preparation/tester_preparer_spip.sh tests/integration/environnement.exemple.sh
@@ -603,7 +603,7 @@ git commit -m "Script de préparation d'un SPIP depuis un dossier vide, avec ses
 **Interfaces :**
 - Consumes : `outils/preparer_spip.sh` (Task 2), comparaison des documents du vérificateur (Task 1).
 
-- [ ] **Step 1 : base MySQL jetable des essais**
+- [x] **Step 1 : base MySQL jetable des essais**
 
 Elle est créée par un administrateur MySQL (fait sur la machine de test : base `jetable`), accessible au login MySQL des `wp-config.php` des WordPress de test, par exemple :
 
@@ -613,7 +613,7 @@ sudo mysql -e "CREATE DATABASE <base> CHARACTER SET utf8mb4; GRANT ALL PRIVILEGE
 
 Vérifier : `mysql $MYSQL_OPTIONS -N "$BASE_PREP_MYSQL" -e "select 1"` affiche `1`.
 
-- [ ] **Step 2 : écrire les tests des préparations complètes**
+- [x] **Step 2 : écrire les tests des préparations complètes**
 
 Ajouter à la fin de `tests/preparation/tester_preparer_spip.sh`, après le bloc `if [ "${1:-}" != --complet ]; then … fi` :
 
@@ -725,12 +725,12 @@ echo "$echecs échec(s)"
 [ "$echecs" -eq 0 ]
 ```
 
-- [ ] **Step 3 : lancer les tests complets, qui échouent sur les médias**
+- [x] **Step 3 : lancer les tests complets, qui échouent sur les médias**
 
 Run : `tests/preparation/tester_preparer_spip.sh --complet` (réseau, une dizaine de minutes)
 Expected : les cas d'erreur, `plugin introuvable` et la copie des tables du WordPress 6.9 à `ok` ; les trois préparations à `code 0`, plugins et administrateur à `ok` ; mais les trois `vérificateur à OK` en `ECHEC`, avec `documents : 37 médias Wordpress non importés (…)` dans `$ESSAIS/verification.txt` (SPIP 4.4.28 téléchargé : medias 4.4.15 refuse les fichiers). Le journal `$ESSAIS/sqlite.log` montre `37 médias refusés par SPIP`.
 
-- [ ] **Step 4 : exception d'autorisation pour les documents**
+- [x] **Step 4 : exception d'autorisation pour les documents**
 
 L'exception ne vaut que pour l'appel de `ajouter_un_document()`, et elle est levée aussitôt après, même en cas d'erreur. Dans `wp2spip/importer_documents.php`, remplacer la ligne :
 
@@ -752,7 +752,7 @@ par :
 				}
 ```
 
-- [ ] **Step 5 : non-régression sur SPIP 4.4.21**
+- [x] **Step 5 : non-régression sur SPIP 4.4.21**
 
 L'exception ne change rien là où le contrôle n'existe pas :
 
@@ -768,12 +768,12 @@ cd "$WP2SPIP"
 
 Expected : `code 0`, `IDENTIQUE`, `OK`.
 
-- [ ] **Step 6 : relancer les tests complets**
+- [x] **Step 6 : relancer les tests complets**
 
 Run : `tests/preparation/tester_preparer_spip.sh --complet`
 Expected : toutes les lignes à `ok`, dont les trois `vérificateur à OK (OK)`, puis `0 échec(s)`, code `0`. Contrôler aussi qu'aucun appel de `plugins:svp:telecharger` n'a échoué : `grep -c "en échec\|Impossible de déballer" "$ESSAIS"/sqlite.log "$ESSAIS"/mysql.log "$ESSAIS"/partagee.log` affiche `0` pour chaque journal.
 
-- [ ] **Step 7 : commit**
+- [x] **Step 7 : commit**
 
 ```bash
 git add tests/preparation/tester_preparer_spip.sh wp2spip/importer_documents.php
@@ -790,7 +790,7 @@ git commit -m "Préparations complètes testées (SQLite, MySQL distincte, base 
 - Modify : `docs/superpowers/specs/2026-10-08-wp2spip-ensemble-design.md` (§ 6, ligne du sous-projet 11)
 - Modify : `docs/superpowers/plans/2026-10-08-wp2spip-developpement.md` (Task 12 ter)
 
-- [ ] **Step 1 : readme**
+- [x] **Step 1 : readme**
 
 Dans `readme.md`, juste avant `## Refaire un import` :
 
@@ -807,13 +807,13 @@ Les accès à la base sont lus dans le `wp-config.php` du Wordpress, sans l'exé
 Il faut SPIP-Cli avec les correctifs de `plugins:svp:telecharger` (sélection du plugin, autorisation). `core:installer` ne recevant les mots de passe qu'en argument, ils sont brièvement visibles dans la liste des processus pendant l'installation, et il affiche celui de l'administrateur.
 ````
 
-- [ ] **Step 2 : statuts**
+- [x] **Step 2 : statuts**
 
 - spec du sous-projet 11 : `Statut : design validé, à planifier.` devient `Statut : réalisé (plan : docs/superpowers/plans/2026-10-08-wp2spip-preparation-spip.md).` ;
 - spec d'ensemble, § 6 : marquer la ligne du sous-projet 11 comme réalisée, comme celles des sous-projets 1 et 2 ;
 - plan général, Task 12 ter : cocher `Réalisation ; validation …`, avec le résultat (`tests/preparation/tester_preparer_spip.sh --complet` : 0 échec ; médias refusés par SPIP 4.4.28 corrigés).
 
-- [ ] **Step 3 : commit**
+- [x] **Step 3 : commit**
 
 ```bash
 git add readme.md docs/superpowers

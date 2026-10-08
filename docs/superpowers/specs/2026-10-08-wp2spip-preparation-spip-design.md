@@ -2,7 +2,7 @@
 
 Date : 2026-10-08
 Spec d'ensemble : `2026-10-08-wp2spip-ensemble-design.md`, § 6, sous-projet 11 (réalisé avant le sous-projet 3).
-Statut : design validé, planifié (plan : `docs/superpowers/plans/2026-10-08-wp2spip-preparation-spip.md`).
+Statut : réalisé (plan : `docs/superpowers/plans/2026-10-08-wp2spip-preparation-spip.md`).
 
 ## 1. Objet
 

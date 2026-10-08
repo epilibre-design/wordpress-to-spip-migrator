@@ -1657,7 +1657,7 @@ Chacun suit le cycle de la spec (§ 6) : spec détaillée, relecture, puis plan 
 
 - [x] Spec : `docs/superpowers/specs/2026-10-08-wp2spip-preparation-spip-design.md` (script shell, options + `wp-config.php`, téléchargement, installation, plugins, base externe, import).
 - [x] Plan : `docs/superpowers/plans/2026-10-08-wp2spip-preparation-spip.md` (SPIP-Cli actuel, sans nouveau correctif ; contrôles après chaque étape).
-- [ ] Réalisation ; validation : préparation depuis un dossier vide en MySQL et en SQLite pour WP 6.9 et 7.1, avec `--importer`, puis vérificateur à OK.
+- [x] Réalisation ; validation : préparation depuis un dossier vide en MySQL et en SQLite pour WP 6.9 et 7.1, avec `--importer`, puis vérificateur à OK. Résultat : `tests/preparation/tester_preparer_spip.sh --complet` à 0 échec (cas d'erreur ; SQLite, MySQL distincte et base partagée sur une copie jetable) ; médias refusés par SPIP 4.4.28 corrigés ; vérificateur complété (documents comparés par identifiant).
 
 ### Task 13 : sous-projet 3 — balisage des blocs de l'éditeur
 

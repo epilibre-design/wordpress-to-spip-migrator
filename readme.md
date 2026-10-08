@@ -40,6 +40,17 @@ Help:
   Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est gardée et il ne sera jamais réimporté : on peut relancer la commande, ou un traitement seul. L’import part d’un Wordpress figé. Pour refaire un import (import interrompu, nouvelle version de wp2spip), remettre le SPIP à zéro, puis relancer un import complet.
 ```
 
+## Préparer un SPIP
+Depuis un dossier vide, `outils/preparer_spip.sh` télécharge et installe SPIP, ajoute sale, pages, polyhier et wp2spip, déclare la base du Wordpress comme base externe, et peut lancer l'import :
+
+``` bash
+$ SPIP_ADMIN_PASS='…' outils/preparer_spip.sh --spip /chemin/du/spip --wordpress /chemin/du/wordpress --importer
+```
+
+Les accès à la base sont lus dans le `wp-config.php` du Wordpress, sans l'exécuter. La base de SPIP est en SQLite par défaut (`--base-spip mysql:<base>` pour une base MySQL existante). Sans `SPIP_ADMIN_PASS`, un mot de passe est généré et affiché à la fin. Toutes les options : `outils/preparer_spip.sh --help`.
+
+Il faut SPIP-Cli avec les correctifs de `plugins:svp:telecharger` (sélection du plugin, autorisation). `core:installer` ne recevant les mots de passe qu'en argument, ils sont brièvement visibles dans la liste des processus pendant l'installation, et il affiche celui de l'administrateur.
+
 ## Refaire un import
 L'import part d'un Wordpress figé : une copie du site, ou un site qui n'évolue plus pendant la migration. Relancer la commande n'importe que les contenus pas encore importés, et ne modifie pas ceux qui le sont déjà.
 
