@@ -89,3 +89,89 @@ function wp2spip_decoder_entites($texte) {
 		return in_array($caractere, array('<', '>', '&')) ? $entite[0] : $caractere;
 	}, (string) $texte);
 }
+
+/**
+ * Tables WordPress lues par wp2spip, sans leur préfixe
+ *
+ * @return array
+ */
+function wp2spip_tables_wordpress() {
+	return array('posts', 'postmeta', 'terms', 'term_taxonomy', 'term_relationships', 'options', 'users', 'usermeta', 'comments');
+}
+
+/**
+ * Préfixe des tables WordPress de l'import : celui noté par la commande, wp_ pour un SPIP qui n'a pas encore importé
+ *
+ * @return string
+ */
+function wp2spip_prefixe_tables() {
+	return $GLOBALS['meta']['wp2spip_prefixe_tables'] ?? 'wp_';
+}
+
+/**
+ * Nom complet d'une table WordPress
+ *
+ * @param string $nom nom sans préfixe : posts, postmeta…
+ * @return string
+ */
+function wp2spip_table($nom) {
+	return wp2spip_prefixe_tables() . $nom;
+}
+
+/**
+ * Préfixe valide : la règle de WordPress (wp-admin/setup-config.php), qui permet de le placer dans les requêtes
+ *
+ * @param string $prefixe
+ * @return bool
+ */
+function wp2spip_prefixe_valide($prefixe) {
+	return (bool) preg_match('/^[A-Za-z0-9_]+$/', (string) $prefixe);
+}
+
+/**
+ * Préfixe des tables déclaré dans le code d'un wp-config.php, lu sans l'exécuter
+ *
+ * L'affectation de $table_prefix doit y figurer exactement une fois, avec une valeur littérale : sinon
+ * (absente, conditionnelle, calculée) le préfixe n'est pas supposé.
+ *
+ * @param string $source contenu de wp-config.php
+ * @return string|null préfixe, ou null s'il est introuvable
+ */
+function wp2spip_prefixe_wp_config($source) {
+	$jetons = array_values(array_filter(
+		token_get_all((string) $source),
+		fn($jeton) => !is_array($jeton) or !in_array($jeton[0], array(T_WHITESPACE, T_COMMENT, T_DOC_COMMENT))
+	));
+	$prefixes = array();
+	$affectations = 0;
+	foreach ($jetons as $i => $jeton) {
+		if (!is_array($jeton) or $jeton[0] !== T_VARIABLE or $jeton[1] !== '$table_prefix' or ($jetons[$i + 1] ?? null) !== '=') {
+			continue;
+		}
+		$affectations++;
+		$valeur = $jetons[$i + 2] ?? null;
+		if (is_array($valeur) and $valeur[0] === T_CONSTANT_ENCAPSED_STRING and ($jetons[$i + 3] ?? null) === ';') {
+			$prefixes[] = ($valeur[1][0] === "'")
+				? strtr(substr($valeur[1], 1, -1), array('\\\\' => '\\', "\\'" => "'"))
+				: stripcslashes(substr($valeur[1], 1, -1));
+		}
+	}
+	return ($affectations === 1 and count($prefixes) === 1) ? $prefixes[0] : null;
+}
+
+/**
+ * Tables lues par wp2spip absentes de la base WordPress
+ *
+ * @param string $base identifiant de la base WordPress dans SPIP
+ * @param string $prefixe
+ * @return array noms complets des tables absentes
+ */
+function wp2spip_tables_wordpress_absentes($base, $prefixe) {
+	$absentes = array();
+	foreach (wp2spip_tables_wordpress() as $nom) {
+		if (!sql_showtable($prefixe . $nom, true, $base)) {
+			$absentes[] = $prefixe . $nom;
+		}
+	}
+	return $absentes;
+}
