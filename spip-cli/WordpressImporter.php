@@ -97,6 +97,8 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 			'importer_polyhierarchie',
 			'importer_commentaires',
 		);
+		$traitements_disponibles = pipeline('wp2spip_traitements', $traitements_disponibles);
+		// Ancien nom du pipeline, gardé pour les extensions qui l'utilisent
 		$traitements_disponibles = pipeline('w2spip_traitements', $traitements_disponibles);
 		
 		// Infos

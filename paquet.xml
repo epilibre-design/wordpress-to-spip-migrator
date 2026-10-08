@@ -16,6 +16,8 @@
 	<pipeline nom="declarer_tables_objets_sql" inclure="wp2spip_pipelines.php" />
 	
 	<!-- Pipelines du plugin -->
+	<pipeline nom="wp2spip_traitements" action="" />
+	<!-- Ancien nom, toujours appelé pour compatibilité -->
 	<pipeline nom="w2spip_traitements" action="" />
 	
 	<necessite nom="sale" compatibilite="[1.0.0;]" />
