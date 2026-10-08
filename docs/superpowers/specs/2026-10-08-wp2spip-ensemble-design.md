@@ -6,7 +6,14 @@ Statut : état des lieux et feuille de route. Chaque sous-projet de la feuille d
 
 ## 1. Objet et périmètre
 
-wp2spip importe le contenu d'un site WordPress dans un site SPIP **vierge**, en ligne de commande, via une commande [SPIP-Cli](https://contrib.spip.net/SPIP-Cli). L'import est **ré-exécutable** : un nouveau passage n'importe que ce qui ne l'a pas encore été, et l'option `--update` met à jour ce qui l'a déjà été (utile si le WordPress continue de vivre pendant la migration).
+wp2spip importe le contenu d'un site WordPress dans un site SPIP, en ligne de commande, via une commande [SPIP-Cli](https://contrib.spip.net/SPIP-Cli).
+
+Principes :
+
+- **WordPress figé** : l'import part d'un WordPress qui ne bouge pas pendant la migration (copie du site, ou site gelé). wp2spip ne prévoit pas de suivre un WordPress qui continue d'évoluer.
+- **SPIP vierge** : le site SPIP de destination ne contient aucun contenu avant le premier import.
+- **Ré-exécutable** : un nouveau passage n'importe que ce qui ne l'a pas encore été (reprise après interruption, traitement lancé seul) ; l'option `--update` réapplique les traitements aux contenus déjà importés, par exemple après une amélioration de wp2spip.
+- **Identifiants conservés** (cible, § 6, sous-projet 1) : articles, pages, documents et rubriques SPIP reprennent l'identifiant de leur source WordPress.
 
 Cibles :
 
@@ -20,7 +27,7 @@ Cibles :
 Hors périmètre du cœur :
 
 - le thème WordPress et sa mise en page ;
-- les données des extensions WordPress (Yoast, ACF, calendriers, formulaires…) : elles relèvent d'**extensions de wp2spip** (§ 6, sous-projets 7 et 8) ;
+- les données des extensions WordPress (Yoast, ACF, calendriers, formulaires…) : elles relèvent d'**extensions de wp2spip** (§ 6, sous-projets 8 et 9) ;
 - les menus de navigation WordPress (`nav_menu`), les liens du blogroll (`wp_links`) et les types de contenus personnalisés.
 
 ## 2. Architecture
@@ -46,7 +53,7 @@ spip wordpress:importer [options] <dir_wordpress>
 - un nom inconnu passé à `--traitements` est ignoré sans message ; si aucun nom n'est valide, rien n'est lancé et la commande retourne `0` ;
 - un traitement n'a aucun moyen de signaler un échec.
 
-**Code de sortie, comportement cible** (§ 6, sous-projet 1) :
+**Code de sortie, comportement cible** (§ 6, sous-projet 2) :
 
 - la liste par défaut ne contient que des traitements implémentés ;
 - un nom inconnu passé à `--traitements` est une erreur : message, aucun traitement lancé, code `1` ;
@@ -61,7 +68,7 @@ L'import est une suite de **traitements**, exécutés dans cet ordre :
 1. `importer_metas`
 2. `importer_auteurs`
 3. `importer_rubriques`
-4. `importer_mots` : **n'existe pas encore** (§ 6, sous-projet 4). Il figure pourtant dans la liste par défaut : la commande affiche une erreur à son tour, puis continue. Il en sera retiré tant qu'il n'est pas implémenté (§ 6, sous-projet 1).
+4. `importer_mots` : **n'existe pas encore** (§ 6, sous-projet 5). Il figure pourtant dans la liste par défaut : la commande affiche une erreur à son tour, puis continue. Il en sera retiré tant qu'il n'est pas implémenté (§ 6, sous-projet 2).
 5. `importer_documents`
 6. `importer_articles`
 7. `importer_acces`
@@ -78,7 +85,7 @@ Un plugin peut donc surcharger un traitement, ou en fournir une variante pour un
 
 ### 2.3 Points d'extension
 
-- **Pipeline `w2spip_traitements`** : reçoit la liste ordonnée des traitements ; une extension y insère les siens à la position voulue et fournit le fichier `wp2spip/<traitement>.php` correspondant. Le nom comporte une coquille historique (§ 6, sous-projet 1).
+- **Pipeline `w2spip_traitements`** : reçoit la liste ordonnée des traitements ; une extension y insère les siens à la position voulue et fournit le fichier `wp2spip/<traitement>.php` correspondant. Le nom comporte une coquille historique (§ 6, sous-projet 2).
 - **Surcharge par `charger_fonction()`** : voir § 2.2.
 
 ### 2.4 Traçabilité et ré-exécution
@@ -92,7 +99,7 @@ Un plugin peut donc surcharger un traitement, ou en fournir une variante pour un
 ### 2.5 Accès à WordPress
 
 - **Base** : la base WordPress est déclarée dans SPIP comme base externe (Maintenance technique → « Déclarer une base externe »). Toutes les requêtes WordPress passent par l'API `sql_*` avec ce serveur. Elle peut être la même base que celle du SPIP : les tables SPIP (`spip_*`) et WordPress (`wp_*`) cohabitent sans collision.
-- **Préfixe** : les tables WordPress sont aujourd'hui supposées préfixées par `wp_` (§ 6, sous-projet 5).
+- **Préfixe** : les tables WordPress sont aujourd'hui supposées préfixées par `wp_` (§ 6, sous-projet 6).
 - **Fichiers** : les médias sont lus dans `wp-content/uploads/` du dossier fourni ; à défaut, téléchargés depuis leur URL d'origine.
 
 ### 2.6 Dépendances
@@ -116,7 +123,7 @@ Un plugin peut donc surcharger un traitement, ou en fournir une variante pour un
 | `admin_email` | `email_webmaster` |
 | `blogdescription` (passé par sale) | `slogan_site` |
 
-Limite : l'adresse du site SPIP est écrasée par celle du WordPress, ce qui est gênant pour un site de test local (§ 6, sous-projet 1).
+Limite : l'adresse du site SPIP est écrasée par celle du WordPress, ce qui est gênant pour un site de test local (§ 6, sous-projet 2).
 
 ### 3.2 `importer_auteurs`
 
@@ -138,7 +145,7 @@ Limite : l'adresse du site SPIP est écrasée par celle du WordPress, ce qui est
 
 - Taxonomies `category` et `link_category` → rubriques, en conservant la hiérarchie (les parents sont créés avant leurs enfants).
 - Titre et description passés par sale.
-- Limite : `texte_backend()` est appliqué au titre et au texte et les stocke avec des entités HTML (`&#233;` au lieu de `é`) (§ 6, sous-projet 1).
+- Limite : `texte_backend()` est appliqué au titre et au texte et les stocke avec des entités HTML (`&#233;` au lieu de `é`) (§ 6, sous-projet 2).
 
 ### 3.4 `importer_documents`
 
@@ -188,9 +195,9 @@ La recherche du document à partir d'une URL (`wp2spip_chercher_document()`) :
 **Bilan** : la commande signale les liens vers des fichiers du site restés tels quels, en distinguant les fichiers **absents de la médiathèque** (souvent des liens déjà cassés sur le site WordPress) des médias **importés mais placés là où SPIP n'a pas de raccourci** (image de fond d'un bloc « Couverture »…). Le détail par contenu s'affiche avec `-v`.
 
 **Limites connues** :
-- **liens internes vers un contenu pas encore importé** : la recherche d'un `articleN` (par `?p=`, `?page_id=` ou slug) ne trouve que les contenus SPIP déjà créés. Un lien vers un contenu traité plus tard dans le même passage garde son URL WordPress, et un nouveau passage sans `--update` ne le corrige pas, puisqu'il ne retouche pas les textes déjà importés. Les contenus étant traités par identifiant WordPress croissant, un lien vers un contenu plus ancien est converti ; seul un lien vers un contenu plus récent est concerné. Mesure sur le site réel après un seul passage : aucun lien interne vers un contenu laissé tel quel, hormis le lien vers la page d'accueil. Correction prévue : une passe de résolution des liens en fin d'import (§ 6, sous-projet 1) ;
-- hiérarchie des pages perdue (§ 6, sous-projet 3) ;
-- balisage des blocs de l'éditeur WordPress (`<figure class="wp-block-…">`, `<figcaption>`…) laissé dans le texte (§ 6, sous-projet 2) ;
+- **liens internes vers un contenu pas encore importé** : la recherche d'un `articleN` (par `?p=`, `?page_id=` ou slug) ne trouve que les contenus SPIP déjà créés. Un lien vers un contenu traité plus tard dans le même passage garde son URL WordPress, et un nouveau passage sans `--update` ne le corrige pas, puisqu'il ne retouche pas les textes déjà importés. Les contenus étant traités par identifiant WordPress croissant, un lien vers un contenu plus ancien est converti ; seul un lien vers un contenu plus récent est concerné. Mesure sur le site réel après un seul passage : aucun lien interne vers un contenu laissé tel quel, hormis le lien vers la page d'accueil. Correction prévue : avec les identifiants conservés, un lien vers le contenu WordPress N s'écrit directement `[->articleN]`, que ce contenu soit déjà importé ou non (§ 6, sous-projet 1) ;
+- hiérarchie des pages perdue (§ 6, sous-projet 4) ;
+- balisage des blocs de l'éditeur WordPress (`<figure class="wp-block-…">`, `<figcaption>`…) laissé dans le texte (§ 6, sous-projet 3) ;
 - un contenu sans titre reçoit le titre par défaut de SPIP (« Nouvel article N° … ») ;
 - avec `--update`, la réinsertion des URL propres déjà présentes échoue sans conséquence (doublon de clé, journalisé par SPIP).
 
@@ -277,7 +284,7 @@ L'import WordPress télécharge les médias du contenu de test dans `wp-content/
 - Chaque site SPIP de test a une sauvegarde de son état vierge (dump des tables `spip_*` ou archive de la base SQLite) : la remise à zéro consiste à la restaurer et à vider `IMG/` et `local/`.
 - Piège rencontré : `spip plugins:activer` n'installe pas les tables des plugins ; lancer ensuite `spip plugins:maj:bdd`.
 
-Ces vérifications sont aujourd'hui manuelles (§ 6, sous-projet 6).
+Ces vérifications sont aujourd'hui manuelles (§ 6, sous-projet 7).
 
 ## 6. Feuille de route
 
@@ -285,18 +292,20 @@ Chaque sous-projet aura sa propre spec, puis son plan de réalisation.
 
 | # | Sous-projet | Nature | Contenu |
 |---|---|---|---|
-| 1 | Corrections et fiabilité | cœur | codes de sortie conformes au comportement cible (§ 2.1) : `importer_mots` retiré de la liste par défaut, noms inconnus de `--traitements` refusés, échec d'un traitement signalé ; passe de résolution des liens internes en fin d'import, sur tous les contenus importés (y compris lors des passages précédents), pour les liens vers un contenu importé après celui qui le cite (§ 3.5) ; titres et textes de rubriques sans entités HTML ; option pour ne pas écraser l'adresse du site ; pipeline renommé `wp2spip_traitements`, l'ancien nom restant appelé pour compatibilité |
-| 2 | Balisage des blocs de l'éditeur | cœur | nettoyer `<figure>`, `<figcaption>`, classes `wp-block-*` et commentaires de blocs, en gardant les légendes ; galeries vers des documents |
-| 3 | Hiérarchie des pages | cœur | conserver la structure des pages parentes et enfants (décision ouverte, § 7) |
-| 4 | Étiquettes | cœur | `importer_mots` : `post_tag` → mots-clés d'un groupe dédié, liés aux articles |
-| 5 | Préfixe des tables | cœur | option `--prefixe` (défaut `wp_`), y compris pour la méta des rôles (`<prefixe>capabilities`) |
-| 6 | Tests automatisés | cœur | tests PHPUnit des fonctions de conversion, et tests d'intégration sur le contenu *Theme Unit Test* |
-| 7 | `wp2spip_yoast` | extension | catégorie principale Yoast comme rubrique principale (traitement inséré après `importer_articles`, avant `importer_polyhierarchie`) ; ensuite, titre SEO et méta-description |
-| 8 | `wp2spip_acf` | extension | champs ACF → Champs Extras (vraisemblablement via Champs Extras Interface, à vérifier), d'après leurs définitions (`acf-field`) ; correspondances vers des champs natifs quand elles existent (lien hypertexte de l'article, mot-clé technique) |
-| 9 | Signalements aux plugins tiers | amont | sale : `extraire_images()` parcourt une portion de texte de trop (warning PHP 8, sans effet sur le résultat) ; Polyhiérarchie configurable : pipeline `objet_compte_enfants` non déclaré, champ `date` codé en dur dans `calculer_rubriques` |
+| 1 | Identifiants WordPress conservés | cœur | articles et pages créés avec `id_article` = ID WordPress, documents avec `id_document` = ID du média, rubriques avec `id_rubrique` = ID de la catégorie, via le paramètre `$set` de `objet_inserer()` (vérifié en MySQL et en SQLite) ; les auteurs gardent la numérotation automatique (l'administrateur créé à l'installation de SPIP porte le n° 1) ; précondition vérifiée au lancement : aucun article, document ni rubrique non issu de WordPress, sinon erreur ; liens internes écrits directement d'après l'ID WordPress (`?p=`, `?page_id=`, et slug résolu dans `wp_posts`), ce qui supprime la limite décrite au § 3.5 |
+| 2 | Corrections et fiabilité | cœur | codes de sortie conformes au comportement cible (§ 2.1) : `importer_mots` retiré de la liste par défaut, noms inconnus de `--traitements` refusés, échec d'un traitement signalé ; titres et textes de rubriques sans entités HTML ; option pour ne pas écraser l'adresse du site ; pipeline renommé `wp2spip_traitements`, l'ancien nom restant appelé pour compatibilité ; readme mis à jour (WordPress figé, rôle de `--update`) |
+| 3 | Balisage des blocs de l'éditeur | cœur | nettoyer `<figure>`, `<figcaption>`, classes `wp-block-*` et commentaires de blocs, en gardant les légendes ; galeries vers des documents |
+| 4 | Hiérarchie des pages | cœur | conserver la structure des pages parentes et enfants (décision ouverte, § 7) |
+| 5 | Étiquettes | cœur | `importer_mots` : `post_tag` → mots-clés d'un groupe dédié, liés aux articles |
+| 6 | Préfixe des tables | cœur | option `--prefixe` (défaut `wp_`), y compris pour la méta des rôles (`<prefixe>capabilities`) |
+| 7 | Tests automatisés | cœur | tests PHPUnit des fonctions de conversion, et tests d'intégration sur le contenu *Theme Unit Test* |
+| 8 | `wp2spip_yoast` | extension | catégorie principale Yoast comme rubrique principale (traitement inséré après `importer_articles`, avant `importer_polyhierarchie`) ; ensuite, titre SEO et méta-description |
+| 9 | `wp2spip_acf` | extension | champs ACF → Champs Extras (vraisemblablement via Champs Extras Interface, à vérifier), d'après leurs définitions (`acf-field`) ; correspondances vers des champs natifs quand elles existent (lien hypertexte de l'article, mot-clé technique) |
+| 10 | Signalements aux plugins tiers | amont | sale : `extraire_images()` parcourt une portion de texte de trop (warning PHP 8, sans effet sur le résultat) ; Polyhiérarchie configurable : pipeline `objet_compte_enfants` non déclaré, champ `date` codé en dur dans `calculer_rubriques` |
 
 ## 7. Questions ouvertes
 
-1. **Hiérarchie des pages** (sous-projet 3) : rattacher chaque page à la rubrique équivalente (quand l'arbre des catégories reproduit celui des pages), ou créer une rubrique par page parente, ou garder des pages uniques avec un lien vers leur parent ?
+1. **Hiérarchie des pages** (sous-projet 4) : rattacher chaque page à la rubrique équivalente (quand l'arbre des catégories reproduit celui des pages), ou créer une rubrique par page parente, ou garder des pages uniques avec un lien vers leur parent ?
 2. **Ordre de priorité** de la feuille de route.
 3. **Fusion** de la branche `compat-spip-4.4` dans `master`, et publication d'une version 3.0.0.
+4. **Rôle de `--update`** : avec un WordPress figé, il ne sert plus à suivre un site qui évolue, mais à réappliquer les traitements après une amélioration de wp2spip. Le garder sous cette forme, ou le remplacer par une remise à zéro du SPIP suivie d'un nouvel import complet, plus simple à garantir ?
