@@ -15,11 +15,7 @@ if (!defined('_ECRIRE_INC_VERSION')) {
  * - chaque message garde son id_wordpress : un nouvel import ne crée pas de doublon
  */
 function wp2spip_importer_commentaires_dist($command) {
-	include_spip('inc/plugin');
-	if (!test_plugin_actif('forum')) {
-		$command->output->writeln('Le plugin Forum n’est pas actif : les commentaires ne sont pas importés.');
-		return;
-	}
+	include_spip('inc/wp2spip_plugins');
 
 	$correspondance_statuts = array(
 		'1' => 'publie',
@@ -29,10 +25,7 @@ function wp2spip_importer_commentaires_dist($command) {
 	$wp_comments = sql_allfetsel(
 		'*',
 		'wp_comments',
-		array(
-			sql_in('comment_approved', array_keys($correspondance_statuts)),
-			sql_in('comment_type', array('', 'comment')),
-		),
+		wp2spip_where_commentaires(),
 		'',
 		'comment_ID',
 		'',
@@ -42,6 +35,14 @@ function wp2spip_importer_commentaires_dist($command) {
 	if (!$wp_comments) {
 		$command->output->writeln('Aucun commentaire à importer.');
 		return;
+	}
+
+	// La commande active Forum quand il est requis : inactif malgré tout, l'import ne continue pas
+	// sans les commentaires sans le dire
+	include_spip('inc/plugin');
+	if (!test_plugin_actif('forum')) {
+		$command->output->writeln('<error>' . count($wp_comments) . ' commentaires à importer, mais le plugin Forum n’est pas actif.</error>');
+		return false;
 	}
 	$wp_comments = array_column($wp_comments, null, 'comment_ID');
 

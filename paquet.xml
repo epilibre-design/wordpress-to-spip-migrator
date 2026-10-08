@@ -19,10 +19,15 @@
 	<pipeline nom="wp2spip_traitements" action="" />
 	<!-- Ancien nom, toujours appelé pour compatibilité -->
 	<pipeline nom="w2spip_traitements" action="" />
+	<!-- Conversion d'un bloc de l'éditeur, plugins requis par le contenu Wordpress -->
+	<pipeline nom="wp2spip_bloc" action="" />
+	<pipeline nom="wp2spip_plugins_requis" action="" />
 	
 	<necessite nom="sale" compatibilite="[1.0.0;]" />
 	<necessite nom="pages" compatibilite="[2.0.0;]" />
 	<necessite nom="polyhier" compatibilite="[4.0.0;]" />
 	<utilise nom="forum" />
 	<utilise nom="accesrestreint" />
+	<utilise nom="albums" compatibilite="[4.0.0;]" />
+	<utilise nom="oembed" />
 </paquet>

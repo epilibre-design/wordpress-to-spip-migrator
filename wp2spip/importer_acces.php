@@ -9,31 +9,35 @@ if (!defined('_ECRIRE_INC_VERSION')) {
  *
  * Dans Wordpress, un contenu privé n'est visible que des éditeurs, un contenu protégé
  * que de ceux qui ont le mot de passe. importer_articles les laisse non publiés ;
- * si le plugin Accès restreint est actif, on les publie ici en les liant à une zone
+ * la commande active Accès restreint quand ils existent ; on les publie ici en les liant à une zone
  * réservée aux visiteurs identifiés (les mots de passe Wordpress ne sont pas repris).
  */
 function wp2spip_importer_acces_dist($command) {
-	include_spip('inc/plugin');
-	if (!test_plugin_actif('accesrestreint')) {
-		$command->output->writeln('Accès restreint n’est pas actif : les contenus privés ou protégés par mot de passe restent non publiés.');
-		return;
-	}
+	include_spip('inc/wp2spip_plugins');
 
 	// Les contenus Wordpress concernés
 	$wp_posts = sql_allfetsel(
 		'ID, post_status, post_password, post_date, post_modified',
 		'wp_posts',
-		array(
-			sql_in('post_type', array('post', 'page')),
-			'(post_status = "private" or (post_password != "" and ' . sql_in('post_status', array('publish', 'future')) . '))',
-		),
+		wp2spip_where_contenus_restreints(),
 		'',
 		'ID',
 		'',
 		'',
 		$command->base
 	);
+	if (!$wp_posts) {
+		return;
+	}
 	$wp_posts = array_column($wp_posts, null, 'ID');
+
+	// La commande active Accès restreint quand il est requis : inactif malgré tout, l'import ne continue pas
+	// en laissant ces contenus non publiés sans le dire
+	include_spip('inc/plugin');
+	if (!test_plugin_actif('accesrestreint')) {
+		$command->output->writeln('<error>' . count($wp_posts) . ' contenus privés ou protégés à publier en zone restreinte, mais Accès restreint n’est pas actif.</error>');
+		return false;
+	}
 
 	include_spip('action/editer_objet');
 	include_spip('action/editer_liens');
