@@ -16,7 +16,7 @@ Principes :
 - **Traitements relançables** : un nouveau passage n'importe que ce qui ne l'a pas encore été, ce qui permet de lancer un traitement seul (`--traitements`). Les objets déjà importés (auteurs, rubriques, documents, articles, messages de forum) ne sont pas retouchés, à l'exception de trois traitements qui recalculent à chaque passage : `importer_metas` réécrit la configuration du site, `importer_polyhierarchie` réaligne les rubriques secondaires des articles et recalcule le statut des rubriques, `importer_commentaires` recalcule les fils de discussion (`id_parent`, `id_thread`, `date_thread`) des messages importés. Ces recalculs partent de WordPress, figé : ils produisent le même résultat à chaque passage.
 - **Import interrompu** (coupure, erreur) : il se refait de zéro, comme après une amélioration de wp2spip (ci-dessous). wp2spip ne prévoit pas de reprise qui compléterait les contenus laissés incomplets par l'interruption.
 - **Refaire un import** (par exemple après une amélioration de wp2spip) : remettre le SPIP à zéro, puis relancer un import complet. Il n'y a pas de mise à jour des contenus déjà importés.
-- **Identifiants conservés** (cible, § 6, sous-projet 1) : articles, pages, documents et rubriques SPIP reprennent l'identifiant de leur source WordPress.
+- **Identifiants conservés** : articles, pages, documents et rubriques SPIP reprennent l'identifiant de leur source WordPress (§ 6, sous-projet 1). Un identifiant déjà pris dans SPIP arrête l'import avant toute création.
 
 Cibles :
 
@@ -41,7 +41,7 @@ Hors périmètre du cœur :
 spip wordpress:importer [options] <dir_wordpress>
 ```
 
-Options actuelles :
+Options :
 
 | Argument / option | Rôle |
 |---|---|
@@ -49,20 +49,15 @@ Options actuelles :
 | `-b, --base` | identifiant de la base WordPress déclarée dans SPIP comme base externe (défaut : `wordpress`) |
 | `-t, --traitements` | liste de traitements à lancer, séparés par des virgules (défaut : tous) |
 | `-i, --info` | affiche la version de WordPress et les traitements disponibles, sans rien importer |
+| `--garder-adresse` | ne remplace pas l'adresse du site SPIP par celle du WordPress |
 | `-v` | détail des anomalies par contenu (liens vers des médias non convertis…) |
 
-**Code de sortie, comportement actuel** : `1` si la commande n'est pas lancée depuis un site SPIP ou si `wp-includes/version.php` est introuvable ; `0` dans tous les autres cas. Le code `0` ne garantit donc pas un import complet :
+**Code de sortie** :
 
-- un traitement introuvable (c'est le cas d'`importer_mots`, § 2.2) affiche une erreur, puis la commande continue et retourne `0` ;
-- un nom inconnu passé à `--traitements` est ignoré sans message ; si aucun nom n'est valide, rien n'est lancé et la commande retourne `0` ;
-- un traitement n'a aucun moyen de signaler un échec.
-
-**Code de sortie, comportement cible** (§ 6, sous-projet 2) :
-
-- la liste par défaut ne contient que des traitements implémentés ;
+- `1` si la commande n'est pas lancée depuis un site SPIP, ou si `wp-includes/version.php` est introuvable ;
 - un nom inconnu passé à `--traitements` est une erreur : message, aucun traitement lancé, code `1` ;
 - un traitement introuvable est une erreur : message, arrêt, code `1` ;
-- un traitement peut signaler un échec en retournant `false` : la commande s'arrête (les traitements suivants dépendent des précédents, par exemple les articles des rubriques) et retourne `1` ;
+- un traitement signale un échec en retournant `false` (identifiant déjà pris, erreur de l'API d'édition…) : la commande s'arrête, les traitements suivants dépendant des précédents (les articles des rubriques…), et retourne `1` ;
 - sinon, `0`.
 
 ### 2.2 Traitements
@@ -72,12 +67,15 @@ L'import est une suite de **traitements**, exécutés dans cet ordre :
 1. `importer_metas`
 2. `importer_auteurs`
 3. `importer_rubriques`
-4. `importer_mots` : **n'existe pas encore** (§ 6, sous-projet 5). Il figure pourtant dans la liste par défaut : la commande affiche une erreur à son tour, puis continue. Il en sera retiré tant qu'il n'est pas implémenté (§ 6, sous-projet 2).
-5. `importer_documents`
-6. `importer_articles`
-7. `importer_acces`
-8. `importer_polyhierarchie`
-9. `importer_commentaires`
+4. `importer_documents`
+5. `importer_articles`
+6. `importer_acces`
+7. `importer_polyhierarchie`
+8. `importer_commentaires`
+
+`importer_mots` (étiquettes) viendra avec le sous-projet 5, entre `importer_rubriques` et `importer_documents`.
+
+Les contenus WordPress sont lus dans l'ordre de leur identifiant : deux imports d'un même WordPress produisent le même résultat.
 
 Chaque traitement est une fonction chargée par `charger_fonction()` depuis `wp2spip/<traitement>.php`. La commande cherche, dans l'ordre, une variante propre à la version de WordPress :
 
@@ -89,7 +87,7 @@ Un plugin peut donc surcharger un traitement, ou en fournir une variante pour un
 
 ### 2.3 Points d'extension
 
-- **Pipeline `w2spip_traitements`** : reçoit la liste ordonnée des traitements ; une extension y insère les siens à la position voulue et fournit le fichier `wp2spip/<traitement>.php` correspondant. Le nom comporte une coquille historique (§ 6, sous-projet 2).
+- **Pipeline `wp2spip_traitements`** : reçoit la liste ordonnée des traitements ; une extension y insère les siens à la position voulue et fournit le fichier `wp2spip/<traitement>.php` correspondant. L'ancien nom, `w2spip_traitements` (coquille historique), est toujours appelé après lui, pour les extensions existantes.
 - **Surcharge par `charger_fonction()`** : voir § 2.2.
 
 ### 2.4 Traçabilité et ré-exécution
@@ -133,7 +131,8 @@ Limite : l'adresse du site SPIP est écrasée par celle du WordPress, ce qui est
 
 - Utilisateurs de `wp_users`, sauf les comptes sans email dont l'identifiant commence par `_` (faux comptes créés en masse par certaines extensions).
 - Nom : prénom + nom (métas `first_name`, `last_name`), sinon nom affiché, sinon `user_nicename`, sinon identifiant.
-- Identifiant, email, site web repris.
+- Identifiant, email, site web repris. Les auteurs gardent la numérotation de SPIP (l'administrateur créé à l'installation porte le n° 1).
+- Un identifiant refusé par SPIP (déjà pris, souvent par l'administrateur créé à l'installation, ou trop court) est signalé, et l'auteur est importé sans identifiant de connexion, à compléter à la main.
 - Statut d'après le rôle WordPress (méta `wp_capabilities`) :
 
 | Rôle WordPress | Statut SPIP |
@@ -147,20 +146,20 @@ Limite : l'adresse du site SPIP est écrasée par celle du WordPress, ce qui est
 
 ### 3.3 `importer_rubriques`
 
-- Taxonomies `category` et `link_category` → rubriques, en conservant la hiérarchie (les parents sont créés avant leurs enfants).
-- Titre et description passés par sale.
-- Limite : `texte_backend()` est appliqué au titre et au texte et les stocke avec des entités HTML (`&#233;` au lieu de `é`) (§ 6, sous-projet 2).
+- Taxonomies `category` et `link_category` → rubriques, en conservant la hiérarchie (les parents sont créés avant leurs enfants), avec `id_rubrique` = identifiant de la catégorie.
+- Titre et description passés par sale, sans entités HTML (`é` et non `&#233;`), sauf `&lt;`, `&gt;` et `&amp;`, gardées pour ne pas créer de balise.
 
 ### 3.4 `importer_documents`
 
-- Médias (`post_type = attachment`, `post_status = inherit`), y compris ceux rattachés à aucun contenu.
+- Médias (`post_type = attachment`, `post_status = inherit`), y compris ceux rattachés à aucun contenu, avec `id_document` = identifiant du média : le document est créé vide avec cet identifiant, puis le fichier y est installé (`ajouter_un_document($id_document, …)`).
+- Un fichier refusé par SPIP (type non autorisé…) ne laisse pas de document vide : il est compté, et détaillé avec `-v`.
 - Fichier lu dans `wp-content/uploads/` ; à défaut, téléchargé depuis son URL (`guid`), puis la copie temporaire est supprimée.
 - Le fichier est **copié** dans `IMG/` : le dossier WordPress n'est jamais modifié.
 - Titre, descriptif (contenu ou extrait du média), date ; URL propre d'après le slug WordPress.
 
 ### 3.5 `importer_articles`
 
-**Contenus importés** : articles (`post`) et pages (`page`).
+**Contenus importés** : articles (`post`) et pages (`page`), avec `id_article` = identifiant WordPress.
 
 **Rubrique principale** :
 - page WordPress → page unique SPIP (`id_rubrique = -1`, champ `page` = `wordpress_page_<ID>`) ;
@@ -185,7 +184,7 @@ Limite : l'adresse du site SPIP est écrasée par celle du WordPress, ce qui est
 | Élément WordPress | Résultat SPIP |
 |---|---|
 | lien vers un média du site | `[texte->documentN]` |
-| lien vers un contenu (`?p=`, `?page_id=` ou slug) | `[texte->articleN]` |
+| lien vers un contenu (`?p=`, `?page_id=` ou slug) | `[texte->articleN]`, N étant l'identifiant WordPress, que le contenu soit déjà importé ou non |
 | raccourci `[caption]` | `<docN\|alignement\|largeur=…>`, la légende devenant le descriptif du document |
 | `<img>` | `<imgN\|alignement>` |
 | lecteur `<audio>` / `<video>`, raccourcis `[audio]` / `[video]` | `<docN>` |
@@ -198,7 +197,7 @@ La recherche du document à partir d'une URL (`wp2spip_chercher_document()`) :
 **Bilan** : la commande signale les liens vers des fichiers du site restés tels quels, en distinguant les fichiers **absents de la médiathèque** (souvent des liens déjà cassés sur le site WordPress) des médias **importés mais placés là où SPIP n'a pas de raccourci** (image de fond d'un bloc « Couverture »…). Le détail par contenu s'affiche avec `-v`.
 
 **Limites connues** :
-- **liens internes vers un contenu pas encore importé** : la recherche d'un `articleN` (par `?p=`, `?page_id=` ou slug) ne trouve que les contenus SPIP déjà créés. Un lien vers un contenu traité plus tard dans le même passage garde son URL WordPress, et un nouveau passage ne le corrige pas, puisqu'il ne retouche pas les contenus déjà importés. La requête qui lit les contenus n'impose aucun ordre (pas de `ORDER BY`) ; en pratique, MySQL les renvoie dans l'ordre de leur identifiant, si bien qu'un lien vers un contenu plus ancien est en général converti, mais rien ne le garantit. Mesure sur le site réel après un seul passage : aucun lien interne vers un contenu laissé tel quel, hormis le lien vers la page d'accueil. Correction prévue : avec les identifiants conservés, un lien vers le contenu WordPress N s'écrit directement `[->articleN]`, que ce contenu soit déjà importé ou non (§ 6, sous-projet 1) ;
+- **slug ambigu** : un lien désigné par son slug est résolu dans `wp_posts`. Si plusieurs contenus ont ce slug (pages de parents différents, article et page), le chemin complet de la page doit terminer l'URL ; s'il reste plusieurs candidats, le lien est laissé tel quel plutôt que de viser peut-être le mauvais contenu ;
 - hiérarchie des pages perdue (§ 6, sous-projet 4) ;
 - balisage des blocs de l'éditeur WordPress (`<figure class="wp-block-…">`, `<figcaption>`…) laissé dans le texte (§ 6, sous-projet 3) ;
 - un contenu sans titre reçoit le titre par défaut de SPIP (« Nouvel article N° … ») ;
@@ -251,6 +250,16 @@ Point de départ : version 2.0.3, compatible SPIP 3.2 uniquement.
 | `897ac83` | **Contenus privés et protégés** : un contenu protégé par mot de passe n'est plus publié en clair ; nouveau traitement `importer_acces` (Accès restreint). |
 | `0538b49` | **Commentaires** : fils de discussion, plus de doublons, commentaires des WordPress < 5.5 (jusque-là tous ignorés), commentaires en attente, commentateurs identifiés. |
 | `55f4c7f` | **Liens vers les médias** : index de tous les noms de fichiers, URL encodées, http/https/www, images retouchées et miniatures, lecteurs audio et vidéo, bilan des liens non convertis. |
+| `af92d93` | **Tests d'intégration** (`tests/integration/`) : remise à zéro des sites de test, export comparable d'un import à l'autre, vérification des identifiants. |
+| `63d62c8` | **Codes de sortie** : traitements inconnus refusés, arrêt sur un échec, `importer_mots` retiré de la liste. |
+| `6750f1f` | **Dates de modification** WordPress conservées (l'association d'un auteur ou d'une zone les écrasait). |
+| `ea51e02` | **Suppression de `--update`**. |
+| `77531d1` | Contenus WordPress lus dans l'ordre de leur identifiant. |
+| `706a83b`, `d011e8f`, `afe5b12` | **Identifiants WordPress conservés** pour les rubriques, documents, articles et pages ; échecs de l'API d'édition signalés ; logins refusés par SPIP signalés. |
+| `5a35a8c` | Rubriques sans entités HTML. |
+| `a77fd91` | **Liens internes** écrits d'après l'identifiant WordPress, slugs ambigus laissés tels quels. |
+| `a11f766` | Option `--garder-adresse`. |
+| `ff267df` | Pipeline `wp2spip_traitements`. |
 
 ## 5. Validation
 
@@ -280,14 +289,16 @@ L'import WordPress télécharge les médias du contenu de test dans `wp-content/
 - WordPress 6.9 et 7.1 : résultats **identiques entre les deux versions**, aux différences d'installation près (adresse du site, date d'installation) ; 118 rubriques secondaires attendues ; fils de commentaires conformes à WordPress, sans écart de parent ; contenu protégé publié en zone avec Accès restreint, non publié sans.
 - Simulation WordPress < 5.5 (types de commentaires vides) : 30 messages, aucun écart.
 - Idempotence vérifiée pour les commentaires et les zones : un second passage ne crée rien.
+- Après les sous-projets 1 et 2 (validation avec `tests/integration/`) : sur les quatre sites, import complet en code `0` et `verifier_identifiants.php` à **OK** (identifiant SPIP = identifiant WordPress pour tous les articles, pages, rubriques et documents ; aucun lien `?p=` ou `?page_id=` vers le site d'origine laissé tel quel ; tout `[->articleN]` désigne un article existant). Site réel : SQLite = MySQL ligne à ligne. Par rapport à l'import d'avant ces sous-projets, seuls changent les titres de rubriques sans entités, le titre par défaut d'un contenu sans titre (« Nouvel article N° » + identifiant WordPress) et, pour deux contenus de même slug, celui qui reçoit l'URL (désormais toujours le plus ancien). Un identifiant déjà pris arrête l'import (code `1`) sans rien créer, pour chaque type d'objet.
 
 ### 5.3 Méthode
 
 - Comparaison des contenus importés **champ par champ** entre bases ou entre versions, et des structures (rubriques secondaires, fils de commentaires) **lien par lien** avec la source WordPress.
 - Chaque site SPIP de test a une sauvegarde de son état vierge (dump des tables `spip_*` ou archive de la base SQLite) : la remise à zéro consiste à la restaurer et à vider `IMG/` et `local/`.
 - Piège rencontré : `spip plugins:activer` n'installe pas les tables des plugins ; lancer ensuite `spip plugins:maj:bdd`.
+- Outils dans `tests/integration/` (exclus des archives du plugin) : `remise_a_zero.sh` (état vierge d'un site de test), `exporter_import.php` (export trié, indépendant des identifiants SPIP, pour comparer deux imports ligne à ligne), `verifier_identifiants.php` (identifiants conservés, liens internes ; code de sortie `1` en cas d'écart). Les chemins et accès de la machine de test restent dans `environnement.sh`, non versionné.
 
-Ces vérifications sont aujourd'hui manuelles (§ 6, sous-projet 7).
+Ces vérifications sont lancées à la main ; leur automatisation relève du sous-projet 7.
 
 ## 6. Feuille de route
 
@@ -295,8 +306,8 @@ Chaque sous-projet aura sa propre spec, puis son plan de réalisation.
 
 | # | Sous-projet | Nature | Contenu |
 |---|---|---|---|
-| 1 | Identifiants WordPress conservés | cœur | articles et pages créés avec `id_article` = ID WordPress, rubriques avec `id_rubrique` = ID de la catégorie, documents avec `id_document` = ID du média ; les auteurs gardent la numérotation automatique (l'administrateur créé à l'installation de SPIP porte le n° 1). **Création** : l'identifiant imposé et `id_wordpress` sont passés ensemble dans le paramètre `$set` de `objet_inserer()`, en une seule insertion (vérifié en MySQL et en SQLite), si bien qu'aucun objet n'existe sans son `id_wordpress`. **Documents** : document créé vide de cette façon, puis fichier installé par `ajouter_un_document($id_document, …)`, qui met à jour un document existant au lieu d'en créer un (vérifié : fichier copié, source intacte, titre conservé, aucun document en double). **Identifiant déjà occupé** : par le même contenu WordPress, celui-ci est déjà importé et n'est pas retouché ; par un autre contenu, erreur et arrêt, code `1`. Un import interrompu se refait de zéro (§ 1) : pas de logique de reprise. **Liens internes** écrits directement d'après l'ID WordPress (`?p=`, `?page_id=`, et slug résolu dans `wp_posts`), ce qui supprime la limite décrite au § 3.5 |
-| 2 | Corrections et fiabilité | cœur | codes de sortie conformes au comportement cible (§ 2.1) : `importer_mots` retiré de la liste par défaut, noms inconnus de `--traitements` refusés, échec d'un traitement signalé ; contenus lus dans l'ordre de leur identifiant WordPress (`ORDER BY`), pour un traitement reproductible ; titres et textes de rubriques sans entités HTML ; option pour ne pas écraser l'adresse du site ; pipeline renommé `wp2spip_traitements`, l'ancien nom restant appelé pour compatibilité ; suppression de l'option `--update` et des branches de mise à jour dans les traitements ; readme mis à jour (WordPress figé, refaire un import = remise à zéro puis import complet) |
+| 1 | Identifiants WordPress conservés — **réalisé** | cœur | articles et pages créés avec `id_article` = ID WordPress, rubriques avec `id_rubrique` = ID de la catégorie, documents avec `id_document` = ID du média ; les auteurs gardent la numérotation automatique (l'administrateur créé à l'installation de SPIP porte le n° 1). **Création** : l'identifiant imposé et `id_wordpress` sont passés ensemble dans le paramètre `$set` de `objet_inserer()`, en une seule insertion (vérifié en MySQL et en SQLite), si bien qu'aucun objet n'existe sans son `id_wordpress`. **Documents** : document créé vide de cette façon, puis fichier installé par `ajouter_un_document($id_document, …)`, qui met à jour un document existant au lieu d'en créer un (vérifié : fichier copié, source intacte, titre conservé, aucun document en double). **Identifiant déjà occupé** : par le même contenu WordPress, celui-ci est déjà importé et n'est pas retouché ; par un autre contenu, erreur et arrêt, code `1`. Un import interrompu se refait de zéro (§ 1) : pas de logique de reprise. **Liens internes** écrits directement d'après l'ID WordPress (`?p=`, `?page_id=`, et slug résolu dans `wp_posts`), ce qui supprime la limite décrite au § 3.5 |
+| 2 | Corrections et fiabilité — **réalisé** | cœur | codes de sortie conformes au comportement cible (§ 2.1) : `importer_mots` retiré de la liste par défaut, noms inconnus de `--traitements` refusés, échec d'un traitement signalé ; contenus lus dans l'ordre de leur identifiant WordPress (`ORDER BY`), pour un traitement reproductible ; titres et textes de rubriques sans entités HTML ; option pour ne pas écraser l'adresse du site ; pipeline renommé `wp2spip_traitements`, l'ancien nom restant appelé pour compatibilité ; suppression de l'option `--update` et des branches de mise à jour dans les traitements ; readme mis à jour (WordPress figé, refaire un import = remise à zéro puis import complet) |
 | 3 | Balisage des blocs de l'éditeur | cœur | nettoyer `<figure>`, `<figcaption>`, classes `wp-block-*` et commentaires de blocs, en gardant les légendes ; galeries vers des documents |
 | 4 | Hiérarchie des pages | cœur | conserver la structure des pages parentes et enfants (décision ouverte, § 7) |
 | 5 | Étiquettes | cœur | `importer_mots` : `post_tag` → mots-clés d'un groupe dédié, liés aux articles |

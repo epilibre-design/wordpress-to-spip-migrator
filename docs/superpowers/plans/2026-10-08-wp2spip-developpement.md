@@ -81,7 +81,7 @@ Les tâches suivantes se vérifient sur les SPIP de test. Les variables ci-desso
 | `SPIP_REEL_SQLITE`, `SPIP_REEL_MYSQL`, `BASE_REEL_MYSQL`, `WP_REEL` | SPIP qui importent le site réel (SQLite, MySQL), base MySQL du second, dossier du WordPress réel |
 | `MYSQL_OPTIONS`, `MYSQL_PWD` | accès MySQL (par exemple `-uutilisateur`) |
 
-Chaque commande de vérification commence par `source "$WP2SPIP/tests/integration/environnement.sh"`.
+Chaque commande de vérification commence par `source "$WP2SPIP/tests/integration/environnement.sh"` : exporter d'abord `WP2SPIP` (chemin du dépôt) dans le shell, sans quoi ce `source` échoue. Dans un pipeline (`… | grep`), activer `set -o pipefail` pour garder le code de sortie de la commande.
 
 ---
 
@@ -100,7 +100,7 @@ Chaque commande de vérification commence par `source "$WP2SPIP/tests/integratio
 **Interfaces :**
 - Produces : `remise_a_zero.sh <site> <état vierge> [base]` ; `exporter_import.php` (export TSV trié, indépendant des identifiants SPIP) ; `verifier_identifiants.php` (affiche `OK` ou `ECHEC` suivi de la liste des écarts) ; états vierges `$SAUVEGARDES/vierge-*-v2.*` avec Accès restreint actif ; exports de référence `$SAUVEGARDES/export-*-reference.tsv`.
 
-- [ ] **Step 1 : modèle d'environnement**
+- [x] **Step 1 : modèle d'environnement**
 
 `tests/integration/environnement.exemple.sh` :
 
@@ -143,7 +143,7 @@ Ajouter à la fin de `.gitattributes` :
 
 Puis créer localement `tests/integration/environnement.sh` avec les valeurs de la machine de test.
 
-- [ ] **Step 2 : script de remise à zéro**
+- [x] **Step 2 : script de remise à zéro**
 
 `tests/integration/remise_a_zero.sh` (exécutable, `chmod +x`) :
 
@@ -182,7 +182,7 @@ rm -rf tmp/cache/*
 echo "Site remis à zéro : $site"
 ```
 
-- [ ] **Step 3 : export comparable**
+- [x] **Step 3 : export comparable**
 
 `tests/integration/exporter_import.php` :
 
@@ -260,7 +260,7 @@ sort($lignes);
 echo join("\n", $lignes) . "\n";
 ```
 
-- [ ] **Step 4 : vérification des identifiants**
+- [x] **Step 4 : vérification des identifiants**
 
 `tests/integration/verifier_identifiants.php` :
 
@@ -328,7 +328,7 @@ if ($echecs) {
 echo "OK\n";
 ```
 
-- [ ] **Step 5 : états vierges avec Accès restreint**
+- [x] **Step 5 : états vierges avec Accès restreint**
 
 Les états vierges des SPIP de test ont été pris avant l'activation d'Accès restreint. En refaire un, pour chaque site. Le SPIP du WordPress 7.1 reste **sans** Accès restreint : il couvre le cas où le plugin est absent (contenus privés et protégés non publiés). Le SPIP SQLite du site réel reçoit le plugin (copie du dossier `acces_restreint` du SPIP MySQL), pour que les deux imports du site réel restent comparables.
 
@@ -350,7 +350,7 @@ mysqldump --no-tablespaces $MYSQL_OPTIONS "$BASE_REEL_MYSQL" $(mysql $MYSQL_OPTI
 
 Expected : pour chaque site, `plugins:lister` montre les six plugins actifs (cinq pour le SPIP du WordPress 7.1, sans `accesrestreint`) ; les quatre fichiers `vierge-*-v2.*` existent. Dans la suite, « remettre à zéro » = `remise_a_zero.sh` avec ces fichiers `-v2`.
 
-- [ ] **Step 6 : exports de référence avec le code actuel**
+- [x] **Step 6 : exports de référence avec le code actuel**
 
 ```bash
 source "$WP2SPIP/tests/integration/environnement.sh"
@@ -366,7 +366,7 @@ Expected : `code 0` ; export de plusieurs centaines de lignes ; `verifier_identi
 
 Faire de même pour le site réel en SQLite (`$SPIP_REEL_SQLITE`, `$WP_REEL`, `vierge-sqlite-v2.tgz`, fichiers `import-reel-sqlite-reference.log` et `export-reel-sqlite-reference.tsv`).
 
-- [ ] **Step 7 : commit**
+- [x] **Step 7 : commit**
 
 ```bash
 cd "$WP2SPIP"
@@ -400,7 +400,7 @@ diff "$SAUVEGARDES/export-wp6-reference.tsv" "$SAUVEGARDES/export-wp6.tsv" && ec
 **Interfaces :**
 - Produces : un traitement qui retourne `false` arrête la commande avec le code `1` ; tout autre retour (dont `null`) vaut succès. `appliquer_traitement(string $traitement): bool`.
 
-- [ ] **Step 1 : constater le comportement actuel**
+- [x] **Step 1 : constater le comportement actuel**
 
 ```bash
 source "$WP2SPIP/tests/integration/environnement.sh"; cd "$SPIP_WP6"
@@ -410,7 +410,7 @@ source "$WP2SPIP/tests/integration/environnement.sh"; cd "$SPIP_WP6"
 
 Expected (avant correction) : `code 0` les deux fois ; le second affiche « Aucune fonction implémentée ».
 
-- [ ] **Step 2 : liste par défaut sans `importer_mots`**
+- [x] **Step 2 : liste par défaut sans `importer_mots`**
 
 Dans `execute()`, remplacer la liste :
 
@@ -427,7 +427,7 @@ Dans `execute()`, remplacer la liste :
 		);
 ```
 
-- [ ] **Step 3 : refuser les noms inconnus et s'arrêter sur un échec**
+- [x] **Step 3 : refuser les noms inconnus et s'arrêter sur un échec**
 
 Remplacer, de `// Peut-être qu'on veut lancer seulement certains traitements` jusqu'au `return Command::SUCCESS;` final de `execute()` :
 
@@ -457,7 +457,7 @@ Remplacer, de `// Peut-être qu'on veut lancer seulement certains traitements` j
 		return Command::SUCCESS;
 ```
 
-- [ ] **Step 4 : `appliquer_traitement()` retourne un booléen**
+- [x] **Step 4 : `appliquer_traitement()` retourne un booléen**
 
 Remplacer la fin de `appliquer_traitement()`, depuis `// Sinon rien, on peut pas faire cette opération` :
 
@@ -476,7 +476,7 @@ Remplacer la fin de `appliquer_traitement()`, depuis `// Sinon rien, on peut pas
 
 et ajouter le type de retour à la signature : `protected function appliquer_traitement($traitement): bool {`.
 
-- [ ] **Step 5 : vérifier**
+- [x] **Step 5 : vérifier**
 
 ```bash
 "$SPIP_CLI" wordpress:importer "$WP6" -t importer_inconnu --no-ansi; echo "code $?"
@@ -486,7 +486,7 @@ et ajouter le type de retour à la signature : `protected function appliquer_tra
 
 Expected : « Traitements inconnus : importer_inconnu… » et `code 1` ; idem pour `importer_mots` ; la liste disponible ne contient plus `importer_mots`. Puis contrôle NR : `code 0` et `IDENTIQUE`.
 
-- [ ] **Step 6 : commit**
+- [x] **Step 6 : commit**
 
 ```bash
 git add spip-cli/WordpressImporter.php
@@ -510,7 +510,7 @@ Constat au premier contrôle NR : `date_modif` change d'un import à l'autre. As
 **Interfaces :**
 - Produces : plus de propriété `$command->update` ; chaque traitement ne crée que ce qui n'est pas encore importé.
 
-- [ ] **Step 1 : constater**
+- [x] **Step 1 : constater**
 
 ```bash
 grep -n "update" "$WP2SPIP"/spip-cli/*.php "$WP2SPIP"/wp2spip/*.php "$WP2SPIP"/readme.md | grep -v sql_updateq
@@ -518,7 +518,7 @@ grep -n "update" "$WP2SPIP"/spip-cli/*.php "$WP2SPIP"/wp2spip/*.php "$WP2SPIP"/r
 
 Expected : une vingtaine de lignes (option, propriété, branches `elseif ($command->update)`).
 
-- [ ] **Step 2 : la commande**
+- [x] **Step 2 : la commande**
 
 Dans `spip-cli/WordpressImporter.php` :
 - supprimer `public $update = false;` ;
@@ -536,7 +536,7 @@ Dans `spip-cli/WordpressImporter.php` :
 Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est gardée et il ne sera jamais réimporté : on peut relancer la commande, ou un traitement seul. L’import part d’un Wordpress figé. Pour refaire un import (import interrompu, nouvelle version de wp2spip), remettre le SPIP à zéro, puis relancer un import complet.
 ```
 
-- [ ] **Step 3 : les traitements auteurs, rubriques, documents, articles**
+- [x] **Step 3 : les traitements auteurs, rubriques, documents, articles**
 
 Dans chacun des quatre fichiers, remplacer le bloc d'en-tête (`// S'il n'y a pas l'option update…` jusqu'à l'accolade fermante du `if`) par, avec la table du traitement (`spip_auteurs`, `spip_rubriques`, `spip_documents`, `spip_articles`) :
 
@@ -547,7 +547,7 @@ Dans chacun des quatre fichiers, remplacer le bloc d'en-tête (`// S'il n'y a pa
 
 Puis supprimer dans chacun la branche `// Sinon on ne met à jour que si demandé` / `elseif ($command->update) { … }` entière et la ligne `$nb_maj = 0;`. Dans `importer_documents.php` et `importer_articles.php`, remplacer `$command->update ? $nb_maj++ : $nb_import++;` par `$nb_import++;`.
 
-- [ ] **Step 4 : `importer_acces.php`**
+- [x] **Step 4 : `importer_acces.php`**
 
 Remplacer :
 
@@ -566,7 +566,7 @@ par :
 
 et supprimer le bloc `// En mise à jour, retirer de nos zones…` / `if ($command->update) { … }` entier.
 
-- [ ] **Step 5 : `importer_commentaires.php`**
+- [x] **Step 5 : `importer_commentaires.php`**
 
 Dans le docblock, remplacer les deux lignes `- chaque message garde son id_wordpress : …` / `et --update met à jour …` par :
 
@@ -603,7 +603,7 @@ Supprimer `$nb_maj = 0;`, remplacer le commentaire `// 1. Créer ou mettre à jo
 		. ($nb_sans_article ? " $nb_sans_article commentaires ignorés (contenu non importé)." : ''));
 ```
 
-- [ ] **Step 6 : readme**
+- [x] **Step 6 : readme**
 
 Dans `readme.md`, supprimer la ligne `-u, --update …` de l'aide, remplacer le paragraphe d'aide « Lorsqu’un contenu est déjà importé… » par le texte du Step 2, et remplacer la section « Importer un site qui continue de vivre » par :
 
@@ -614,7 +614,7 @@ L'import part d'un Wordpress figé : une copie du site, ou un site qui n'évolue
 Pour refaire un import (import interrompu, nouvelle version de wp2spip), remettre le SPIP à zéro, puis relancer un import complet.
 ```
 
-- [ ] **Step 7 : vérifier**
+- [x] **Step 7 : vérifier**
 
 ```bash
 grep -n "update" "$WP2SPIP"/spip-cli/*.php "$WP2SPIP"/wp2spip/*.php "$WP2SPIP"/readme.md | grep -v sql_updateq
@@ -624,7 +624,7 @@ for f in "$WP2SPIP"/spip-cli/*.php "$WP2SPIP"/wp2spip/*.php; do php -l "$f" | gr
 
 Expected : aucune ligne ; l'option `--update` n'existe pas (`code 1`) ; aucune erreur de syntaxe. Puis contrôle NR : `IDENTIQUE`. Puis relancer l'import sur le même site sans remise à zéro : `code 0`, `diff` toujours `IDENTIQUE` (rien n'est recréé).
 
-- [ ] **Step 8 : commit**
+- [x] **Step 8 : commit**
 
 ```bash
 git add spip-cli/WordpressImporter.php wp2spip/*.php readme.md
@@ -639,7 +639,7 @@ git commit -m "Suppression de l'option --update : l'import part d'un Wordpress f
 **Interfaces :**
 - Produces : traitements reproductibles d'un import à l'autre, quel que soit le moteur.
 
-- [ ] **Step 1 : ajouter les `ORDER BY`**
+- [x] **Step 1 : ajouter les `ORDER BY`**
 
 L'ordre est le 5ᵉ paramètre de `sql_allfetsel($select, $from, $where, $groupby, $orderby, $limit, $having, $serveur)`. Dans les appels qui lisent la base WordPress, remplacer le 5ᵉ paramètre `''` par :
 
@@ -674,11 +674,11 @@ Exemple pour `importer_articles.php` :
 
 (supprimer au passage la ligne commentée `//'post_status = "publish"',`).
 
-- [ ] **Step 2 : vérifier**
+- [x] **Step 2 : vérifier**
 
 Relire `git diff` : chacune des huit requêtes du tableau a son ordre, et aucune autre requête n'a changé. Puis contrôle NR. Expected : `IDENTIQUE` (MySQL renvoyait déjà cet ordre en pratique ; seule la garantie change).
 
-- [ ] **Step 3 : commit**
+- [x] **Step 3 : commit**
 
 ```bash
 git add wp2spip/*.php
@@ -699,7 +699,7 @@ git commit -m "Contenus Wordpress lus dans l'ordre de leur identifiant"
   - `wp2spip_erreur_modification($command, string $objet, int $id, string $erreur): bool` — message avec l'erreur de `objet_modifier()`, retourne `false`.
 - Consumes : `appliquer_traitement()` arrête l'import quand un traitement retourne `false` (Task 2).
 
-- [ ] **Step 1 : test qui échoue — identifiant occupé**
+- [x] **Step 1 : test qui échoue — identifiant occupé**
 
 ```bash
 source "$WP2SPIP/tests/integration/environnement.sh"
@@ -712,7 +712,7 @@ cd "$SPIP_WP6"
 
 Expected avant correction : `int(1)` à l'insertion, puis l'import passe (`code 0`) et crée toutes les catégories à côté de la rubrique 1 (compte = catégories + 1).
 
-- [ ] **Step 2 : helpers**
+- [x] **Step 2 : helpers**
 
 `inc/wp2spip.php` :
 
@@ -794,7 +794,7 @@ function wp2spip_erreur_insertion($command, $objet, $id) {
 }
 ```
 
-- [ ] **Step 3 : `importer_rubriques.php`**
+- [x] **Step 3 : `importer_rubriques.php`**
 
 Après `$wp_categories = wp2spip_enfants_rubriques($wp_categories, 0);`, ajouter `include_spip('inc/wp2spip');` aux inclusions du début du bloc, et :
 
@@ -866,7 +866,7 @@ Ajouté à l'exécution : propager l'échec de `objet_modifier()` dans `importer
 			}
 ```
 
-- [ ] **Step 4 : vérifier**
+- [x] **Step 4 : vérifier**
 
 Rejouer le Step 1. Expected : « 1 identifiants de rubrique déjà pris … : 1 », « Import arrêté », `code 1`, `int(1)` rubrique en base (rien n'a été créé).
 
@@ -889,7 +889,7 @@ cd "$SPIP_REEL_SQLITE"
 
 Expected : `code 0` ; 0 identifiant différent.
 
-- [ ] **Step 5 : commit**
+- [x] **Step 5 : commit**
 
 ```bash
 git add inc/wp2spip.php wp2spip/importer_rubriques.php wp2spip/importer_auteurs.php
@@ -904,7 +904,7 @@ git commit -m "Rubriques créées avec l'identifiant de leur catégorie Wordpres
 **Interfaces :**
 - Produces : `wp2spip_decoder_entites(string $texte): string` — décode les entités HTML sauf celles de `<`, `>` et `&`.
 
-- [ ] **Step 1 : test qui échoue**
+- [x] **Step 1 : test qui échoue**
 
 Après le contrôle NR de la Task 5 (base WP 6.9 importée) :
 
@@ -914,7 +914,7 @@ cd "$SPIP_WP6"; "$SPIP_CLI" php:eval 'var_dump(sql_getfetsel("titre", "spip_rubr
 
 Expected avant correction : `string(15) "Non class&#233;"` (WordPress stocke ce nom avec une entité).
 
-- [ ] **Step 2 : helper**
+- [x] **Step 2 : helper**
 
 Ajouter à `inc/wp2spip.php` :
 
@@ -936,7 +936,7 @@ function wp2spip_decoder_entites($texte) {
 }
 ```
 
-- [ ] **Step 3 : l'appliquer aux rubriques**
+- [x] **Step 3 : l'appliquer aux rubriques**
 
 Dans `importer_rubriques.php`, remplacer :
 
@@ -952,7 +952,7 @@ par :
 				'texte' => wp2spip_decoder_entites(sale($wp_category['description'])),
 ```
 
-- [ ] **Step 4 : vérifier**
+- [x] **Step 4 : vérifier**
 
 ```bash
 cd "$SPIP_WP6"
@@ -961,7 +961,7 @@ cd "$SPIP_WP6"
 
 Expected : `string(…) "Non classé &amp; &lt;b&gt; été &#60;"`. Puis contrôle NR : seules diffèrent des lignes `rubrique` dont le titre ou le texte avait des entités (`Non class&#233;` → `Non classé`) ; vérifier avec `diff … | grep -v "^[<>] rubrique"` → seulement des lignes `---` et de numéros.
 
-- [ ] **Step 5 : commit**
+- [x] **Step 5 : commit**
 
 ```bash
 git add inc/wp2spip.php wp2spip/importer_rubriques.php
@@ -977,7 +977,7 @@ git commit -m "Rubriques : titres et textes sans entités HTML"
 - Consumes : `wp2spip_verifier_identifiants()`, `wp2spip_erreur_insertion()`, `wp2spip_erreur_modification()` (Task 5).
 - Produces : `id_document` = ID du média WordPress pour tout média dont le fichier a été trouvé.
 
-- [ ] **Step 1 : test qui échoue — identifiant occupé**
+- [x] **Step 1 : test qui échoue — identifiant occupé**
 
 ```bash
 "$WP2SPIP/tests/integration/remise_a_zero.sh" "$SPIP_WP6" "$SAUVEGARDES/vierge-wp6-v2.sql.gz" "$BASE_WP6"
@@ -990,7 +990,7 @@ ID=$(mysql $MYSQL_OPTIONS -N "$BASE_WP6" -e "select min(ID) from wp_posts where 
 
 Expected avant correction : `code 0` et tous les médias importés en plus du document occupant.
 
-- [ ] **Step 2 : création à identifiant imposé**
+- [x] **Step 2 : création à identifiant imposé**
 
 Dans `importer_documents.php`, ajouter `include_spip('inc/wp2spip');` aux inclusions, puis, juste avant `$nb_attachments = count($wp_attachments);` :
 
@@ -1079,7 +1079,7 @@ Après la boucle, remplacer `// Une ligne vide à la fin` et son `writeln('')` p
 		}
 ```
 
-- [ ] **Step 3 : vérifier**
+- [x] **Step 3 : vérifier**
 
 Rejouer le Step 1. Expected : message d'identifiant pris, « Import arrêté », `code 1`, `int(1)` document en base.
 
@@ -1092,7 +1092,7 @@ ls "$WP6"/wp-content/uploads | head -3   # source intacte
 
 Expected : `IDENTIQUE`, y compris les noms de fichiers dans `IMG/` (colonne 6 des lignes `document`) : les médias sont traités dans le même ordre (Task 4), les suffixes de collision sont donc les mêmes ; toute différence est un écart à analyser avant de continuer. 0 identifiant différent ; dossier WordPress inchangé.
 
-- [ ] **Step 4 : commit**
+- [x] **Step 4 : commit**
 
 ```bash
 git add wp2spip/importer_documents.php
@@ -1108,7 +1108,7 @@ git commit -m "Documents créés avec l'identifiant de leur média Wordpress"
 - Consumes : `wp2spip_verifier_identifiants()`, `wp2spip_erreur_insertion()`, `wp2spip_erreur_modification()` (Task 5).
 - Produces : `id_article` = ID WordPress pour chaque `post` et `page` ; c'est ce sur quoi la Task 9 écrit les liens internes.
 
-- [ ] **Step 1 : test qui échoue — identifiant occupé**
+- [x] **Step 1 : test qui échoue — identifiant occupé**
 
 ```bash
 "$WP2SPIP/tests/integration/remise_a_zero.sh" "$SPIP_WP6" "$SAUVEGARDES/vierge-wp6-v2.sql.gz" "$BASE_WP6"
@@ -1120,7 +1120,7 @@ ID=$(mysql $MYSQL_OPTIONS -N "$BASE_WP6" -e "select min(ID) from wp_posts where 
 
 Expected avant correction : `code 0`.
 
-- [ ] **Step 2 : vérification préalable**
+- [x] **Step 2 : vérification préalable**
 
 Ajouter `include_spip('inc/wp2spip');` aux inclusions, puis, juste avant `$nb_posts = count($wp_posts);` :
 
@@ -1131,7 +1131,7 @@ Ajouter `include_spip('inc/wp2spip');` aux inclusions, puis, juste avant `$nb_po
 		}
 ```
 
-- [ ] **Step 3 : création à identifiant imposé**
+- [x] **Step 3 : création à identifiant imposé**
 
 Supprimer `'id_wordpress' => $id_wordpress,` du tableau `$article`. Après la Task 3, le bloc de création se lit :
 
@@ -1190,7 +1190,7 @@ par :
 
 et, à la fin de la boucle, `if (!$erreur) { sql_updateq('spip_articles', $supplements, …); }` par le seul `sql_updateq('spip_articles', $supplements, 'id_article = '.$id_article);` (Task 2 bis), puisqu'on n'y arrive plus en cas d'erreur.
 
-- [ ] **Step 4 : vérifier**
+- [x] **Step 4 : vérifier**
 
 Rejouer le Step 1 : message d'identifiant pris, `code 1`, aucun article créé hormis l'occupant. Puis contrôle NR et :
 
@@ -1200,7 +1200,7 @@ Rejouer le Step 1 : message d'identifiant pris, `code 1`, aucun article créé h
 
 Expected : `IDENTIQUE` ; les trois tables à 0 identifiant différent ; il peut rester des écarts « lien Wordpress non converti » : c'est le test de la Task 9.
 
-- [ ] **Step 5 : commit**
+- [x] **Step 5 : commit**
 
 ```bash
 git add wp2spip/importer_articles.php
@@ -1216,7 +1216,7 @@ git commit -m "Articles et pages créés avec l'identifiant de leur contenu Word
 - Consumes : `id_article` = ID WordPress (Task 8) ; `wp2spip_chercher_document()`, `wp2spip_url_du_site()` (existants).
 - Produces : `wp2spip_index_contenus(string $base): array` → `array('types' => array(ID => post_type), 'slugs' => array(slug normalisé => array(ID, …)), 'chemins' => array(ID => chemin))` ; `wp2spip_chercher_slug(string $chemin, array $contenus): int` (0 si ambigu) ; `wp2spip_normaliser_slug(string $slug): string`.
 
-- [ ] **Step 1 : test qui échoue**
+- [x] **Step 1 : test qui échoue**
 
 Un lien vers un contenu pas encore importé doit être converti. Le vérifier sur un SPIP où aucun article n'existe encore :
 
@@ -1236,7 +1236,7 @@ EOF
 
 Expected avant correction : `int(0)` articles, puis les deux URL renvoyées inchangées.
 
-- [ ] **Step 2 : index des contenus et résolution des slugs**
+- [x] **Step 2 : index des contenus et résolution des slugs**
 
 Ajouter dans `importer_articles.php`, après `wp2spip_chercher_lien()` :
 
@@ -1358,7 +1358,7 @@ foreach (array("contact", "2012/01/contact", "asso/equipe", "club/equipe", "equi
 
 Expected : `contact => 10`, `2012/01/contact => 10`, `asso/equipe => 20`, `club/equipe => 30`, `equipe => 0` (ambigu), `actu => 0` (article et page de même slug), `%C3%A9t%C3%A9 => 60`, `été => 60`.
 
-- [ ] **Step 3 : `wp2spip_chercher_lien()`**
+- [x] **Step 3 : `wp2spip_chercher_lien()`**
 
 Remplacer la fonction entière (docblock compris) par :
 
@@ -1414,7 +1414,7 @@ function wp2spip_chercher_lien($lien, $url_wordpress, $base='wordpress') {
 }
 ```
 
-- [ ] **Step 4 : vérifier**
+- [x] **Step 4 : vérifier**
 
 Rejouer le Step 1 : toujours `int(0)` articles, et les deux URL deviennent `article<ID>`. Puis contrôle NR :
 
@@ -1425,7 +1425,7 @@ diff "$SAUVEGARDES/export-wp6-reference.tsv" "$SAUVEGARDES/export-wp6.tsv" | gre
 
 Expected : les seules différences sont des lignes `article` (texte : URL WordPress → `article#wpN` ou `document#wpN`) et celles de la Task 6 ; `verifier_identifiants.php` affiche **OK**. Relire les lignes changées : chaque nouveau `article#wpN` doit correspondre au contenu WordPress visé par l'URL d'origine.
 
-- [ ] **Step 5 : commit**
+- [x] **Step 5 : commit**
 
 ```bash
 git add wp2spip/importer_articles.php
@@ -1440,7 +1440,7 @@ git commit -m "Liens internes écrits d'après l'identifiant Wordpress, contenu 
 **Interfaces :**
 - Produces : option `--garder-adresse` ; propriété `public $garder_adresse = false;`.
 
-- [ ] **Step 1 : test qui échoue**
+- [x] **Step 1 : test qui échoue**
 
 ```bash
 cd "$SPIP_WP6"
@@ -1450,7 +1450,7 @@ cd "$SPIP_WP6"
 
 Expected avant correction : option inconnue, `code 1`.
 
-- [ ] **Step 2 : l'option**
+- [x] **Step 2 : l'option**
 
 Dans `WordpressImporter.php` : ajouter `public $garder_adresse = false;` après `public $base = 'wordpress';`, l'option après `info` :
 
@@ -1484,7 +1484,7 @@ Dans `importer_metas.php`, remplacer le bloc `siteurl` par :
 		}
 ```
 
-- [ ] **Step 3 : vérifier**
+- [x] **Step 3 : vérifier**
 
 ```bash
 "$SPIP_CLI" wordpress:importer "$WP6" -t importer_metas --garder-adresse --no-ansi; echo "code $?"
@@ -1495,7 +1495,7 @@ Dans `importer_metas.php`, remplacer le bloc `siteurl` par :
 
 Expected : « conservée (http://exemple.test) », `code 0`, `http://exemple.test` ; puis sans l'option, l'adresse du WordPress 6.9.
 
-- [ ] **Step 4 : commit**
+- [x] **Step 4 : commit**
 
 ```bash
 git add spip-cli/WordpressImporter.php wp2spip/importer_metas.php
@@ -1510,7 +1510,7 @@ git commit -m "Option --garder-adresse : ne pas remplacer l'adresse du site SPIP
 **Interfaces :**
 - Produces : pipeline `wp2spip_traitements` ; `w2spip_traitements` reste appelé après lui, pour les extensions existantes.
 
-- [ ] **Step 1 : déclaration**
+- [x] **Step 1 : déclaration**
 
 Dans `paquet.xml`, remplacer :
 
@@ -1536,7 +1536,7 @@ Dans `WordpressImporter.php`, remplacer `$traitements_disponibles = pipeline('w2
 		$traitements_disponibles = pipeline('w2spip_traitements', $traitements_disponibles);
 ```
 
-- [ ] **Step 2 : vérifier avec un plugin de test temporaire**
+- [x] **Step 2 : vérifier avec un plugin de test temporaire**
 
 ```bash
 cd "$SPIP_WP6"; P=plugins/test_wp2spip_pipeline; mkdir -p $P
@@ -1560,7 +1560,7 @@ EOF
 
 Expected : la liste se termine par `importer_test_nouveau, importer_test_ancien`.
 
-- [ ] **Step 3 : commit**
+- [x] **Step 3 : commit**
 
 ```bash
 git add paquet.xml spip-cli/WordpressImporter.php
@@ -1572,7 +1572,7 @@ git commit -m "Pipeline wp2spip_traitements, l'ancien w2spip_traitements reste a
 **Files :**
 - Modify : `readme.md`, `docs/superpowers/specs/2026-10-08-wp2spip-ensemble-design.md`
 
-- [ ] **Step 1 : readme**
+- [x] **Step 1 : readme**
 
 Mettre l'aide de `readme.md` à jour avec la sortie réelle de `spip help wordpress:importer` (nouvelle option `--garder-adresse`, plus de `--update`), ajouter après « Refaire un import » :
 
@@ -1583,7 +1583,7 @@ Les articles, pages, rubriques et documents SPIP reprennent l'identifiant de leu
 
 et, dans « Pour les devs », remplacer la mention du pipeline par `wp2spip_traitements` (l'ancien `w2spip_traitements` reste appelé).
 
-- [ ] **Step 2 : spec**
+- [x] **Step 2 : spec**
 
 Dans la spec :
 - § 1 : principe « Identifiants conservés » : retirer « (cible, § 6, sous-projet 1) » ;
@@ -1598,7 +1598,7 @@ Dans la spec :
 
 Relire : aucune mention du site réel autrement que « site réel » ; aucune mention de `--update` hors historique.
 
-- [ ] **Step 3 : validation sur les quatre sites**
+- [x] **Step 3 : validation sur les quatre sites**
 
 Chaque import et chaque vérification doit réussir : la boucle s'arrête au premier code non nul.
 
@@ -1630,7 +1630,7 @@ diff "$SAUVEGARDES/export-reel-sqlite-reference.tsv" "$SAUVEGARDES/export-reel-S
 
 Expected : `wp6 : OK`, `wp7 : OK`, `reel-SQLITE : OK`, `reel-MYSQL : OK`, `SQLite = MySQL` (la commande s'arrête avant au moindre échec) ; entre WP 6.9 et 7.1, seule diffère la ligne `zone` (le 7.1 est sans Accès restreint) ; par rapport à la référence du site réel, seules diffèrent des lignes `article` (liens convertis) et `rubrique` (entités), à relire une à une. Relancer ensuite `valider "$SPIP_WP6" "$WP6" wp6-bis` sur le site déjà importé : `OK`, et `diff` entre `export-wp6.tsv` et `export-wp6-bis.tsv` vide.
 
-- [ ] **Step 4 : commit**
+- [x] **Step 4 : commit**
 
 ```bash
 git add readme.md docs/superpowers/specs/2026-10-08-wp2spip-ensemble-design.md

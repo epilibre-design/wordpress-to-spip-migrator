@@ -26,6 +26,7 @@ Options:
   -b, --base[=BASE]                Identifiant de la base Wordpress déclarée dans SPIP [default: "wordpress"]
   -t, --traitements[=TRAITEMENTS]  Liste de traitements séparés par des virgules, si on veut n’en lancer que certains.
   -i, --info[=INFO]                Affiche la version du Wordpress et les traitements disponibles.
+      --garder-adresse             Ne pas remplacer l’adresse du site SPIP par celle du Wordpress.
   -h, --help                       Display help for the given command. When no command is given display help for the list command
   -q, --quiet                      Do not output any message
   -V, --version                    Display this application version
@@ -44,6 +45,16 @@ L'import part d'un Wordpress figé : une copie du site, ou un site qui n'évolue
 
 Pour refaire un import (import interrompu, nouvelle version de wp2spip), remettre le SPIP à zéro, puis relancer un import complet.
 
+La commande retourne le code de sortie 1 si un traitement échoue (l'import s'arrête alors, les traitements suivants dépendant des précédents) ou si `--traitements` contient un nom inconnu, 0 sinon.
+
+## Identifiants
+Les articles, pages, rubriques et documents SPIP reprennent l'identifiant de leur contenu Wordpress (article 42 = contenu Wordpress 42). Les liens internes (`?p=`, `?page_id=`, slug) deviennent donc des raccourcis SPIP même vers un contenu importé plus tard. L'import doit se faire dans un SPIP vierge : si un identifiant est déjà pris, la commande s'arrête avant de créer quoi que ce soit, avec le code de sortie 1.
+
+Les auteurs gardent la numérotation de SPIP. Un login Wordpress refusé par SPIP (déjà pris, par exemple par l'administrateur créé à l'installation, ou trop court) est signalé, et l'auteur est importé sans login.
+
+## Adresse du site
+Par défaut, l'adresse du site SPIP prend celle du Wordpress. L'option `--garder-adresse` conserve celle du SPIP.
+
 ## Contenus privés et protégés par mot de passe
 Les contenus privés ou protégés par mot de passe dans Wordpress ne sont jamais publiés tels quels.
 
@@ -59,3 +70,6 @@ Pour cela, la commande cherche les traitements dans cet ordre :
 - `wp2spip_<traitement>_<versionX>_<versionY>`
 - `wp2spip_<traitement>_<versionX>`
 - `wp2spip_<traitement>`
+Une extension peut ajouter ses propres traitements avec le pipeline `wp2spip_traitements`, qui reçoit la liste ordonnée des traitements : elle y insère les siens à la position voulue, et fournit le fichier `wp2spip/<traitement>.php` correspondant. L'ancien nom du pipeline, `w2spip_traitements`, est toujours appelé.
+
+Un traitement signale un échec en retournant `false` : la commande s'arrête et retourne le code de sortie 1.
