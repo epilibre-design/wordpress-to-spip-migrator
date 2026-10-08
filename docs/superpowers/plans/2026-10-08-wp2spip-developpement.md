@@ -489,6 +489,15 @@ git add spip-cli/WordpressImporter.php
 git commit -m "Codes de sortie : traitements inconnus refusés, arrêt sur un échec"
 ```
 
+### Task 2 bis : dates de modification WordPress conservées (ajoutée à l'exécution)
+
+Constat au premier contrôle NR : `date_modif` change d'un import à l'autre. Associer un auteur ou une zone à un article (`objet_associer`) remet `date_modif` à la date du jour, après que `importer_articles` y a écrit la date WordPress ; la spec (§ 3.5) dit pourtant ces dates conservées.
+
+- [x] `importer_articles.php` : écriture des dates WordPress (`$supplements`) déplacée après les associations (documents, URL, auteur).
+- [x] `importer_acces.php` : `date_modif` rétablie (`post_modified`) après la publication et l'association à la zone.
+- [x] Vérification : 82 sur 82 articles du WP 6.9 avec `date_modif` = `post_modified`, `date` et `date_redac` = `post_date`.
+- [x] Exports de référence (Task 1, Step 6) refaits avec ce correctif.
+
 ### Task 3 : suppression de `--update`
 
 **Files :**
