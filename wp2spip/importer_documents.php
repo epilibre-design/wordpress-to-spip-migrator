@@ -13,7 +13,7 @@ function wp2spip_importer_documents_dist($command) {
 		!$command->update
 		and $ids_wordpress = sql_allfetsel('id_wordpress', 'spip_documents', 'id_wordpress>0')
 	) {
-		$ids_wordpress = array_map('reset', $ids_wordpress);
+		$ids_wordpress = array_column($ids_wordpress, 'id_wordpress');
 	}
 	
 	// On va chercher tous les auteurs Wordpress qui ont l'air pertinent
@@ -53,6 +53,7 @@ function wp2spip_importer_documents_dist($command) {
 		
 		foreach ($wp_attachments as $wp_attachment) {
 			$id_wordpress = intval($wp_attachment['ID']);
+			$distant = false;
 			
 			// On cherche en priorité dans le dossier local
 			$chemin = $command->dir_wordpress . ltrim(parse_url($wp_attachment['guid'], PHP_URL_PATH), '/');

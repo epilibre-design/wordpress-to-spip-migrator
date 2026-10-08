@@ -64,9 +64,7 @@ if (!defined('_ECRIRE_INC_VERSION')) {
 		foreach ($wp_comments  as $wp_comment) {
 			$comment_post_ID = intval($wp_comment['comment_post_ID']);
             $comment_ID = intval($wp_comment['comment_ID']);
-            unset($id_article);
-			$l_article = sql_fetsel('id_article', 'spip_articles', 'id_wordpress = '.$comment_post_ID) ;
-            $id_article=intval($l_article['id_article']);      
+            $id_article = intval(sql_getfetsel('id_article', 'spip_articles', 'id_wordpress = '.$comment_post_ID));
             //$command->output->writeln("$id_article ");
         
             // récuperation des données

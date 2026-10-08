@@ -13,7 +13,7 @@ function wp2spip_importer_articles_dist($command) {
 		!$command->update
 		and $ids_wordpress = sql_allfetsel('id_wordpress', 'spip_articles', 'id_wordpress>0')
 	) {
-		$ids_wordpress = array_map('reset', $ids_wordpress);
+		$ids_wordpress = array_column($ids_wordpress, 'id_wordpress');
 	}
 	
 	// On va chercher tous les articles Wordpress qui ont l'air pertinent
@@ -54,14 +54,12 @@ function wp2spip_importer_articles_dist($command) {
 		foreach ($wp_posts as $wp_post) {
 			$id_wordpress = intval($wp_post['ID']);
 
-			unset ($id_rubrique_principale) ;
-			unset ($id_secteur);
-			unset ($page);
+			$id_rubrique_principale = 0;
+			$page = '';
 			
 			// Si c'est une page on cherche même pas
 			if ($wp_post['post_type'] == 'page') {
 				$id_rubrique_principale = -1;
-				$id_secteur = 0;
 				$page = 'wordpress_page_' . $id_wordpress;
 			}
 			// On va chercher toutes les catégories, et on prend la première comme rubrique principale
@@ -73,26 +71,29 @@ function wp2spip_importer_articles_dist($command) {
 					'tax.taxonomy = "category"',
 				),
 				'',
-				'',
+				'rel.term_order, tax.term_id',
 				'',
 				'',
 				$command->base
 			)) {
-				$ids_categories = array_map('reset', $ids_categories);
+				$ids_categories = array_column($ids_categories, 'term_id');
 				
 				// Pour chacune on doit retrouver l'id_rubrique chez SPIP
-				if ($ids_rubriques = sql_allfetsel('id_rubrique', 'spip_rubriques', sql_in('id_wordpress', $ids_categories))) {
-					$ids_rubriques = array_map('reset', $ids_rubriques);
+				if ($ids_rubriques = sql_allfetsel('id_rubrique, id_wordpress', 'spip_rubriques', sql_in('id_wordpress', $ids_categories))) {
+					$ids_rubriques = array_column($ids_rubriques, 'id_rubrique', 'id_wordpress');
 					
-					// La principale
-					$id_rubrique_principale = array_shift($ids_rubriques);
+					// La principale : la première catégorie Wordpress qui existe dans le SPIP
+					// (les autres sont ajoutées en rubriques secondaires par importer_polyhierarchie)
+					foreach ($ids_categories as $id_categorie) {
+						if (isset($ids_rubriques[$id_categorie])) {
+							$id_rubrique_principale = intval($ids_rubriques[$id_categorie]);
+							break;
+						}
+					}
 				}
 			}
 			
 			// TODO si pas de rubrique, il faudrait en créer une par défaut ?
-			if (!$id_rubrique_principale) {
-				$id_rubrique_principale = 0;
-			}
 			
 			// On passe déjà sale() en premier pour y voir plus clair
 			$texte = sale($wp_post['post_content']);
@@ -213,7 +214,7 @@ function wp2spip_importer_articles_dist($command) {
 			// On compose l'article SPIP
 			$article = array(
 				'id_parent' => $id_rubrique_principale,
-				'page' => $page ? $page : '',
+				'page' => $page,
 				'titre' => $wp_post['post_title'],
 				'texte' => $texte,
 				'date' => $wp_post['post_date'],
@@ -324,7 +325,7 @@ function wp2spip_chercher_lien($lien, $url_wordpress, $base='wordpress') {
 		}
 		// Si on trouve un id de post directement easy
 		elseif (
-			($id_wordpress = parametre_url($lien, 'page_id') or $id_wordpress = parametre_url($lien, 'p'))
+			($id_wordpress = intval(parametre_url($lien, 'page_id')) or $id_wordpress = intval(parametre_url($lien, 'p')))
 			and $id_article = sql_getfetsel('id_article', 'spip_articles', 'id_wordpress = '.$id_wordpress)
 		) {
 			$lien = "article$id_article";
@@ -358,11 +359,11 @@ function wp2spip_importer_articles_documents($command, $id_wordpress, $id_articl
 		'',
 		$command->base
 	)) {
-		$ids_attachments = array_map('reset', $ids_attachments);
+		$ids_attachments = array_column($ids_attachments, 'ID');
 		
 		// Ensuite on va chercher tous les documents SPIP qui correspondent
 		if ($ids_documents = sql_allfetsel('id_document', 'spip_documents', sql_in('id_wordpress', $ids_attachments))) {
-			$ids_documents = array_map('reset', $ids_documents);
+			$ids_documents = array_column($ids_documents, 'id_document');
 			
 			// On met tout ça en lien de l'article
 			objet_associer(array('document'=>$ids_documents), array('article'=>$id_article));

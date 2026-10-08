@@ -1,10 +1,10 @@
 <paquet
 	prefix="wp2spip"
 	categorie="divers"
-	version="2.0.3"
+	version="3.0.0"
 	schema="2.0.0"
 	etat="test"
-	compatibilite="[3.2.0;3.2.*]"
+	compatibilite="[4.2.0;4.4.*]"
 	logo="wp2spip.svg"
 	documentation=""
 >
@@ -18,7 +18,8 @@
 	<!-- Pipelines du plugin -->
 	<pipeline nom="w2spip_traitements" action="" />
 	
-	<necessite nom="sale" compatibilite="[0.1.5;]" />
-	<necessite nom="pages" compatibilite="[1.5.3;[" />
-	<necessite nom="polyhier" compatibilite="[3.6.14;[" />
+	<necessite nom="sale" compatibilite="[1.0.0;]" />
+	<necessite nom="pages" compatibilite="[2.0.0;]" />
+	<necessite nom="polyhier" compatibilite="[4.0.0;]" />
+	<utilise nom="forum" />
 </paquet>

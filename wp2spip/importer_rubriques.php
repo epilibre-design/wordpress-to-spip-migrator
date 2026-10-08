@@ -13,7 +13,7 @@ function wp2spip_importer_rubriques_dist($command) {
 		!$command->update
 		and $ids_wordpress = sql_allfetsel('id_wordpress', 'spip_rubriques', 'id_wordpress>0')
 	) {
-		$ids_wordpress = array_map('reset', $ids_wordpress);
+		$ids_wordpress = array_column($ids_wordpress, 'id_wordpress');
 	}
 	
 	// On va chercher toutes les catégories

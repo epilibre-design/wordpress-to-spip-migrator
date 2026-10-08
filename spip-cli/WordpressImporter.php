@@ -15,7 +15,7 @@ class WordpressImporter extends Command {
 	public $base = 'wordpress';
 	public $update = false;
 	
-	protected function configure() {
+	protected function configure(): void {
 		$this
 			->setName('wordpress:importer')
 			->setDescription('Importe un site Wordpress dans un site SPIP')
@@ -55,7 +55,7 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 		;
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 		global $spip_racine;
 		global $spip_loaded;
 		
@@ -63,70 +63,78 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 		$this->input = $input;
 		$this->output = $output;
 		
-		// Si on est bien dans un dossier SPIP
-		if ($spip_loaded) {
-			// Dossier sur le disque où se trouve les fichiers du Wordpress
-			$this->dir_wordpress = rtrim($input->getArgument('dir_wordpress'), '/') . '/';
-			
-			// Identifiant de la base Wordpress dans SPIP
-			$this->base = $input->getOption('base');
-			
-			// On va chercher la version de Wordpress dont il s'agit
-			include_once $this->dir_wordpress . 'wp-includes/version.php';
-			$this->wp_version = $wp_version;
-			
-			// Est-ce qu'on doit mettre à jourles choses déjà migrées ?
-			$this->update = $input->getOption('update');
-			
-			$traitements_disponibles = array(
-				'importer_metas',
-				'importer_auteurs',
-				'importer_rubriques',
-				'importer_mots',
-				'importer_documents',
-				'importer_articles',
-				'importer_commentaires',
-			);
-			$traitements_disponibles = pipeline('w2spip_traitements', $traitements_disponibles);
-			
-			// Infos
-			$output->writeln(array(
-				'<info>C’est parti pour importer ce Wordpress !</info>',
-				'* <comment>'. ($this->update ? 'Les contenus déjà migrés seront mis à jour.' : 'Les contenus déjà migrés ne seront pas ré-importés.') .'</comment>',
-				'* <comment>Version</comment> : ' . $this->wp_version,
-				'* <comment>Base</comment> : ' . $this->base,
-				'* <comment>Fichiers</comment> : ' . $this->dir_wordpress,
-				'* <comment>Traitements disponibles</comment> : ' . join(', ', $traitements_disponibles),
-				'',
-			));
-			
-			// Si on cherche juste à lire les infos, on s'arrête là
-			if ($input->hasParameterOption(array('--info', '-i'))) {
-				exit;
-			}
-			
-			// Peut-être qu'on veut lancer seulement certains traitements
-			if ($traitements_ok = $input->getOption('traitements')) {
-				$traitements_ok = array_map('trim', explode(',', $traitements_ok));
-				$traitements_ok = array_intersect($traitements_disponibles, $traitements_ok);
-			}
-			else {
-				$traitements_ok = $traitements_disponibles;
-			}
-			
-			foreach ($traitements_ok as $traitement) {
-				$this->appliquer_traitement($traitement);
-			}
-		}
-		else{
+		// Si on n'est pas dans un dossier SPIP, on ne peut rien faire
+		if (!$spip_loaded) {
 			$output->writeln('<error>Vous devez lancer la commande depuis un site SPIP pour importer le contenu Wordpress.</error>');
+			return Command::FAILURE;
 		}
+		
+		// Dossier sur le disque où se trouve les fichiers du Wordpress
+		$this->dir_wordpress = rtrim($input->getArgument('dir_wordpress'), '/') . '/';
+		
+		// Identifiant de la base Wordpress dans SPIP
+		$this->base = $input->getOption('base');
+		
+		// On va chercher la version de Wordpress dont il s'agit
+		$fichier_version = $this->dir_wordpress . 'wp-includes/version.php';
+		if (!is_readable($fichier_version)) {
+			$output->writeln("<error>Impossible de lire $fichier_version : est-ce bien le dossier d’un Wordpress ?</error>");
+			return Command::FAILURE;
+		}
+		include $fichier_version;
+		$this->wp_version = $wp_version;
+		
+		// Est-ce qu'on doit mettre à jourles choses déjà migrées ?
+		$this->update = $input->getOption('update');
+		
+		$traitements_disponibles = array(
+			'importer_metas',
+			'importer_auteurs',
+			'importer_rubriques',
+			'importer_mots',
+			'importer_documents',
+			'importer_articles',
+			'importer_polyhierarchie',
+			'importer_commentaires',
+		);
+		$traitements_disponibles = pipeline('w2spip_traitements', $traitements_disponibles);
+		
+		// Infos
+		$output->writeln(array(
+			'<info>C’est parti pour importer ce Wordpress !</info>',
+			'* <comment>'. ($this->update ? 'Les contenus déjà migrés seront mis à jour.' : 'Les contenus déjà migrés ne seront pas ré-importés.') .'</comment>',
+			'* <comment>Version</comment> : ' . $this->wp_version,
+			'* <comment>Base</comment> : ' . $this->base,
+			'* <comment>Fichiers</comment> : ' . $this->dir_wordpress,
+			'* <comment>Traitements disponibles</comment> : ' . join(', ', $traitements_disponibles),
+			'',
+		));
+		
+		// Si on cherche juste à lire les infos, on s'arrête là
+		if ($input->hasParameterOption(array('--info', '-i'))) {
+			return Command::SUCCESS;
+		}
+		
+		// Peut-être qu'on veut lancer seulement certains traitements
+		if ($traitements_ok = $input->getOption('traitements')) {
+			$traitements_ok = array_map('trim', explode(',', $traitements_ok));
+			$traitements_ok = array_intersect($traitements_disponibles, $traitements_ok);
+		}
+		else {
+			$traitements_ok = $traitements_disponibles;
+		}
+		
+		foreach ($traitements_ok as $traitement) {
+			$this->appliquer_traitement($traitement);
+		}
+		
+		return Command::SUCCESS;
 	}
 	
 	protected function appliquer_traitement($traitement) {
 		$decoupe_version = explode('.', $this->wp_version);
 		$version_X = $decoupe_version[0];
-		$version_Y = $decoupe_version[1];
+		$version_Y = $decoupe_version[1] ?? 0;
 		
 		$fonction = '';
 		// S'il existe une fonction wp2spip_$fonction_X_Y

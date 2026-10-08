@@ -13,7 +13,7 @@ function wp2spip_importer_auteurs_dist($command) {
 		!$command->update
 		and $ids_wordpress = sql_allfetsel('id_wordpress', 'spip_auteurs', 'id_wordpress>0')
 	) {
-		$ids_wordpress = array_map('reset', $ids_wordpress);
+		$ids_wordpress = array_column($ids_wordpress, 'id_wordpress');
 	}
 	
 	// On va chercher tous les auteurs Wordpress qui ont l'air pertinent
@@ -57,18 +57,20 @@ function wp2spip_importer_auteurs_dist($command) {
 			// On compose l'auteur SPIP
 			$auteur = array(
 				'email' => $wp_user['user_email'],
-				'nom' => trim($metas['first_name'].' '.$metas['last_name']) ?: $wp_user['display_name'] ?: $wp_user['user_nicename'] ?: $wp_user['user_login'],
+				'nom' => trim(($metas['first_name'] ?? '').' '.($metas['last_name'] ?? '')) ?: $wp_user['display_name'] ?: $wp_user['user_nicename'] ?: $wp_user['user_login'],
 				'login' => $wp_user['user_login'] ?: uniqid(), // Toujours login non vide pour avoir le droit de faire un rappel avec son email
-				'pass' => ' ', // Mot de passe non vide pour avoir le droit de faire un rappel
 				'url_site' => $wp_user['user_url'],
 				'id_wordpress' => $id_wordpress_user,
 			);
 			
 			// Pour les statuts
 			$wp_statut = '';
-			if (isset($metas['wp_capabilities'])) {
-				$metas['wp_capabilities'] = unserialize($metas['wp_capabilities']);
-				$wp_statut = array_keys($metas['wp_capabilities'])[0];
+			if (
+				isset($metas['wp_capabilities'])
+				and $capabilities = unserialize($metas['wp_capabilities'], array('allowed_classes' => false))
+				and is_array($capabilities)
+			) {
+				$wp_statut = array_key_first($capabilities);
 			}
 			switch ($wp_statut) {
 				case 'administrator':
@@ -99,6 +101,10 @@ function wp2spip_importer_auteurs_dist($command) {
 				// INSUP
 				autoriser_exception('modifier', 'auteur', $id_auteur, true);
 				autoriser_exception('instituer', 'auteur', $id_auteur, true);
+				
+				// Mot de passe non vide (et inconnu) pour avoir le droit de faire un rappel,
+				// seulement à la création pour ne pas écraser un mot de passe choisi depuis
+				$auteur['pass'] = bin2hex(random_bytes(16));
 				
 				if ($ok = objet_modifier('auteur', $id_auteur, $auteur)) {
 					$nb_import++;
