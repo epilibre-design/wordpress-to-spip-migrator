@@ -1,7 +1,7 @@
 # wp2spip — spec d'ensemble
 
 Date : 2026-10-08
-Branche de référence : `compat-spip-4.4`
+Branche de référence : `compat-spip-4.4`, partie de `master` au commit `3b9fc8d` (dernier commit de `master`, septembre 2022) ; elle inclut donc tout `master`. Les anciennes branches `v0` et `v1` (plugin de première génération, `plugin.xml`) ne concernent pas la commande SPIP-Cli et sont hors du champ de cette spec.
 Statut : état des lieux et feuille de route. Chaque sous-projet de la feuille de route (§ 6) fera l'objet de sa propre spec détaillée avant réalisation.
 
 ## 1. Objet et périmètre
