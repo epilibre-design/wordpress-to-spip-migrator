@@ -326,14 +326,15 @@ echo $echecs ? "ECHEC\n- " . join("\n- ", $echecs) . "\n" : "OK\n";
 
 - [ ] **Step 5 : états vierges avec Accès restreint**
 
-Les états vierges des SPIP de test ont été pris avant l'activation d'Accès restreint. En refaire un, pour chaque site :
+Les états vierges des SPIP de test ont été pris avant l'activation d'Accès restreint. En refaire un, pour chaque site. Le SPIP du WordPress 7.1 reste **sans** Accès restreint : il couvre le cas où le plugin est absent (contenus privés et protégés non publiés). Le SPIP SQLite du site réel reçoit le plugin (copie du dossier `acces_restreint` du SPIP MySQL), pour que les deux imports du site réel restent comparables.
 
 ```bash
 source "$WP2SPIP/tests/integration/environnement.sh"
 for n in 6 7; do
 	site=SPIP_WP$n; base=BASE_WP$n
+	plugins="forum"; [ $n = 6 ] && plugins="accesrestreint forum"
 	"$WP2SPIP/tests/integration/remise_a_zero.sh" "${!site}" "$SAUVEGARDES/vierge-wp$n.sql.gz" "${!base}"
-	(cd "${!site}" && "$SPIP_CLI" plugins:activer accesrestreint forum -y && "$SPIP_CLI" plugins:maj:bdd && "$SPIP_CLI" plugins:lister | grep -E "accesrestreint|forum|pages|polyhier|sale|wp2spip")
+	(cd "${!site}" && "$SPIP_CLI" plugins:activer $plugins -y && "$SPIP_CLI" plugins:maj:bdd && "$SPIP_CLI" plugins:lister | grep -E "accesrestreint|forum|pages|polyhier|sale|wp2spip")
 	mysqldump --no-tablespaces $MYSQL_OPTIONS "${!base}" $(mysql $MYSQL_OPTIONS -N "${!base}" -e "show tables like 'spip\\_%'") | gzip > "$SAUVEGARDES/vierge-wp$n-v2.sql.gz"
 done
 "$WP2SPIP/tests/integration/remise_a_zero.sh" "$SPIP_REEL_MYSQL" "$SAUVEGARDES/vierge-mysql.sql.gz" "$BASE_REEL_MYSQL"
@@ -343,7 +344,7 @@ mysqldump --no-tablespaces $MYSQL_OPTIONS "$BASE_REEL_MYSQL" $(mysql $MYSQL_OPTI
 (cd "$SPIP_REEL_SQLITE" && "$SPIP_CLI" plugins:activer accesrestreint forum -y && "$SPIP_CLI" plugins:maj:bdd && tar czf "$SAUVEGARDES/vierge-sqlite-v2.tgz" config/bases IMG local)
 ```
 
-Expected : pour chaque site, `plugins:lister` montre les six plugins actifs ; les quatre fichiers `vierge-*-v2.*` existent. Dans la suite, « remettre à zéro » = `remise_a_zero.sh` avec ces fichiers `-v2`.
+Expected : pour chaque site, `plugins:lister` montre les six plugins actifs (cinq pour le SPIP du WordPress 7.1, sans `accesrestreint`) ; les quatre fichiers `vierge-*-v2.*` existent. Dans la suite, « remettre à zéro » = `remise_a_zero.sh` avec ces fichiers `-v2`.
 
 - [ ] **Step 6 : exports de référence avec le code actuel**
 
@@ -1483,7 +1484,7 @@ diff "$SAUVEGARDES/export-reel-SQLITE.tsv" "$SAUVEGARDES/export-reel-MYSQL.tsv" 
 diff "$SAUVEGARDES/export-reel-sqlite-reference.tsv" "$SAUVEGARDES/export-reel-SQLITE.tsv" | grep "^[<>]" | cut -f1 | sort | uniq -c
 ```
 
-Expected : quatre `code 0` et quatre `OK` ; WP 6.9 et 7.1 importent les mêmes objets (aux différences d'installation près) ; `SQLite = MySQL` ; par rapport à la référence du site réel, seules diffèrent des lignes `article` (liens convertis) et `rubrique` (entités). Relancer ensuite l'import sur un site déjà importé : `code 0`, export inchangé.
+Expected : quatre `code 0` et quatre `OK` ; WP 6.9 et 7.1 importent les mêmes objets (aux différences d'installation près ; le 7.1, sans Accès restreint, n'a pas de ligne `zone` et laisse le contenu protégé non publié) ; `SQLite = MySQL` ; par rapport à la référence du site réel, seules diffèrent des lignes `article` (liens convertis) et `rubrique` (entités). Relancer ensuite l'import sur un site déjà importé : `code 0`, export inchangé.
 
 - [ ] **Step 4 : commit**
 
