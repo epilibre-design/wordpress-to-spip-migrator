@@ -156,7 +156,9 @@ erreur_attendue() { # erreur_attendue <libellé> <message> <arguments de prepare
 	"$preparer" --spip "$ESSAIS/spip-erreur" --spip-cli "$SPIP_CLI" "$@" >/dev/null 2>"$ESSAIS/erreur.txt"
 	code=$?
 	[ "$code" -eq 1 ] && grep -qF -- "$message" "$ESSAIS/erreur.txt" && [ ! -e "$ESSAIS/spip-erreur" ]
-	resultat "$libelle (code $code : $(head -c 150 "$ESSAIS/erreur.txt"))" $?
+	# Code lu avant la substitution $(…) du libellé, qui le remettrait à 0
+	local reussi=$?
+	resultat "$libelle (code $code : $(head -c 150 "$ESSAIS/erreur.txt"))" "$reussi"
 }
 
 # Copie de wp-config.php du WordPress 6.9, modifiée par sed, dans un faux dossier WordPress
@@ -675,7 +677,8 @@ pass_genere=$(sed -n 's/^Mot de passe : \(.*\) (généré)$/\1/p' "$ESSAIS/sqlit
 [ -n "$pass_genere" ] && admin_authentifie "$spip" "$pass_genere" && ! admin_authentifie "$spip" adminadmin
 resultat "SQLite : administrateur authentifié avec le mot de passe généré, affiché au bilan, pas avec adminadmin" $?
 import_verifie "$spip"
-resultat "SQLite : vérificateur à OK ($(tail -1 "$ESSAIS/verification.txt"))" $?
+reussi=$?
+resultat "SQLite : vérificateur à OK ($(tail -1 "$ESSAIS/verification.txt"))" "$reussi"
 
 # MySQL distincte, WordPress 7.1, wp2spip copié, mot de passe choisi par SPIP_ADMIN_PASS
 spip="$ESSAIS/spip-mysql"
@@ -693,7 +696,8 @@ resultat "MySQL distincte : wp2spip copié, sans tests/" $?
 admin_authentifie "$spip" "$pass_admin" && ! admin_authentifie "$spip" adminadmin
 resultat "MySQL distincte : administrateur authentifié avec le mot de passe de SPIP_ADMIN_PASS, pas avec adminadmin" $?
 import_verifie "$spip"
-resultat "MySQL distincte : vérificateur à OK ($(tail -1 "$ESSAIS/verification.txt"))" $?
+reussi=$?
+resultat "MySQL distincte : vérificateur à OK ($(tail -1 "$ESSAIS/verification.txt"))" "$reussi"
 
 # Base partagée (comme les sites de test), sur une copie jetable du WordPress 6.9 : ses tables wp_ copiées
 # dans $BASE_PREP_MYSQL, et un dossier WordPress dont wp-config.php désigne cette base (fichiers en liens)
@@ -714,7 +718,8 @@ resultat "base partagée, WordPress 6.9 : code 0 (code $code, journal $ESSAIS/pa
 plugins_prets "$spip"
 resultat "base partagée : plugins sous plugins/auto et actifs" $?
 import_verifie "$spip"
-resultat "base partagée : vérificateur à OK ($(tail -1 "$ESSAIS/verification.txt"))" $?
+reussi=$?
+resultat "base partagée : vérificateur à OK ($(tail -1 "$ESSAIS/verification.txt"))" "$reussi"
 
 echo "$echecs échec(s)"
 [ "$echecs" -eq 0 ]

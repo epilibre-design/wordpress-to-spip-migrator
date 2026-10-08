@@ -20,3 +20,8 @@ export BASE_REEL_MYSQL=base_reel
 # Accès MySQL
 export MYSQL_OPTIONS=-uutilisateur
 export MYSQL_PWD=motdepasse
+
+# Tests de outils/preparer_spip.sh (tests/preparation/) : dossier de travail, et base MySQL jetable,
+# vidée par les tests, accessible au login MySQL des WordPress de test
+export ESSAIS=/chemin/vers/essais-preparation
+export BASE_PREP_MYSQL=base_jetable
