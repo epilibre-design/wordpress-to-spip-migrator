@@ -36,3 +36,4 @@ prive/exec/wp2spip_fin.html -text
 prive/themes/spip/images/wp2spip-16.png -text
 prive/themes/spip/images/wp2spip.png -text
 /docs export-ignore
+/tests export-ignore
