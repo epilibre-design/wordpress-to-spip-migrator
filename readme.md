@@ -94,6 +94,20 @@ Les pages Wordpress deviennent des pages uniques (plugin Pages), sans rubrique. 
 
 Le type `sous_page` est ajouté à la configuration d'a2a ; il y reste après la désinstallation de wp2spip. Si une page manque dans SPIP, ou si a2a ne crée pas un lien (les deux pages déjà liées par un autre type, liaisons multiples désactivées), le traitement `importer_hierarchie_pages` échoue et la commande retourne le code de sortie 1.
 
+## Tests
+Les tests demandent PHP 8.4 et Composer. Depuis la racine du dépôt :
+
+``` bash
+$ composer install
+$ composer tests-unit           # tests unitaires, sans SPIP
+$ composer install-spip-test    # SPIP 4.4 SQLite dans vendor/spip/spip, plugins requis, wp2spip lié (réseau, une fois)
+$ composer tests-integration    # tests dans ce SPIP, sur une base WordPress SQLite de test
+```
+
+`composer install-spip-test` applique à SPIP-Cli de `vendor/` les correctifs de `plugins:svp:telecharger` (`tests/spip-cli.patch`). Les tests d'intégration lisent une base WordPress construite à partir de `tests/integration/data/` et retirent ce qu'ils créent : ils se relancent sur le même état.
+
+`composer tests-import` importe complètement, depuis un dossier vide, deux WordPress installés en français avec le contenu *Theme Unit Test* (6.9 et 7.1, dossiers `$WP6` et `$WP7` de `tests/integration/environnement.sh`, à créer d'après `environnement.exemple.sh`), et compare chaque import à `tests/integration/references/theme-unit-test.tsv`, où l'adresse du site et la date d'installation de WordPress sont normalisées. Une évolution de l'import met la référence à jour avec `tests/integration/valider.sh <dossier WordPress> --mettre-a-jour` ; le diff de la référence se relit dans le même commit.
+
 ## Pour les devs
 Chaque contenu possible à importer est implémenté dans des traitements `wp2spip_<traitement>` dans des fichiers `wp2spip/<traitement>.php`.
 

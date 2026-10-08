@@ -1685,7 +1685,8 @@ Chacun suit le cycle de la spec (§ 6) : spec détaillée, relecture, puis plan 
 ### Task 17 : sous-projet 7 — tests automatisés
 
 - [x] Spec : `docs/superpowers/specs/2026-10-09-wp2spip-tests-automatises-design.md` (PHPUnit selon le skill `spip-testing` : `tests/unit/` sans SPIP, `tests/integration/` dans un SPIP de `vendor/` avec une base WordPress SQLite de test ; `valider.sh` et référence versionnée normalisée pour l'import complet).
-- [ ] Plan, réalisation.
+- [x] Plan : `docs/superpowers/plans/2026-10-09-wp2spip-tests-automatises.md` (code mis au point sur un prototype)
+- [x] Réalisation ; validation : 55 tests unitaires et 48 tests d'intégration (148 assertions) verts, relancés sur le même état ; sabotage unitaire (échec de `BlocsTest` sur l'espaceur) et sabotage d'intégration, après correction d'une donnée de test (échec de `testLiensDansLOrdreWordpress` et `testPageAbsenteEnEchec`) ; `composer tests-import` : import complet des WordPress 6.9 et 7.1 conformes à la référence versionnée (643 lignes), écart volontaire détecté (code 1) ; préparation complète à 0 échec ; depuis un clone neuf, `composer install`, `tests-unit`, `install-spip-test` et `tests-integration` au vert (un échec aléatoire de `install-spip-test.sh` sous `pipefail` corrigé).
 
 ### Task 18 : sous-projet 8 — extension `wp2spip_yoast`
 
