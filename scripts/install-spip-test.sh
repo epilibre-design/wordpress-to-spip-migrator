@@ -20,7 +20,10 @@ spip() {
 }
 
 plugin_actif() {
-	spip plugins:lister --short --raw --no-dist | grep -qx "[[:space:]]*$1"
+	# Sortie capturée avant le grep : grep -q quitte tôt, et pipefail ferait échouer le tube (SIGPIPE) de façon aléatoire
+	local actifs
+	actifs=$(spip plugins:lister --short --raw --no-dist)
+	grep -qx "[[:space:]]*$1" <<<"$actifs"
 }
 
 [ -x "$spip_cli" ] || erreur "SPIP-Cli absent de vendor/bin : lancer composer install"
