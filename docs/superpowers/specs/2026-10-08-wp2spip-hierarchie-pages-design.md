@@ -2,7 +2,7 @@
 
 Date : 2026-10-08
 Spec d'ensemble : `2026-10-08-wp2spip-ensemble-design.md`, § 6, sous-projet 4, et § 7, question 1.
-Statut : design validé, à planifier.
+Statut : design validé, planifié (plan : `docs/superpowers/plans/2026-10-08-wp2spip-hierarchie-pages.md`).
 
 ## 1. Constat
 
@@ -71,6 +71,7 @@ Nouveau traitement, fichier `wp2spip/importer_hierarchie_pages.php`, placé dans
 Le traitement affiche :
 
 - `N liens de sous-pages créés (a2a, type sous_page), pour P pages parentes.` ;
+- à une relance, `K liens de sous-pages déjà présents.` ;
 - en cas d'échec (code `1`) :
   - `Pages enfants ou parentes absentes de SPIP, pas de lien : <ID enfant> (parent <ID parent>), …` ;
   - `Liens sous_page non créés par a2a, les pages étant déjà liées par un autre type (liaisons multiples désactivées dans la configuration d'a2a) : <ID enfant> (parent <ID parent>), …`.

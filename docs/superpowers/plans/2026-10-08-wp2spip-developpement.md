@@ -1669,7 +1669,8 @@ Chacun suit le cycle de la spec (§ 6) : spec détaillée, relecture, puis plan 
 
 - [x] Décision préalable (spec § 7) : pages uniques liées par a2a (type `sous_page`, parent → enfant, ordre WordPress), a2a installé par l'import si besoin ; pas de squelette fourni.
 - [x] Spec : `docs/superpowers/specs/2026-10-08-wp2spip-hierarchie-pages-design.md`.
-- [ ] Plan, réalisation ; validation : les 13 pages enfants du contenu de test et les 18 du site réel retrouvent leur parent, dans l'ordre WordPress.
+- [x] Plan : `docs/superpowers/plans/2026-10-08-wp2spip-hierarchie-pages.md` (code mis au point sur un prototype : installation d'a2a, liens dans l'ordre WordPress, relance sans doublon, conflit et page absente en échec, boucles d'exemple vérifiées).
+- [ ] Réalisation ; validation : les 13 pages enfants du contenu de test et les 18 du site réel retrouvent leur parent, dans l'ordre WordPress.
 
 ### Task 15 : sous-projet 5 — étiquettes (`importer_mots`)
 
