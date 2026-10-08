@@ -41,6 +41,8 @@ function wp2spip_importer_articles_dist($command) {
 		$nb_posts = count($wp_posts);
 		$nb_import = 0;
 		$nb_maj = 0;
+		$nb_liens_absents = 0;
+		$nb_liens_non_convertis = 0;
 		$command->output->writeln("$nb_posts articles à importer.");
 		
 		$progressBar = new ProgressBar($command->output, $nb_posts);
@@ -184,16 +186,54 @@ function wp2spip_importer_articles_dist($command) {
 				}
 			}
 			
-			// On gère en plus le cas des images super facile à retrouver où il ya "wp-image-ID" dedans
-			$pattern_imgs = '<img[^>]*?wp-image-([0-9]+)[^>]*?>';
-			if(preg_match_all("|$pattern_imgs|s", $texte, $matches) and is_array($matches)) {
-				foreach ($matches[0] as $cle => $img) {
-					if (
-						$id_wordpress_doc = intval($matches[1][$cle])
-						and $id_document = sql_getfetsel('id_document', 'spip_documents', 'id_wordpress = '.$id_wordpress_doc)
-					) {
-						$texte = str_replace($img, "<img$id_document>", $texte);
+			// Les lecteurs audio et vidéo (blocs de l'éditeur, ou raccourcis [audio] et [video]) deviennent des <docN>
+			$remplacer_lecteur = function ($lecteur) use ($url_wordpress, $command) {
+				// Un lien SPIP dont le texte commence par « audio » ou « video » n'est pas un raccourci de lecteur
+				if (strpos($lecteur[0], '->') !== false) {
+					return $lecteur[0];
+				}
+				preg_match_all('#(?:\bsrc=|\b(?:mp3|m4a|ogg|wav|wma|mp4|m4v|webm|ogv|wmv|flv|mov)=|\s)["\']?((?:https?:)?//[^\s"\'\]]+|/wp-content/[^\s"\'\]]+)#i', $lecteur[0], $urls);
+				foreach ($urls[1] as $url) {
+					if ($id_document = wp2spip_chercher_document($url, $url_wordpress, $command->base)) {
+						return "<doc$id_document>";
 					}
+				}
+				return $lecteur[0];
+			};
+			$texte = preg_replace_callback('#<(video|audio)\b[^>]*>.*?</\1>#is', $remplacer_lecteur, $texte);
+			$texte = preg_replace_callback('#\[(audio|video)\b[^\]]*\](?:.*?\[/\1\])?#is', $remplacer_lecteur, $texte);
+
+			// Les images restantes : on cherche le document d'après le fichier (src), sinon d'après la classe "wp-image-ID"
+			// (le fichier d'abord : un import Wordpress vers Wordpress renumérote les médias sans corriger ces classes)
+			$texte = preg_replace_callback('|<img\b[^>]*>|is', function ($img) use ($url_wordpress, $command) {
+				$img = $img[0];
+				$id_document = 0;
+				if (preg_match('#\bsrc=["\']([^"\']+)["\']#i', $img, $trouve)) {
+					$id_document = wp2spip_chercher_document($trouve[1], $url_wordpress, $command->base);
+				}
+				if (
+					!$id_document
+					and preg_match('#\bwp-image-([0-9]+)#', $img, $trouve)
+				) {
+					$id_document = intval(sql_getfetsel('id_document', 'spip_documents', 'id_wordpress = ' . intval($trouve[1])));
+				}
+				if (!$id_document) {
+					return $img;
+				}
+				$align = '';
+				if (preg_match('#\balign(left|right|center)\b#', $img, $trouve)) {
+					$align = '|' . $trouve[1];
+				}
+				return "<img$id_document$align>";
+			}, $texte);
+
+			// Les liens vers les fichiers du site qu'on n'a pas su convertir : on les signale, en distinguant
+			// les fichiers absents de la médiathèque de ceux importés mais placés là où SPIP n'a pas de raccourci (image de fond…)
+			foreach (wp2spip_liens_medias_restants($texte, $url_wordpress) as $reste) {
+				$id_document = wp2spip_chercher_document($reste, $url_wordpress, $command->base);
+				$id_document ? $nb_liens_non_convertis++ : $nb_liens_absents++;
+				if ($command->output->isVerbose()) {
+					$command->output->writeln("\nArticle Wordpress $id_wordpress : $reste " . ($id_document ? "(document $id_document, non converti)" : '(absent de la médiathèque)'));
 				}
 			}
 			
@@ -304,6 +344,12 @@ function wp2spip_importer_articles_dist($command) {
 		
 		// Une ligne vide à la fin
 		$command->output->writeln('');
+		if ($nb_liens_absents) {
+			$command->output->writeln("$nb_liens_absents liens vers des fichiers du site absents de la médiathèque Wordpress, laissés tels quels (détail avec -v).");
+		}
+		if ($nb_liens_non_convertis) {
+			$command->output->writeln("$nb_liens_non_convertis liens vers des médias importés, mais placés là où SPIP n’a pas de raccourci (image de fond…), laissés tels quels (détail avec -v).");
+		}
 	}
 }
 
@@ -317,16 +363,10 @@ function wp2spip_importer_articles_dist($command) {
  * @return string Retourne le lien interne au SPIP, doc123 ou article123
  */
 function wp2spip_chercher_lien($lien, $url_wordpress, $base='wordpress') {
-	$pattern_doc = 'wp-content/uploads/';
-	
-	// Seulement si c'est une URL relative OU qu'il y a le domaine du site dedans
-	if (!tester_url_absolue($lien) or strpos($lien, $url_wordpress) !== false) {
+	// Seulement si c'est une URL relative OU qu'elle pointe sur le site d'origine
+	if (wp2spip_url_du_site($lien, $url_wordpress)) {
 		// Si c'est un document du site d'origine
-		if (
-			preg_match("#$pattern_doc#s", $lien)
-			and $id_wordpress_doc = sql_getfetsel('ID', 'wp_posts', 'guid = '.sql_quote($lien), '', '', '', '', $base)
-			and $id_document = sql_getfetsel('id_document', 'spip_documents', 'id_wordpress = '.intval($id_wordpress_doc))
-		) {
+		if ($id_document = wp2spip_chercher_document($lien, $url_wordpress, $base)) {
 			$lien = "document$id_document";
 		}
 		// Si on trouve un id de post directement easy
@@ -336,9 +376,10 @@ function wp2spip_chercher_lien($lien, $url_wordpress, $base='wordpress') {
 		) {
 			$lien = "article$id_article";
 		}
-		// Sinon faut chercher une sorte de slug
+		// Sinon faut chercher une sorte de slug (pas pour un fichier d'uploads introuvable, qui n'est pas une page)
 		elseif (
-			$chemin = parse_url($lien, PHP_URL_PATH)
+			strpos($lien, '/wp-content/uploads/') === false
+			and $chemin = parse_url($lien, PHP_URL_PATH)
 			and $slug = trim(basename($chemin), '/')
 			and $url = sql_fetsel('type, id_objet', 'spip_urls', 'url='.sql_quote($slug))
 		) {
@@ -347,6 +388,161 @@ function wp2spip_chercher_lien($lien, $url_wordpress, $base='wordpress') {
 	}
 	
 	return $lien;
+}
+
+/**
+ * Teste si une URL pointe sur le site Wordpress d'origine (ou est relative)
+ *
+ * Indépendamment du protocole et du "www." : un site passé en https
+ * a souvent encore des liens en http dans ses contenus.
+ *
+ * @param string $url
+ * @param string $url_wordpress URL du site Wordpress (option siteurl)
+ * @return bool
+ */
+function wp2spip_url_du_site($url, $url_wordpress) {
+	if (!tester_url_absolue($url)) {
+		return true;
+	}
+	$hote = fn($u) => preg_replace('/^www\./', '', strtolower((string) parse_url($u, PHP_URL_HOST)));
+	return $hote($url) !== '' and $hote($url) === $hote($url_wordpress);
+}
+
+/**
+ * Retrouve le document SPIP correspondant à l'URL d'un fichier de la médiathèque Wordpress
+ *
+ * On compare le chemin sous wp-content/uploads/ (décodé) à tous les noms connus
+ * de chaque média : fichier réel, tailles dérivées, original d'une image retouchée
+ * ou réduite, guid. Ce qui couvre les accents encodés dans les URL, les miniatures
+ * et les images retouchées (dont le guid garde l'ancien nom).
+ *
+ * @param string $url
+ * @param string $url_wordpress
+ * @param string $base
+ * @return int id_document, ou 0 si introuvable
+ */
+function wp2spip_chercher_document($url, $url_wordpress, $base = 'wordpress') {
+	if (
+		!wp2spip_url_du_site($url, $url_wordpress)
+		or !$chemin = wp2spip_chemin_upload($url)
+	) {
+		return 0;
+	}
+
+	$index = wp2spip_index_medias($base);
+	$id_wordpress = $index[$chemin] ?? 0;
+
+	// Variantes non référencées : taille dérivée (-300x200), image retouchée (-e1479812986279), réduite (-scaled)
+	if (!$id_wordpress) {
+		$original = preg_replace('/(-\d+x\d+|-e\d{10,}|-scaled)+(\.\w+)$/', '$2', $chemin);
+		$id_wordpress = $index[$original] ?? 0;
+	}
+	if (!$id_wordpress) {
+		return 0;
+	}
+
+	static $documents = array();
+	if (!isset($documents[$id_wordpress])) {
+		$documents[$id_wordpress] = intval(sql_getfetsel('id_document', 'spip_documents', 'id_wordpress = ' . intval($id_wordpress)));
+	}
+	return $documents[$id_wordpress];
+}
+
+/**
+ * Chemin d'un fichier relatif à wp-content/uploads/, décodé, sans paramètres
+ *
+ * @param string $url
+ * @return string chemin, ou '' si l'URL n'est pas dans uploads
+ */
+function wp2spip_chemin_upload($url) {
+	$chemin = (string) parse_url(html_entity_decode($url), PHP_URL_PATH);
+	if (!preg_match('#/wp-content/uploads/(.+)$#', $chemin, $trouve)) {
+		return '';
+	}
+	return rawurldecode($trouve[1]);
+}
+
+/**
+ * Index de tous les noms de fichiers connus pour chaque média Wordpress
+ *
+ * @param string $base
+ * @return array chemin relatif à uploads/ => ID du média Wordpress
+ */
+function wp2spip_index_medias($base = 'wordpress') {
+	static $index = array();
+	if (isset($index[$base])) {
+		return $index[$base];
+	}
+	$index[$base] = array();
+
+	// Le guid, souvent l'URL d'origine du fichier
+	foreach (sql_allfetsel('ID, guid', 'wp_posts', 'post_type = "attachment"', '', '', '', '', $base) as $media) {
+		if ($chemin = wp2spip_chemin_upload($media['guid'])) {
+			$index[$base][$chemin] = intval($media['ID']);
+		}
+	}
+
+	$metas = sql_allfetsel(
+		'post_id, meta_key, meta_value',
+		'wp_postmeta',
+		sql_in('meta_key', array('_wp_attached_file', '_wp_attachment_metadata', '_wp_attachment_backup_sizes')),
+		'',
+		'',
+		'',
+		'',
+		$base
+	);
+	// Le fichier réel, prioritaire sur tous les autres noms
+	$fichiers_reels = array();
+	foreach ($metas as $meta) {
+		if ($meta['meta_key'] == '_wp_attached_file') {
+			$fichiers_reels[intval($meta['post_id'])] = $meta['meta_value'];
+			$index[$base][$meta['meta_value']] = intval($meta['post_id']);
+		}
+	}
+
+	// Les autres noms (tailles dérivées, original d'une image réduite ou retouchée) sont dans le même dossier
+	foreach ($metas as $meta) {
+		$id = intval($meta['post_id']);
+		if (
+			$meta['meta_key'] == '_wp_attached_file'
+			or !isset($fichiers_reels[$id])
+			or !is_array($infos = @unserialize($meta['meta_value'], array('allowed_classes' => false)))
+		) {
+			continue;
+		}
+		$dossier = dirname($fichiers_reels[$id]);
+		$dossier = ($dossier === '.') ? '' : "$dossier/";
+
+		if ($meta['meta_key'] == '_wp_attachment_metadata') {
+			// array('file' => …, 'sizes' => array('medium' => array('file' => …)), 'original_image' => …)
+			$fichiers = array_column($infos['sizes'] ?? array(), 'file');
+			if (!empty($infos['original_image'])) {
+				$fichiers[] = $infos['original_image'];
+			}
+		}
+		else {
+			// _wp_attachment_backup_sizes : array('full-orig' => array('file' => …), 'thumbnail-orig' => …)
+			$fichiers = array_column($infos, 'file');
+		}
+		foreach ($fichiers as $fichier) {
+			$index[$base][$dossier . $fichier] ??= $id;
+		}
+	}
+
+	return $index[$base];
+}
+
+/**
+ * Liste les liens vers des fichiers d'uploads du site d'origine restés dans un texte
+ *
+ * @param string $texte
+ * @param string $url_wordpress
+ * @return array
+ */
+function wp2spip_liens_medias_restants($texte, $url_wordpress) {
+	preg_match_all('#[^\s"\'<>\[\]()|]*/wp-content/uploads/[^\s"\'<>\[\]()|]+#', $texte, $trouves);
+	return array_values(array_unique(array_filter($trouves[0], fn($url) => wp2spip_url_du_site($url, $url_wordpress))));
 }
 
 function wp2spip_importer_articles_documents($command, $id_wordpress, $id_article) {
