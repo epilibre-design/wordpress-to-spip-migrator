@@ -73,3 +73,19 @@ function wp2spip_erreur_insertion($command, $objet, $id) {
 	$command->output->writeln("\n<error>Impossible de créer l’objet $objet $id avec l’identifiant de son contenu Wordpress.</error>");
 	return false;
 }
+
+/**
+ * Décode les entités HTML d'un texte, sauf celles des caractères qui ont un sens en HTML
+ *
+ * Wordpress stocke souvent les noms et descriptions avec des entités (&#233;, &amp;…).
+ * On garde &lt; &gt; &amp; (et leurs formes numériques) pour ne pas créer de balise.
+ *
+ * @param string $texte
+ * @return string
+ */
+function wp2spip_decoder_entites($texte) {
+	return preg_replace_callback('/&(?:#\d+|#x[0-9a-f]+|[a-z][a-z0-9]*);/i', function ($entite) {
+		$caractere = html_entity_decode($entite[0], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		return in_array($caractere, array('<', '>', '&')) ? $entite[0] : $caractere;
+	}, (string) $texte);
+}

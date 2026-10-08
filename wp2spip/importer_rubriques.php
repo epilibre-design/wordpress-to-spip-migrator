@@ -63,8 +63,8 @@ function wp2spip_importer_rubriques_dist($command) {
 			$rubrique = array(
 				'id_parent' => $id_parent,
 				'confirme_deplace' => 'oui',
-				'titre' => texte_backend(sale($wp_category['titre'])),
-				'texte' => texte_backend(sale($wp_category['description'])),
+				'titre' => wp2spip_decoder_entites(sale($wp_category['titre'])),
+				'texte' => wp2spip_decoder_entites(sale($wp_category['description'])),
 			);
 			
 			// Créée avec l'identifiant de la catégorie et son id_wordpress, en une seule insertion :
