@@ -276,7 +276,7 @@ echo join("\n", $lignes) . "\n";
  *
  * Usage, depuis le site SPIP (base Wordpress déclarée sous le nom "wordpress") :
  *   spip php:eval 'include "<wp2spip>/tests/integration/verifier_identifiants.php";'
- * Affiche OK, ou ECHEC et la liste des écarts.
+ * Affiche OK, ou ECHEC et la liste des écarts avec le code de sortie 1.
  */
 include_spip('base/objets');
 include_spip('wp2spip/importer_articles');
@@ -321,7 +321,11 @@ foreach (sql_allfetsel('id_article, texte', 'spip_articles', 'id_wordpress > 0')
 	}
 }
 
-echo $echecs ? "ECHEC\n- " . join("\n- ", $echecs) . "\n" : "OK\n";
+if ($echecs) {
+	echo "ECHEC\n- " . join("\n- ", $echecs) . "\n";
+	exit(1);
+}
+echo "OK\n";
 ```
 
 - [ ] **Step 5 : états vierges avec Accès restreint**
@@ -358,7 +362,7 @@ cd "$SPIP_WP6"
 wc -l "$SAUVEGARDES/export-wp6-reference.tsv"
 ```
 
-Expected : `code 0` ; export de plusieurs centaines de lignes ; `verifier_identifiants.php` affiche **ECHEC** avec des identifiants différents de id_wordpress : c'est le test qui échoue avant le sous-projet 1.
+Expected : `code 0` ; export de plusieurs centaines de lignes ; `verifier_identifiants.php` affiche **ECHEC** avec des identifiants différents de id_wordpress, et sort avec le code `1` : c'est le test qui échoue avant le sous-projet 1.
 
 Faire de même pour le site réel en SQLite (`$SPIP_REEL_SQLITE`, `$WP_REEL`, `vierge-sqlite-v2.tgz`, fichiers `import-reel-sqlite-reference.log` et `export-reel-sqlite-reference.tsv`).
 
@@ -685,13 +689,14 @@ git commit -m "Contenus Wordpress lus dans l'ordre de leur identifiant"
 
 **Files :**
 - Create : `inc/wp2spip.php`
-- Modify : `wp2spip/importer_rubriques.php`
+- Modify : `wp2spip/importer_rubriques.php`, `wp2spip/importer_auteurs.php`
 
 **Interfaces :**
 - Produces (dans `inc/wp2spip.php`) :
   - `wp2spip_identifiants_occupes(string $objet, array $ids): array` — identifiants (int) parmi `$ids` déjà pris par un objet SPIP ;
   - `wp2spip_verifier_identifiants($command, string $objet, array $ids): bool` — `false` (et message) si un identifiant est occupé ;
-  - `wp2spip_erreur_insertion($command, string $objet, int $id): bool` — message, retourne `false`.
+  - `wp2spip_erreur_insertion($command, string $objet, int $id): bool` — message, retourne `false` ;
+  - `wp2spip_erreur_modification($command, string $objet, int $id, string $erreur): bool` — message avec l'erreur de `objet_modifier()`, retourne `false`.
 - Consumes : `appliquer_traitement()` arrête l'import quand un traitement retourne `false` (Task 2).
 
 - [ ] **Step 1 : test qui échoue — identifiant occupé**
@@ -762,6 +767,20 @@ function wp2spip_verifier_identifiants($command, $objet, $ids) {
 }
 
 /**
+ * Signale un objet créé que l'API n'a pas pu renseigner
+ *
+ * @param WordpressImporter $command
+ * @param string $objet
+ * @param int $id
+ * @param string $erreur message retourné par objet_modifier()
+ * @return bool false, à retourner par le traitement
+ */
+function wp2spip_erreur_modification($command, $objet, $id, $erreur) {
+	$command->output->writeln("\n<error>Impossible de renseigner l’objet $objet $id : $erreur</error>");
+	return false;
+}
+
+/**
  * Signale un objet qui n'a pas pu être créé avec l'identifiant de son contenu Wordpress
  *
  * @param WordpressImporter $command
@@ -810,9 +829,28 @@ Dans la boucle, remplacer la composition de la rubrique et sa création (de `// 
 			autoriser_exception('publierdans', 'rubrique', $id_parent, true);
 			autoriser_exception('creerrubriquedans', 'rubrique', $id_parent, true);
 			
-			if (!objet_modifier('rubrique', $id_rubrique, $rubrique)) {
-				$nb_import++;
+			// objet_modifier() retourne un message d'erreur, ou une chaîne vide
+			if ($erreur = objet_modifier('rubrique', $id_rubrique, $rubrique)) {
+				return wp2spip_erreur_modification($command, 'rubrique', $id_rubrique, $erreur);
 			}
+			$nb_import++;
+```
+
+Dans `importer_auteurs.php`, ajouter `include_spip('inc/wp2spip');` aux inclusions et remplacer de même :
+
+```php
+				if ($ok = objet_modifier('auteur', $id_auteur, $auteur)) {
+					$nb_import++;
+				}
+```
+
+par :
+
+```php
+				if ($erreur = objet_modifier('auteur', $id_auteur, $auteur)) {
+					return wp2spip_erreur_modification($command, 'auteur', $id_auteur, $erreur);
+				}
+				$nb_import++;
 ```
 
 (la recherche du parent par `id_wordpress`, juste avant, reste inchangée.)
@@ -843,8 +881,8 @@ Expected : `code 0` ; 0 identifiant différent.
 - [ ] **Step 5 : commit**
 
 ```bash
-git add inc/wp2spip.php wp2spip/importer_rubriques.php
-git commit -m "Rubriques créées avec l'identifiant de leur catégorie Wordpress"
+git add inc/wp2spip.php wp2spip/importer_rubriques.php wp2spip/importer_auteurs.php
+git commit -m "Rubriques créées avec l'identifiant de leur catégorie Wordpress, échecs de l'API signalés"
 ```
 
 ### Task 6 : titres et textes de rubriques sans entités HTML
@@ -925,7 +963,7 @@ git commit -m "Rubriques : titres et textes sans entités HTML"
 - Modify : `wp2spip/importer_documents.php`
 
 **Interfaces :**
-- Consumes : `wp2spip_verifier_identifiants()`, `wp2spip_erreur_insertion()` (Task 5).
+- Consumes : `wp2spip_verifier_identifiants()`, `wp2spip_erreur_insertion()`, `wp2spip_erreur_modification()` (Task 5).
 - Produces : `id_document` = ID du média WordPress pour tout média dont le fichier a été trouvé.
 
 - [ ] **Step 1 : test qui échoue — identifiant occupé**
@@ -994,9 +1032,10 @@ Remplacer `$nb_maj = 0;` par `$nb_refuses = 0;`. Dans la boucle, remplacer tout 
 					autoriser_exception('modifier', 'document', $id_document, true);
 					autoriser_exception('instituer', 'document', $id_document, true);
 					
-					if (!objet_modifier('document', $id_document, $document)) {
-						$nb_import++;
+					if ($erreur = objet_modifier('document', $id_document, $document)) {
+						return wp2spip_erreur_modification($command, 'document', $id_document, $erreur);
 					}
+					$nb_import++;
 					
 					// Ajouter l'URL libre
 					if ($wp_attachment['post_name']) {
@@ -1040,7 +1079,7 @@ Puis contrôle NR et :
 ls "$WP6"/wp-content/uploads | head -3   # source intacte
 ```
 
-Expected : `IDENTIQUE` (hors éventuels noms de fichiers suffixés différemment dans `IMG/`, colonne 6 des lignes `document`) ; 0 identifiant différent ; dossier WordPress inchangé.
+Expected : `IDENTIQUE`, y compris les noms de fichiers dans `IMG/` (colonne 6 des lignes `document`) : les médias sont traités dans le même ordre (Task 4), les suffixes de collision sont donc les mêmes ; toute différence est un écart à analyser avant de continuer. 0 identifiant différent ; dossier WordPress inchangé.
 
 - [ ] **Step 4 : commit**
 
@@ -1055,7 +1094,7 @@ git commit -m "Documents créés avec l'identifiant de leur média Wordpress"
 - Modify : `wp2spip/importer_articles.php` (fonction `wp2spip_importer_articles_dist`)
 
 **Interfaces :**
-- Consumes : `wp2spip_verifier_identifiants()`, `wp2spip_erreur_insertion()` (Task 5).
+- Consumes : `wp2spip_verifier_identifiants()`, `wp2spip_erreur_insertion()`, `wp2spip_erreur_modification()` (Task 5).
 - Produces : `id_article` = ID WordPress pour chaque `post` et `page` ; c'est ce sur quoi la Task 9 écrit les liens internes.
 
 - [ ] **Step 1 : test qui échoue — identifiant occupé**
@@ -1119,7 +1158,26 @@ Remplacer tout ce qui précède `…objet_modifier, documents, URL libre, auteur
 			autoriser_exception('publierdans', 'rubrique', $id_rubrique_principale, true);
 ```
 
-puis supprimer l'accolade fermante de l'ancien `if ($id_article) {` et désindenter d'une tabulation son contenu (objet_modifier, documents, URL libre, auteur), qui passe au niveau de la boucle. Le compteur reste `$nb_import++;` (Task 3).
+puis supprimer l'accolade fermante de l'ancien `if ($id_article) {` et désindenter d'une tabulation son contenu (objet_modifier, documents, URL libre, auteur), qui passe au niveau de la boucle.
+
+Enfin, propager l'échec de `objet_modifier()`. Remplacer :
+
+```php
+			if (!$erreur = objet_modifier('article', $id_article, $article)) {
+				$nb_import++;
+			}
+```
+
+par :
+
+```php
+			if ($erreur = objet_modifier('article', $id_article, $article)) {
+				return wp2spip_erreur_modification($command, 'article', $id_article, $erreur);
+			}
+			$nb_import++;
+```
+
+et, à la fin de la boucle, `if (!$erreur) { sql_updateq('spip_articles', $supplements, …); }` par le seul `sql_updateq('spip_articles', $supplements, 'id_article = '.$id_article);` (Task 2 bis), puisqu'on n'y arrive plus en cas d'erreur.
 
 - [ ] **Step 4 : vérifier**
 
@@ -1145,7 +1203,7 @@ git commit -m "Articles et pages créés avec l'identifiant de leur contenu Word
 
 **Interfaces :**
 - Consumes : `id_article` = ID WordPress (Task 8) ; `wp2spip_chercher_document()`, `wp2spip_url_du_site()` (existants).
-- Produces : `wp2spip_index_contenus(string $base): array` → `array('types' => array(ID => post_type), 'slugs' => array(slug normalisé => ID))` ; `wp2spip_normaliser_slug(string $slug): string`.
+- Produces : `wp2spip_index_contenus(string $base): array` → `array('types' => array(ID => post_type), 'slugs' => array(slug normalisé => array(ID, …)), 'chemins' => array(ID => chemin))` ; `wp2spip_chercher_slug(string $chemin, array $contenus): int` (0 si ambigu) ; `wp2spip_normaliser_slug(string $slug): string`.
 
 - [ ] **Step 1 : test qui échoue**
 
@@ -1167,7 +1225,7 @@ EOF
 
 Expected avant correction : `int(0)` articles, puis les deux URL renvoyées inchangées.
 
-- [ ] **Step 2 : index des contenus**
+- [ ] **Step 2 : index des contenus et résolution des slugs**
 
 Ajouter dans `importer_articles.php`, après `wp2spip_chercher_lien()` :
 
@@ -1175,22 +1233,22 @@ Ajouter dans `importer_articles.php`, après `wp2spip_chercher_lien()` :
 /**
  * Index des contenus Wordpress qu'un lien peut désigner
  *
- * Un slug partagé (pages de parents différents, média et article…) désigne de préférence
- * un article ou une page, publiés, puis le plus ancien.
- *
  * @param string $base
- * @return array array('types' => array(ID => post_type), 'slugs' => array(slug normalisé => ID))
+ * @return array array(
+ *     'types' => array(ID => post_type),
+ *     'slugs' => array(slug normalisé => array(ID, …)),
+ *     'chemins' => array(ID => chemin normalisé : slug, ou parent/enfant pour une page)
+ * )
  */
 function wp2spip_index_contenus($base = 'wordpress') {
 	static $index = array();
 	if (isset($index[$base])) {
 		return $index[$base];
 	}
-	$index[$base] = array('types' => array(), 'slugs' => array());
-	$priorites = array();
+	$index[$base] = array('types' => array(), 'slugs' => array(), 'chemins' => array());
 
 	$contenus = sql_allfetsel(
-		'ID, post_type, post_status, post_name',
+		'ID, post_type, post_name, post_parent',
 		'wp_posts',
 		sql_in('post_type', array('post', 'page', 'attachment')),
 		'',
@@ -1199,6 +1257,10 @@ function wp2spip_index_contenus($base = 'wordpress') {
 		'',
 		$base
 	);
+	$types = array_column($contenus, 'post_type', 'ID');
+	$noms = array_column($contenus, 'post_name', 'ID');
+	$parents = array_column($contenus, 'post_parent', 'ID');
+
 	foreach ($contenus as $contenu) {
 		$id = intval($contenu['ID']);
 		$index[$base]['types'][$id] = $contenu['post_type'];
@@ -1206,14 +1268,54 @@ function wp2spip_index_contenus($base = 'wordpress') {
 			continue;
 		}
 		$slug = wp2spip_normaliser_slug($contenu['post_name']);
-		$priorite = ($contenu['post_type'] == 'attachment' ? 2 : 0) + ($contenu['post_status'] == 'publish' ? 0 : 1);
-		if (!isset($priorites[$slug]) or $priorite < $priorites[$slug]) {
-			$index[$base]['slugs'][$slug] = $id;
-			$priorites[$slug] = $priorite;
+		$index[$base]['slugs'][$slug][] = $id;
+
+		// Une page enfant a pour chemin celui de ses parents : parent/enfant
+		$chemin = $slug;
+		$parent = intval($contenu['post_parent']);
+		$vus = array();
+		while (
+			$contenu['post_type'] == 'page'
+			and $parent
+			and ($types[$parent] ?? '') == 'page'
+			and !isset($vus[$parent])
+		) {
+			$vus[$parent] = true;
+			$chemin = wp2spip_normaliser_slug($noms[$parent]) . '/' . $chemin;
+			$parent = intval($parents[$parent]);
 		}
+		$index[$base]['chemins'][$id] = $chemin;
 	}
 
 	return $index[$base];
+}
+
+/**
+ * Contenu désigné par le chemin d'une URL
+ *
+ * Le dernier segment est le slug. Si plusieurs contenus ont ce slug (pages de parents
+ * différents, article et page…), on garde ceux dont le chemin complet termine l'URL,
+ * et parmi eux le plus long (parent/enfant plutôt qu'enfant). Toujours ambigu : 0,
+ * le lien reste tel quel plutôt que de viser peut-être le mauvais contenu.
+ *
+ * @param string $chemin chemin de l'URL, sans / au début ni à la fin
+ * @param array $contenus index de wp2spip_index_contenus()
+ * @return int ID Wordpress, ou 0
+ */
+function wp2spip_chercher_slug($chemin, $contenus) {
+	$chemin = join('/', array_map('wp2spip_normaliser_slug', explode('/', $chemin)));
+	$candidats = $contenus['slugs'][basename($chemin)] ?? array();
+	if (count($candidats) > 1) {
+		$longueurs = array();
+		foreach ($candidats as $id) {
+			$complet = $contenus['chemins'][$id];
+			if ($chemin === $complet or substr($chemin, -strlen($complet) - 1) === "/$complet") {
+				$longueurs[$id] = strlen($complet);
+			}
+		}
+		$candidats = $longueurs ? array_keys($longueurs, max($longueurs)) : array();
+	}
+	return (count($candidats) == 1) ? intval($candidats[0]) : 0;
 }
 
 /**
@@ -1227,6 +1329,23 @@ function wp2spip_normaliser_slug($slug) {
 	return strtolower(rawurlencode(rawurldecode($slug)));
 }
 ```
+
+Vérifier la résolution des slugs ambigus (le contenu de test n'en a pas) sur un index construit à la main :
+
+```bash
+cd "$SPIP_WP6"; "$SPIP_CLI" php:eval '
+include_spip("wp2spip/importer_articles");
+$c = array(
+	"slugs" => array("contact" => array(10), "equipe" => array(20, 30), "actu" => array(40, 50), "%c3%a9t%c3%a9" => array(60)),
+	"chemins" => array(10 => "contact", 20 => "asso/equipe", 30 => "club/equipe", 40 => "actu", 50 => "actu", 60 => "%c3%a9t%c3%a9"),
+);
+foreach (array("contact", "2012/01/contact", "asso/equipe", "club/equipe", "equipe", "actu", "%C3%A9t%C3%A9", "été") as $chemin) {
+	echo "$chemin => " . wp2spip_chercher_slug($chemin, $c) . "
+";
+}'
+```
+
+Expected : `contact => 10`, `2012/01/contact => 10`, `asso/equipe => 20`, `club/equipe => 30`, `equipe => 0` (ambigu), `actu => 0` (article et page de même slug), `%C3%A9t%C3%A9 => 60`, `été => 60`.
 
 - [ ] **Step 3 : `wp2spip_chercher_lien()`**
 
@@ -1259,15 +1378,14 @@ function wp2spip_chercher_lien($lien, $url_wordpress, $base='wordpress') {
 		return $lien;
 	}
 	
-	// Un contenu, désigné par son identifiant (?p=, ?page_id=) ou par son slug
+	// Un contenu, désigné par son identifiant (?p=, ?page_id=) ou par son chemin
 	$contenus = wp2spip_index_contenus($base);
 	$id_wordpress = intval(parametre_url($lien, 'page_id')) ?: intval(parametre_url($lien, 'p'));
 	if (
 		!$id_wordpress
-		and $chemin = parse_url($lien, PHP_URL_PATH)
-		and $slug = trim(basename($chemin), '/')
+		and $chemin = trim((string) parse_url($lien, PHP_URL_PATH), '/')
 	) {
-		$id_wordpress = $contenus['slugs'][wp2spip_normaliser_slug($slug)] ?? 0;
+		$id_wordpress = wp2spip_chercher_slug($chemin, $contenus);
 	}
 	
 	switch ($contenus['types'][$id_wordpress] ?? '') {
@@ -1471,29 +1589,35 @@ Relire : aucune mention du site réel autrement que « site réel » ; aucune me
 
 - [ ] **Step 3 : validation sur les quatre sites**
 
+Chaque import et chaque vérification doit réussir : la boucle s'arrête au premier code non nul.
+
 ```bash
 source "$WP2SPIP/tests/integration/environnement.sh"
-for n in 6 7; do
-	site=SPIP_WP$n; base=BASE_WP$n; wp=WP$n
-	"$WP2SPIP/tests/integration/remise_a_zero.sh" "${!site}" "$SAUVEGARDES/vierge-wp$n-v2.sql.gz" "${!base}"
-	(cd "${!site}" && "$SPIP_CLI" wordpress:importer "${!wp}" --no-ansi > "$SAUVEGARDES/import-wp$n.log" 2>&1; echo "wp$n code $?"
-	 "$SPIP_CLI" php:eval "include '$WP2SPIP/tests/integration/verifier_identifiants.php';" | tail -1
-	 "$SPIP_CLI" php:eval "include '$WP2SPIP/tests/integration/exporter_import.php';" > "$SAUVEGARDES/export-wp$n.tsv")
-done
-diff <(cut -f1,2 "$SAUVEGARDES/export-wp6.tsv") <(cut -f1,2 "$SAUVEGARDES/export-wp7.tsv") | head
+valider() { # <site SPIP> <dossier WordPress> <nom>
+	(cd "$1" \
+	&& "$SPIP_CLI" wordpress:importer "$2" --no-ansi > "$SAUVEGARDES/import-$3.log" 2>&1 \
+	&& "$SPIP_CLI" php:eval "include '$WP2SPIP/tests/integration/verifier_identifiants.php';" \
+	&& "$SPIP_CLI" php:eval "include '$WP2SPIP/tests/integration/exporter_import.php';" > "$SAUVEGARDES/export-$3.tsv") \
+	|| { echo "ÉCHEC : $3 (voir $SAUVEGARDES/import-$3.log)"; return 1; }
+	echo "$3 : OK"
+}
+set -e
+"$WP2SPIP/tests/integration/remise_a_zero.sh" "$SPIP_WP6" "$SAUVEGARDES/vierge-wp6-v2.sql.gz" "$BASE_WP6"
+valider "$SPIP_WP6" "$WP6" wp6
+"$WP2SPIP/tests/integration/remise_a_zero.sh" "$SPIP_WP7" "$SAUVEGARDES/vierge-wp7-v2.sql.gz" "$BASE_WP7"
+valider "$SPIP_WP7" "$WP7" wp7
 "$WP2SPIP/tests/integration/remise_a_zero.sh" "$SPIP_REEL_SQLITE" "$SAUVEGARDES/vierge-sqlite-v2.tgz"
+valider "$SPIP_REEL_SQLITE" "$WP_REEL" reel-SQLITE
 "$WP2SPIP/tests/integration/remise_a_zero.sh" "$SPIP_REEL_MYSQL" "$SAUVEGARDES/vierge-mysql-v2.sql.gz" "$BASE_REEL_MYSQL"
-for s in SQLITE MYSQL; do
-	site=SPIP_REEL_$s
-	(cd "${!site}" && "$SPIP_CLI" wordpress:importer "$WP_REEL" --no-ansi > "$SAUVEGARDES/import-reel-$s.log" 2>&1; echo "$s code $?"
-	 "$SPIP_CLI" php:eval "include '$WP2SPIP/tests/integration/verifier_identifiants.php';" | tail -1
-	 "$SPIP_CLI" php:eval "include '$WP2SPIP/tests/integration/exporter_import.php';" > "$SAUVEGARDES/export-reel-$s.tsv")
-done
-diff "$SAUVEGARDES/export-reel-SQLITE.tsv" "$SAUVEGARDES/export-reel-MYSQL.tsv" && echo "SQLite = MySQL"
+valider "$SPIP_REEL_MYSQL" "$WP_REEL" reel-MYSQL
+diff "$SAUVEGARDES/export-reel-SQLITE.tsv" "$SAUVEGARDES/export-reel-MYSQL.tsv"
+echo "SQLite = MySQL"
+set +e
+diff <(cut -f1,2 "$SAUVEGARDES/export-wp6.tsv") <(cut -f1,2 "$SAUVEGARDES/export-wp7.tsv")
 diff "$SAUVEGARDES/export-reel-sqlite-reference.tsv" "$SAUVEGARDES/export-reel-SQLITE.tsv" | grep "^[<>]" | cut -f1 | sort | uniq -c
 ```
 
-Expected : quatre `code 0` et quatre `OK` ; WP 6.9 et 7.1 importent les mêmes objets (aux différences d'installation près ; le 7.1, sans Accès restreint, n'a pas de ligne `zone` et laisse le contenu protégé non publié) ; `SQLite = MySQL` ; par rapport à la référence du site réel, seules diffèrent des lignes `article` (liens convertis) et `rubrique` (entités). Relancer ensuite l'import sur un site déjà importé : `code 0`, export inchangé.
+Expected : `wp6 : OK`, `wp7 : OK`, `reel-SQLITE : OK`, `reel-MYSQL : OK`, `SQLite = MySQL` (la commande s'arrête avant au moindre échec) ; entre WP 6.9 et 7.1, seule diffère la ligne `zone` (le 7.1 est sans Accès restreint) ; par rapport à la référence du site réel, seules diffèrent des lignes `article` (liens convertis) et `rubrique` (entités), à relire une à une. Relancer ensuite `valider "$SPIP_WP6" "$WP6" wp6-bis` sur le site déjà importé : `OK`, et `diff` entre `export-wp6.tsv` et `export-wp6-bis.tsv` vide.
 
 - [ ] **Step 4 : commit**
 

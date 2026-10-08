@@ -9,7 +9,7 @@
  *
  * Usage, depuis le site SPIP (base Wordpress déclarée sous le nom "wordpress") :
  *   spip php:eval 'include "<wp2spip>/tests/integration/verifier_identifiants.php";'
- * Affiche OK, ou ECHEC et la liste des écarts.
+ * Affiche OK, ou ECHEC et la liste des écarts avec le code de sortie 1.
  */
 include_spip('base/objets');
 include_spip('wp2spip/importer_articles');
@@ -54,4 +54,8 @@ foreach (sql_allfetsel('id_article, texte', 'spip_articles', 'id_wordpress > 0')
 	}
 }
 
-echo $echecs ? "ECHEC\n- " . join("\n- ", $echecs) . "\n" : "OK\n";
+if ($echecs) {
+	echo "ECHEC\n- " . join("\n- ", $echecs) . "\n";
+	exit(1);
+}
+echo "OK\n";
