@@ -59,17 +59,21 @@ Le reste est le mécanisme du sous-projet 3, inchangé : téléchargement par `p
 Nouveau traitement, fichier `wp2spip/importer_hierarchie_pages.php`, placé dans la liste par défaut **juste après `importer_articles`**. Il reste désactivable par `--traitements`, comme les autres.
 
 1. Pages enfants lues avec `wp2spip_where_pages_enfants()`, triées par parent, `menu_order`, `post_title`, `ID`. Aucune : le traitement ne fait rien.
-2. a2a inactif alors qu'il y a des pages enfants (installation impossible, ou traitement lancé seul) : message d'erreur et retour `false` (code `1`), comme `importer_acces` sans Accès restreint.
+2. a2a inactif alors qu'il y a des pages enfants : message d'erreur et retour `false` (code `1`), comme `importer_acces` sans Accès restreint. Par la commande, ce cas ne se présente pas : elle vérifie et installe les plugins requis avant le premier traitement, même avec `--traitements` ; si l'installation échoue, elle s'arrête avant tout traitement (spec des blocs, § 4). Cette garde protège un appel direct du traitement.
 3. Type de liaison : si `sous_page` n'est pas dans `a2a/types_liaisons`, il y est ajouté avec le libellé « Sous-page (WordPress) », sans toucher aux autres types ni aux autres réglages d'a2a.
-4. Pour chaque page enfant, dans l'ordre : si la page parente et la page enfant existent dans `spip_articles` (identifiant = ID WordPress), lien `sous_page` créé par `action_a2a_lier_article_dist(id_enfant, id_parent, 'sous_page')` ; sinon, la page est comptée comme « parent introuvable ». Le rang est attribué par a2a dans l'ordre des créations, donc de 1 à n pour chaque parent sur un SPIP vierge.
-5. Un lien déjà présent n'est pas recréé (contrôle d'a2a) : relancer l'import ne crée pas de doublon.
+4. Pour chaque page enfant, dans l'ordre : la page parente et la page enfant doivent exister dans `spip_articles` (identifiant = ID WordPress) ; sinon, la page enfant est notée comme **absente** (l'import est incomplet). Le lien `sous_page` est créé par `action_a2a_lier_article_dist(id_enfant, id_parent, 'sous_page')`. Le rang est attribué par a2a dans l'ordre des créations, donc de 1 à n pour chaque parent sur un SPIP vierge.
+5. **Contrôle après l'appel** : a2a ne signale pas un lien non créé. Quand ses liaisons multiples sont désactivées (`a2a/types_differents`), il n'insère rien si les deux pages sont déjà liées par un lien d'un autre type. Après chaque appel, le traitement vérifie la présence du lien `sous_page` ; absent, la page enfant est notée en **conflit**. Les réglages d'a2a ne sont pas modifiés.
+6. Un lien `sous_page` déjà présent n'est pas recréé (contrôle d'a2a) : relancer l'import ne crée pas de doublon.
+7. **Échec** : s'il y a des pages absentes ou en conflit, le traitement crée tous les liens possibles, puis affiche les identifiants WordPress concernés et retourne `false` (code `1`). Il ne réussit jamais en laissant une page enfant sans son lien.
 
 ## 6. Bilan
 
 Le traitement affiche :
 
 - `N liens de sous-pages créés (a2a, type sous_page), pour P pages parentes.` ;
-- s'il y en a, `M pages enfants dont le parent est introuvable dans SPIP : pas de lien.`
+- en cas d'échec (code `1`) :
+  - `Pages enfants ou parentes absentes de SPIP, pas de lien : <ID enfant> (parent <ID parent>), …` ;
+  - `Liens sous_page non créés par a2a, les pages étant déjà liées par un autre type (liaisons multiples désactivées dans la configuration d'a2a) : <ID enfant> (parent <ID parent>), …`.
 
 ## 7. Données pour le squelette
 
@@ -96,7 +100,11 @@ Les boucles d'exemple sont vérifiées sur un SPIP de test (calcul d'un squelett
 - **WordPress 6.9 et 7.1** : depuis un dossier vide (`outils/preparer_spip.sh --importer`) et sur leurs SPIP de test : a2a installé par l'import, 13 liens pour chacun, vérificateur à OK.
 - **Site réel** : sur son SPIP de test et depuis un dossier vide : 18 liens, rangs par titre, vérificateur à OK ; le reste de l'export identique à celui d'avant le sous-projet.
 - **Sans page enfant** : un WordPress sans page enfant n'installe pas a2a, et le traitement ne fait rien.
-- **Échec** : a2a désactivé et traitement lancé seul : code `1`.
+- **Échecs** :
+  - installation impossible (dépôt injoignable par `_WP2SPIP_DEPOT_SVP`, sur un SPIP sans dépôt) : code `1`, a2a dans la liste des plugins non installés, aucun traitement lancé ;
+  - garde du traitement : a2a désactivé, traitement appelé directement (sans la commande) : retour `false` et message ;
+  - conflit : sur un SPIP importé, un lien `sous_page` remplacé par un lien d'un autre type entre les mêmes pages, liaisons multiples désactivées, puis `-t importer_hierarchie_pages` : code `1`, page signalée en conflit ;
+  - page absente : sur un SPIP importé, l'article d'une page parente retiré, puis `-t importer_hierarchie_pages` : code `1`, page enfant signalée.
 - Tests de la préparation (`tests/preparation/tester_preparer_spip.sh --complet`) : 0 échec.
 
 ## 9. Hors périmètre
