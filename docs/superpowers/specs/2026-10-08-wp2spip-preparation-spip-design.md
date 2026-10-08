@@ -47,12 +47,12 @@ Chaque étape est annoncée. Le script s'arrête à la première erreur : messag
    - base SPIP : avec `sqlite`, extension `pdo_sqlite` présente ; avec `mysql:<base>`, base accessible, différente de celle du WordPress sauf `--base-partagee`, et **sans table au préfixe `spip_`** (arrêt sinon) ;
    - base du WordPress lisible avec les accès de `wp-config.php`.
 2. **Lecture de `wp-config.php`** : `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST` (port éventuel séparé), `$table_prefix`, lus par expressions régulières (`php -r`), **sans exécuter le fichier** ; `siteurl` et `admin_email` lus ensuite dans `wp_options`.
-3. **Téléchargement de SPIP** : `core:telecharger spip -R <version> -d <dossier>`, puis `core:preparer --droits <droits>` dans le dossier.
+3. **Téléchargement de SPIP** : `core:telecharger spip -R <version> -d <dossier>`, puis `core:preparer --auto --droits <droits>` dans le dossier : `--auto` crée `plugins/auto`, accessible en écriture, où SVP télécharge les plugins de l'étape 5 (sans lui, ce téléchargement échoue).
 4. **Installation de SPIP** : `core:installer` avec serveur, hôte, login, base, préfixe, administrateur et adresse ; les deux mots de passe (MySQL de SPIP, administrateur) lui sont transmis par les variables d'environnement `SPIP_DB_PASS` et `SPIP_ADMIN_PASS`, que lit SPIP-Cli corrigé (§ 5), et jamais en argument.
 5. **Plugins**
    - `plugins:svp:depoter <dépôt>` ;
    - `plugins:svp:telecharger sale pages polyhier -y` ;
-   - **contrôle du téléchargement**, qui ne se fie pas au seul code de sortie : code non nul (SPIP-Cli corrigé, § 5), ou l'un des préfixes sans `paquet.xml` correspondant (`prefix="…"`) sous `plugins/` → arrêt, avec un message qui indique la version de SPIP-Cli requise et précise que le SPIP est déjà installé dans le dossier (à supprimer avant de relancer) ;
+   - **contrôle du téléchargement**, qui ne se fie pas au seul code de sortie : code non nul (SPIP-Cli corrigé, § 5), ou l'un des préfixes sans `paquet.xml` correspondant (`prefix="…"`) sous `plugins/auto/` → arrêt, avec un message qui indique la version de SPIP-Cli requise et précise que le SPIP est déjà installé dans le dossier (à supprimer avant de relancer) ;
    - wp2spip : copie (ou lien symbolique) du dossier du script dans `plugins/wp2spip` ;
    - `plugins:activer sale pages polyhier wp2spip -y`, puis `plugins:maj:bdd` ;
    - contrôle : `plugins:lister` montre les quatre plugins actifs.
@@ -85,7 +85,7 @@ Chaque étape est annoncée. Le script s'arrête à la première erreur : messag
 
 ## 6. Validation
 
-- Préparation complète depuis un dossier vide, base **SQLite** (défaut), base **MySQL distincte**, et base **partagée** avec le WordPress (`--base-partagee`, comme les sites de test actuels), pour les WordPress 6.9 et 7.1, avec `--importer` ; puis `tests/integration/verifier_identifiants.php` à **OK**.
+- Préparation complète depuis un dossier vide, base **SQLite** (défaut), base **MySQL distincte**, et base **partagée** avec le WordPress (`--base-partagee`, comme les sites de test actuels), pour les WordPress 6.9 et 7.1, avec `--importer` : sale, pages et polyhier présents sous `plugins/auto/` et actifs (`plugins:lister`), puis `tests/integration/verifier_identifiants.php` à **OK**.
 - `--wp2spip lien` : `plugins/wp2spip` est un lien vers le dépôt.
 - Cas d'erreur, chacun avec code `1` et message explicite : dossier non vide, `wp-config.php` illisible, préfixe de tables autre que `wp_`, accès MySQL refusés, base MySQL identique à celle du WordPress sans `--base-partagee`, base contenant déjà des tables `spip_` (aucun fichier écrit) ; `core:installer` sans le correctif des mots de passe (aucun fichier écrit) ; plugin non téléchargé, simulé par un préfixe inexistant ajouté à la liste (SPIP installé dans le dossier, rien écrit ailleurs, message qui le dit).
 - `ps` pendant la préparation, en MySQL : aucun des trois mots de passe (WordPress, MySQL de SPIP, administrateur) n'apparaît dans les arguments d'un processus.
