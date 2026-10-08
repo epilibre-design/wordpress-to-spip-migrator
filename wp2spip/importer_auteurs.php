@@ -7,14 +7,8 @@ if (!defined('_ECRIRE_INC_VERSION')) {
 }
 
 function wp2spip_importer_auteurs_dist($command) {
-	// S'il n'y a pas l'option update, on évite de charger pour rien les auteurs déjà migrés
-	$ids_wordpress = array(0);
-	if (
-		!$command->update
-		and $ids_wordpress = sql_allfetsel('id_wordpress', 'spip_auteurs', 'id_wordpress>0')
-	) {
-		$ids_wordpress = array_column($ids_wordpress, 'id_wordpress');
-	}
+	// Les contenus déjà importés ne sont pas retouchés
+	$ids_wordpress = array_column(sql_allfetsel('id_wordpress', 'spip_auteurs', 'id_wordpress>0'), 'id_wordpress') ?: array(0);
 	
 	// On va chercher tous les auteurs Wordpress qui ont l'air pertinent
 	if ($wp_users = sql_allfetsel(
@@ -35,7 +29,6 @@ function wp2spip_importer_auteurs_dist($command) {
 		
 		$nb_users = count($wp_users);
 		$nb_import = 0;
-		$nb_maj = 0;
 		$command->output->writeln("$nb_users comptes utilisateurs à importer.");
 		
 		$progressBar = new ProgressBar($command->output, $nb_users);
@@ -108,16 +101,6 @@ function wp2spip_importer_auteurs_dist($command) {
 				
 				if ($ok = objet_modifier('auteur', $id_auteur, $auteur)) {
 					$nb_import++;
-				}
-			}
-			// Sinon on ne met à jour que si demandé
-			elseif ($command->update) {
-				// INSUP
-				autoriser_exception('modifier', 'auteur', $id_auteur, true);
-				autoriser_exception('instituer', 'auteur', $id_auteur, true);
-				
-				if ($ok = objet_modifier('auteur', $id_auteur, $auteur)) {
-					$nb_maj++;
 				}
 			}
 			

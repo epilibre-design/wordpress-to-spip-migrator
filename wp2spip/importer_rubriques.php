@@ -7,14 +7,8 @@ if (!defined('_ECRIRE_INC_VERSION')) {
 }
 
 function wp2spip_importer_rubriques_dist($command) {
-	// S'il n'y a pas l'option update, on évite de charger pour rien les catégories déjà migrées
-	$ids_wordpress = array(0);
-	if (
-		!$command->update
-		and $ids_wordpress = sql_allfetsel('id_wordpress', 'spip_rubriques', 'id_wordpress>0')
-	) {
-		$ids_wordpress = array_column($ids_wordpress, 'id_wordpress');
-	}
+	// Les contenus déjà importés ne sont pas retouchés
+	$ids_wordpress = array_column(sql_allfetsel('id_wordpress', 'spip_rubriques', 'id_wordpress>0'), 'id_wordpress') ?: array(0);
 	
 	// On va chercher toutes les catégories
 	if ($wp_categories = sql_allfetsel(
@@ -40,7 +34,6 @@ function wp2spip_importer_rubriques_dist($command) {
 		
 		$nb_categories = count($wp_categories);
 		$nb_import = 0;
-		$nb_maj = 0;
 		$command->output->writeln("$nb_categories catégories à importer.");
 		
 		$progressBar = new ProgressBar($command->output, $nb_categories);
@@ -81,21 +74,6 @@ function wp2spip_importer_rubriques_dist($command) {
 				
 				if ($ok = objet_modifier('rubrique', $id_rubrique, $rubrique)) {
 					$nb_import++;
-				}
-			}
-			// Sinon on ne met à jour que si demandé
-			elseif ($command->update) {
-				$id_rubrique = intval($rubrique_old['id_rubrique']);
-				
-				// INSUP
-				autoriser_exception('modifier', 'rubrique', $id_rubrique, true);
-				autoriser_exception('instituer', 'rubrique', $id_rubrique, true);
-				autoriser_exception('publierdans', 'rubrique', $id_parent, true);
-				autoriser_exception('creerrubriquedans', 'rubrique', $id_parent, true);
-				autoriser_exception('publierdans', 'rubrique', intval($rubrique_old['id_parent']), true);
-				
-				if ($ok = objet_modifier('rubrique', $id_rubrique, $rubrique)) {
-					$nb_maj++;
 				}
 			}
 			

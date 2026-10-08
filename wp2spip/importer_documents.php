@@ -7,14 +7,8 @@ if (!defined('_ECRIRE_INC_VERSION')) {
 }
 
 function wp2spip_importer_documents_dist($command) {
-	// S'il n'y a pas l'option update, on évite de charger pour rien les documents déjà migrés
-	$ids_wordpress = array(0);
-	if (
-		!$command->update
-		and $ids_wordpress = sql_allfetsel('id_wordpress', 'spip_documents', 'id_wordpress>0')
-	) {
-		$ids_wordpress = array_column($ids_wordpress, 'id_wordpress');
-	}
+	// Les contenus déjà importés ne sont pas retouchés
+	$ids_wordpress = array_column(sql_allfetsel('id_wordpress', 'spip_documents', 'id_wordpress>0'), 'id_wordpress') ?: array(0);
 	
 	// On va chercher tous les auteurs Wordpress qui ont l'air pertinent
 	if ($wp_attachments = sql_allfetsel(
@@ -43,7 +37,6 @@ function wp2spip_importer_documents_dist($command) {
 		
 		$nb_attachments = count($wp_attachments);
 		$nb_import = 0;
-		$nb_maj = 0;
 		$command->output->writeln("$nb_attachments documents joints à importer.");
 		
 		$progressBar = new ProgressBar($command->output, $nb_attachments);
@@ -92,21 +85,11 @@ function wp2spip_importer_documents_dist($command) {
 						autoriser_exception('instituer', 'document', $id_document, true);
 					}
 				}
-				// Sinon on ne met à jour que si demandé
-				elseif ($command->update) {
-					// On met aussi à jour le fichier ?
-					// On peut considérer que pour un update le fichier ne bouge pas chez WP
-					// $ajouter_un_document($id_document, $file, null, null, 'auto');
-					
-					// INSUP
-					autoriser_exception('modifier', 'document', $id_document, true);
-					autoriser_exception('instituer', 'document', $id_document, true);
-				}
 				
 				// Si on a un id_document, c'est qu'on vient d'insérer ou qu'on doit mettre à jour
 				if ($id_document) {
 					if ($ok = objet_modifier('document', $id_document, $document)) {
-						$command->update ? $nb_maj++ : $nb_import++;
+						$nb_import++;
 					}
 					
 					// Ajouter l'URL libre

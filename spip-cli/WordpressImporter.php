@@ -13,7 +13,6 @@ class WordpressImporter extends Command {
 	public $dir_wordpress = null;
 	public $wp_version = null;
 	public $base = 'wordpress';
-	public $update = false;
 	
 	protected function configure(): void {
 		$this
@@ -21,7 +20,7 @@ class WordpressImporter extends Command {
 			->setDescription('Importe un site Wordpress dans un site SPIP')
 			->setHelp('Pour lancer la commande, vous devez avoir préalablement ajouté la base de données du Wordpress en tant que base externe dans votre SPIP, et fournir en argument le dossier où se trouve les fichiers du Wordpress.
 
-Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est gardé et il ne sera jamais réimporté. Vous pouvez donc lancer la commande plusieurs fois sans soucis, seul les nouveaux contenus jamais importés seront migrés. Cela permet notamment de continuer à lancer la commande si le site Wordpress continue d’évoluer.')
+Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est gardée et il ne sera jamais réimporté : on peut relancer la commande, ou un traitement seul. L’import part d’un Wordpress figé. Pour refaire un import (import interrompu, nouvelle version de wp2spip), remettre le SPIP à zéro, puis relancer un import complet.')
 			->addArgument(
 				'dir_wordpress',
 				InputArgument::REQUIRED,
@@ -45,12 +44,6 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 				'i',
 				InputOption::VALUE_OPTIONAL,
 				'Affiche la version du Wordpress et les traitements disponibles.'
-			)
-			->addOption(
-				'update',
-				'u',
-				InputOption::VALUE_NONE,
-				'Met à jour les contenus déjà migrés avec la version du Wordpress. Peut être utile si le site Wordpress continue d’évoluer.'
 			)
 		;
 	}
@@ -84,9 +77,6 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 		include $fichier_version;
 		$this->wp_version = $wp_version;
 		
-		// Est-ce qu'on doit mettre à jourles choses déjà migrées ?
-		$this->update = $input->getOption('update');
-		
 		$traitements_disponibles = array(
 			'importer_metas',
 			'importer_auteurs',
@@ -102,7 +92,7 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 		// Infos
 		$output->writeln(array(
 			'<info>C’est parti pour importer ce Wordpress !</info>',
-			'* <comment>'. ($this->update ? 'Les contenus déjà migrés seront mis à jour.' : 'Les contenus déjà migrés ne seront pas ré-importés.') .'</comment>',
+			'* <comment>Les contenus déjà importés ne sont pas ré-importés.</comment>',
 			'* <comment>Version</comment> : ' . $this->wp_version,
 			'* <comment>Base</comment> : ' . $this->base,
 			'* <comment>Fichiers</comment> : ' . $this->dir_wordpress,

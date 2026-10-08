@@ -12,8 +12,7 @@ if (!defined('_ECRIRE_INC_VERSION')) {
  * - commentaires approuvés => publiés, en attente => proposés ; spam, corbeille,
  *   trackbacks et pingbacks ne sont pas importés
  * - comment_type vide (Wordpress < 5.5) ou "comment" (Wordpress >= 5.5)
- * - chaque message garde son id_wordpress : un nouvel import ne crée pas de doublon,
- *   et --update met à jour les messages déjà importés
+ * - chaque message garde son id_wordpress : un nouvel import ne crée pas de doublon
  */
 function wp2spip_importer_commentaires_dist($command) {
 	include_spip('inc/plugin');
@@ -55,7 +54,6 @@ function wp2spip_importer_commentaires_dist($command) {
 
 	$nb_comments = count($wp_comments);
 	$nb_import = 0;
-	$nb_maj = 0;
 	$nb_sans_article = 0;
 	$command->output->writeln("$nb_comments commentaires à importer.");
 
@@ -64,7 +62,7 @@ function wp2spip_importer_commentaires_dist($command) {
 	$progressBar->setRedrawFrequency(1);
 	$progressBar->start();
 
-	// 1. Créer ou mettre à jour les messages
+	// 1. Créer les messages
 	foreach ($wp_comments as $id_comment => $wp_comment) {
 		$progressBar->advance();
 
@@ -73,7 +71,7 @@ function wp2spip_importer_commentaires_dist($command) {
 			unset($wp_comments[$id_comment]);
 			continue;
 		}
-		if (isset($forums[$id_comment]) and !$command->update) {
+		if (isset($forums[$id_comment])) {
 			continue;
 		}
 
@@ -91,11 +89,7 @@ function wp2spip_importer_commentaires_dist($command) {
 			'id_wordpress' => intval($id_comment),
 		);
 
-		if (isset($forums[$id_comment])) {
-			sql_updateq('spip_forum', $forum, 'id_forum = ' . intval($forums[$id_comment]));
-			$nb_maj++;
-		}
-		elseif ($id_forum = sql_insertq('spip_forum', $forum)) {
+		if ($id_forum = sql_insertq('spip_forum', $forum)) {
 			$forums[$id_comment] = $id_forum;
 			$nb_import++;
 		}
@@ -135,6 +129,6 @@ function wp2spip_importer_commentaires_dist($command) {
 	}
 
 	$command->output->writeln('');
-	$command->output->writeln("$nb_import messages importés, $nb_maj mis à jour, " . count($threads) . " fils de discussion."
+	$command->output->writeln("$nb_import messages importés, " . count($threads) . " fils de discussion."
 		. ($nb_sans_article ? " $nb_sans_article commentaires ignorés (contenu non importé)." : ''));
 }

@@ -7,14 +7,8 @@ if (!defined('_ECRIRE_INC_VERSION')) {
 }
 
 function wp2spip_importer_articles_dist($command) {
-	// S'il n'y a pas l'option update, on évite de charger pour rien les auteurs déjà migrés
-	$ids_wordpress = array(0);
-	if (
-		!$command->update
-		and $ids_wordpress = sql_allfetsel('id_wordpress', 'spip_articles', 'id_wordpress>0')
-	) {
-		$ids_wordpress = array_column($ids_wordpress, 'id_wordpress');
-	}
+	// Les contenus déjà importés ne sont pas retouchés
+	$ids_wordpress = array_column(sql_allfetsel('id_wordpress', 'spip_articles', 'id_wordpress>0'), 'id_wordpress') ?: array(0);
 	
 	// On va chercher tous les articles Wordpress qui ont l'air pertinent
 	if ($wp_posts = sql_allfetsel(
@@ -40,7 +34,6 @@ function wp2spip_importer_articles_dist($command) {
 		
 		$nb_posts = count($wp_posts);
 		$nb_import = 0;
-		$nb_maj = 0;
 		$nb_liens_absents = 0;
 		$nb_liens_non_convertis = 0;
 		$command->output->writeln("$nb_posts articles à importer.");
@@ -293,25 +286,11 @@ function wp2spip_importer_articles_dist($command) {
 				autoriser_exception('instituer', 'rubrique', $id_rubrique_principale, true);
 				autoriser_exception('publierdans', 'rubrique', $id_rubrique_principale, true);
 			}
-			// Sinon on ne met à jour que si demandé
-			elseif ($command->update) {
-				$id_article = intval($article_old['id_article']);
-				
-				// INSUP
-				autoriser_exception('modifier', 'article', $id_article, true);
-				autoriser_exception('instituer', 'article', $id_article, true);
-				autoriser_exception('publierdans', 'rubrique', $id_rubrique_principale, true);
-				autoriser_exception('modifier', 'rubrique', $id_rubrique_principale, true);
-				autoriser_exception('instituer', 'rubrique', $id_rubrique_principale, true);
-				autoriser_exception('publierdans', 'rubrique', intval($article_old['id_rubrique']), true);
-				autoriser_exception('modifier', 'rubrique', intval($article_old['id_rubrique']), true);
-				autoriser_exception('instituer', 'rubrique', intval($article_old['id_rubrique']), true);
-			}
 			
 			// Si on a un id_article, c'est qu'on vient d'insérer ou qu'on doit mettre à jour
 			if ($id_article) {
 				if (!$erreur = objet_modifier('article', $id_article, $article)) {
-					$command->update ? $nb_maj++ : $nb_import++;
+					$nb_import++;
 				}
 				
 				// Associer les docs

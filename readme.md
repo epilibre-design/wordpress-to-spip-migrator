@@ -26,7 +26,6 @@ Options:
   -b, --base[=BASE]                Identifiant de la base Wordpress déclarée dans SPIP [default: "wordpress"]
   -t, --traitements[=TRAITEMENTS]  Liste de traitements séparés par des virgules, si on veut n’en lancer que certains.
   -i, --info[=INFO]                Affiche la version du Wordpress et les traitements disponibles.
-  -u, --update                     Met à jour les contenus déjà migrés avec la version du Wordpress. Peut être utile si le site Wordpress continue d’évoluer.
   -h, --help                       Display help for the given command. When no command is given display help for the list command
   -q, --quiet                      Do not output any message
   -V, --version                    Display this application version
@@ -37,11 +36,13 @@ Options:
 Help:
   Pour lancer la commande, vous devez avoir préalablement ajouté la base de données du Wordpress en tant que base externe dans votre SPIP, et fournir en argument le dossier où se trouve les fichiers du Wordpress.
   
-  Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est gardé et il ne sera jamais réimporté. Vous pouvez donc lancer la commande plusieurs fois sans soucis, seul les nouveaux contenus jamais importés seront migrés. Cela permet notamment de continuer à lancer la commande si le site Wordpress continue d’évoluer.
+  Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est gardée et il ne sera jamais réimporté : on peut relancer la commande, ou un traitement seul. L’import part d’un Wordpress figé. Pour refaire un import (import interrompu, nouvelle version de wp2spip), remettre le SPIP à zéro, puis relancer un import complet.
 ```
 
-## Importer un site qui continue de vivre
-Par défaut quand on lance la commande plusieurs fois, les contenus déjà importés ne le sont pas plusieurs fois. Avec l'option `--update` cela permet de mettre à jour le contenu déjà importé avec le contenu plus à jour du Wordpress, si jamais il continuait d'évoluer.
+## Refaire un import
+L'import part d'un Wordpress figé : une copie du site, ou un site qui n'évolue plus pendant la migration. Relancer la commande n'importe que les contenus pas encore importés, et ne modifie pas ceux qui le sont déjà.
+
+Pour refaire un import (import interrompu, nouvelle version de wp2spip), remettre le SPIP à zéro, puis relancer un import complet.
 
 ## Contenus privés et protégés par mot de passe
 Les contenus privés ou protégés par mot de passe dans Wordpress ne sont jamais publiés tels quels.

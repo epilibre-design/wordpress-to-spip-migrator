@@ -51,9 +51,8 @@ function wp2spip_importer_acces_dist($command) {
 		$cle = ($wp_post['post_status'] == 'private') ? 'prives' : 'proteges';
 		$zones[$cle] ??= wp2spip_zone_acces($cle);
 
-		// Déjà traité lors d'un import précédent : on ne touche plus à ce qu'en a fait le site, sauf mise à jour
-		$deja = sql_countsel('spip_zones_liens', array('id_zone = ' . $zones[$cle], 'objet = "article"', 'id_objet = ' . $id_article));
-		if ($deja and !$command->update) {
+		// Déjà traité lors d'un import précédent : on ne touche plus à ce qu'en a fait le site
+		if (sql_countsel('spip_zones_liens', array('id_zone = ' . $zones[$cle], 'objet = "article"', 'id_objet = ' . $id_article))) {
 			$nb_deja++;
 			continue;
 		}
@@ -67,23 +66,6 @@ function wp2spip_importer_acces_dist($command) {
 		// objet_modifier() et objet_associer() ont remis date_modif à la date du jour
 		sql_updateq('spip_articles', array('date_modif' => $wp_post['post_modified']), 'id_article = ' . $id_article);
 		$nb_publies++;
-	}
-
-	// En mise à jour, retirer de nos zones les articles qui ne sont plus privés ou protégés dans Wordpress
-	// (importer_articles --update leur a déjà redonné leur statut Wordpress)
-	if ($command->update) {
-		foreach (lire_config('wp2spip/zones', array()) as $id_zone) {
-			$liens = sql_allfetsel(
-				'a.id_article, a.id_wordpress',
-				'spip_zones_liens as l join spip_articles as a on a.id_article = l.id_objet',
-				array('l.id_zone = ' . intval($id_zone), 'l.objet = "article"', 'a.id_wordpress > 0')
-			);
-			foreach ($liens as $lien) {
-				if (!isset($wp_posts[$lien['id_wordpress']])) {
-					objet_dissocier(array('zone' => intval($id_zone)), array('article' => intval($lien['id_article'])));
-				}
-			}
-		}
 	}
 
 	$command->output->writeln(count($wp_posts) . ' contenus privés ou protégés dans Wordpress : ' . $nb_publies . ' publiés en zone restreinte, ' . $nb_deja . ' déjà traités.');
