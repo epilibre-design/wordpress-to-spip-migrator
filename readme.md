@@ -51,6 +51,12 @@ Les accès à la base sont lus dans le `wp-config.php` du Wordpress, sans l'exé
 
 Il faut SPIP-Cli avec les correctifs de `plugins:svp:telecharger` (sélection du plugin, autorisation). `core:installer` ne recevant les mots de passe qu'en argument, ils sont brièvement visibles dans la liste des processus pendant l'installation, et il affiche celui de l'administrateur.
 
+## Blocs de l'éditeur et galeries
+Les blocs de l'éditeur Wordpress sont convertis : images en `<imgN>` avec leur alignement (la légende devient le descriptif du document), médias en `<docN>`, mise en page (colonnes, groupes, couvertures, boutons…) gardée avec ses seules classes `wp-block-…`, que le squelette peut styler, contenus embarqués en URL seule sur sa ligne (le plugin oEmbed en fait un lecteur). Chaque galerie (bloc ou raccourci `[gallery]`) devient un album du plugin Albums, inséré par `<albumN>`. Les blocs dynamiques (derniers articles, recherche…), qui n'enregistrent rien dans le contenu, sont retirés. Le bilan de `importer_articles` détaille ces conversions.
+
+## Plugins requis
+Avant le premier traitement, l'import télécharge et active les plugins dont le contenu a besoin : Albums s'il y a une galerie, Accès restreint s'il y a des contenus privés ou protégés, Forum s'il y a des commentaires ; puis il se relance. S'ils manquent, il crée le dossier `plugins/auto` (avec les droits de `plugins/`) et déclare le dépôt standard `https://plugins.spip.net/depots/principal.xml` (constante `_WP2SPIP_DEPOT_SVP`, modifiable dans `mes_options.php`). Il faut SPIP-Cli avec les correctifs de `plugins:svp:telecharger`. En cas d'échec, rien n'est importé et les commandes à lancer à la main sont affichées.
+
 ## Refaire un import
 L'import part d'un Wordpress figé : une copie du site, ou un site qui n'évolue plus pendant la migration. Relancer la commande n'importe que les contenus pas encore importés, et ne modifie pas ceux qui le sont déjà.
 
@@ -69,7 +75,7 @@ Par défaut, l'adresse du site SPIP prend celle du Wordpress. L'option `--garder
 ## Contenus privés et protégés par mot de passe
 Les contenus privés ou protégés par mot de passe dans Wordpress ne sont jamais publiés tels quels.
 
-Si le plugin [Accès restreint](https://contrib.spip.net/Acces-Restreint-3-0) est actif, ils sont publiés dans une zone réservée aux visiteurs identifiés (une zone pour les contenus privés, une pour les contenus protégés). Les mots de passe Wordpress ne sont pas repris. Sinon, ils restent non publiés.
+Ils sont publiés dans une zone du plugin [Accès restreint](https://contrib.spip.net/Acces-Restreint-3-0), que l'import installe (voir « Plugins requis »), réservée aux visiteurs identifiés (une zone pour les contenus privés, une pour les contenus protégés). Les mots de passe Wordpress ne sont pas repris.
 
 ## Pour les devs
 Chaque contenu possible à importer est implémenté dans des traitements `wp2spip_<traitement>` dans des fichiers `wp2spip/<traitement>.php`.
@@ -84,3 +90,5 @@ Pour cela, la commande cherche les traitements dans cet ordre :
 Une extension peut ajouter ses propres traitements avec le pipeline `wp2spip_traitements`, qui reçoit la liste ordonnée des traitements : elle y insère les siens à la position voulue, et fournit le fichier `wp2spip/<traitement>.php` correspondant. L'ancien nom du pipeline, `w2spip_traitements`, est toujours appelé.
 
 Un traitement signale un échec en retournant `false` : la commande s'arrête et retourne le code de sortie 1.
+
+Les pipelines `wp2spip_bloc` (conversion d'un type de bloc : `args` le bloc, `data` le texte produit ou `null`) et `wp2spip_plugins_requis` (plugins requis par le contenu) permettent à une extension de compléter ces deux étapes.

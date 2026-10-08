@@ -199,12 +199,11 @@ La recherche du document à partir d'une URL (`wp2spip_chercher_document()`) :
 **Limites connues** :
 - **slug ambigu** : un lien désigné par son slug est résolu dans `wp_posts`. Si plusieurs contenus ont ce slug (pages de parents différents, article et page), le chemin complet de la page doit terminer l'URL ; s'il reste plusieurs candidats, le lien est laissé tel quel plutôt que de viser peut-être le mauvais contenu ;
 - hiérarchie des pages perdue (§ 6, sous-projet 4) ;
-- balisage des blocs de l'éditeur WordPress (`<figure class="wp-block-…">`, `<figcaption>`…) laissé dans le texte (§ 6, sous-projet 3) ;
 - un contenu sans titre reçoit le titre par défaut de SPIP (« Nouvel article N° … ») ;
 
 ### 3.6 `importer_acces`
 
-- Accès restreint est téléchargé et activé par la commande dès que le WordPress a des contenus privés ou protégés (sous-projet 3). S'il n'est pas actif malgré tout : arrêt en échec (code `1`). Jusqu'au sous-projet 3, le comportement est : message, et les contenus privés ou protégés restent non publiés.
+- Accès restreint est téléchargé et activé par la commande dès que le WordPress a des contenus privés ou protégés (sous-projet 3). S'il n'est pas actif malgré tout : arrêt en échec (code `1`).
 - S'il est actif : chaque contenu **privé**, ou **protégé par mot de passe** et publié/programmé, est lié à une zone, puis publié (date WordPress conservée) ; si l'association ou la publication échoue, le traitement s'arrête en échec :
   - « WordPress : contenus privés » ;
   - « WordPress : contenus protégés par mot de passe ».
@@ -231,7 +230,7 @@ Une zone dont les accès sont gérés compte par compte doit avoir l'option « t
 
 ### 3.8 `importer_commentaires`
 
-- Forum est activé par la commande dès qu'il y a des commentaires à importer (sous-projet 3). S'il n'est pas actif malgré tout : arrêt en échec (code `1`). Jusqu'au sous-projet 3, le comportement est : message, rien n'est importé.
+- Forum est activé par la commande dès qu'il y a des commentaires à importer (sous-projet 3). S'il n'est pas actif malgré tout : arrêt en échec (code `1`).
 - Commentaires de type vide (WordPress < 5.5) ou `comment` (≥ 5.5) ; trackbacks, pingbacks, spam et corbeille exclus.
 - Approuvé → publié ; en attente → proposé.
 - Texte passé par sale ; auteur, email, site, adresse IP, date repris ; un commentateur ayant un compte WordPress est relié à son auteur SPIP.
@@ -309,7 +308,7 @@ Chaque sous-projet aura sa propre spec, puis son plan de réalisation.
 | 1 | Identifiants WordPress conservés — **réalisé** | cœur | articles et pages créés avec `id_article` = ID WordPress, rubriques avec `id_rubrique` = ID de la catégorie, documents avec `id_document` = ID du média ; les auteurs gardent la numérotation automatique (l'administrateur créé à l'installation de SPIP porte le n° 1). **Création** : l'identifiant imposé et `id_wordpress` sont passés ensemble dans le paramètre `$set` de `objet_inserer()`, en une seule insertion (vérifié en MySQL et en SQLite), si bien qu'aucun objet n'existe sans son `id_wordpress`. **Documents** : document créé vide de cette façon, puis fichier installé par `ajouter_un_document($id_document, …)`, qui met à jour un document existant au lieu d'en créer un (vérifié : fichier copié, source intacte, titre conservé, aucun document en double). **Identifiant déjà occupé** : par le même contenu WordPress, celui-ci est déjà importé et n'est pas retouché ; par un autre contenu, erreur et arrêt, code `1`. Un import interrompu se refait de zéro (§ 1) : pas de logique de reprise. **Liens internes** écrits directement d'après l'ID WordPress (`?p=`, `?page_id=`, et slug résolu dans `wp_posts`), ce qui supprime la limite décrite au § 3.5 |
 | 2 | Corrections et fiabilité — **réalisé** | cœur | codes de sortie conformes au comportement cible (§ 2.1) : `importer_mots` retiré de la liste par défaut, noms inconnus de `--traitements` refusés, échec d'un traitement signalé ; contenus lus dans l'ordre de leur identifiant WordPress (`ORDER BY`), pour un traitement reproductible ; titres et textes de rubriques sans entités HTML ; option pour ne pas écraser l'adresse du site ; pipeline renommé `wp2spip_traitements`, l'ancien nom restant appelé pour compatibilité ; suppression de l'option `--update` et des branches de mise à jour dans les traitements ; readme mis à jour (WordPress figé, refaire un import = remise à zéro puis import complet) |
 | 11 | Préparation d'un SPIP (réalisé **avant** le 3) — **réalisé** | outil | script `outils/preparer_spip.sh` qui télécharge et installe SPIP, ses plugins et wp2spip, déclare la base WordPress, puis peut lancer l'import, en s'appuyant sur les commandes actuelles de SPIP-Cli et en contrôlant le résultat de chaque étape (spec `2026-10-08-wp2spip-preparation-spip-design.md`) ; médias de nouveau importés sur SPIP 4.4.28 (medias 4.4.15 refusait tous les fichiers en ligne de commande) |
-| 3 | Balisage des blocs de l'éditeur | cœur | nettoyer `<figure>`, `<figcaption>`, classes `wp-block-*` et commentaires de blocs, en gardant les légendes ; galeries vers des documents |
+| 3 | Balisage des blocs de l'éditeur — **réalisé** | cœur | nettoyer `<figure>`, `<figcaption>`, classes `wp-block-*` et commentaires de blocs, en gardant les légendes ; galeries vers des documents |
 | 4 | Hiérarchie des pages | cœur | conserver la structure des pages parentes et enfants (décision ouverte, § 7) |
 | 5 | Étiquettes | cœur | `importer_mots` : `post_tag` → mots-clés d'un groupe dédié, liés aux articles |
 | 6 | Préfixe des tables | cœur | option `--prefixe` (défaut `wp_`), y compris pour la méta des rôles (`<prefixe>capabilities`) |

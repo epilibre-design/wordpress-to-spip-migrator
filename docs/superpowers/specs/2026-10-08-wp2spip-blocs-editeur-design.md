@@ -2,7 +2,7 @@
 
 Date : 2026-10-08
 Spec d'ensemble : `2026-10-08-wp2spip-ensemble-design.md`, § 6, sous-projet 3.
-Statut : design validé, planifié (plan : `docs/superpowers/plans/2026-10-08-wp2spip-blocs-editeur.md`).
+Statut : réalisé (plan : `docs/superpowers/plans/2026-10-08-wp2spip-blocs-editeur.md`).
 
 ## 1. Constat
 
@@ -75,6 +75,7 @@ Classes conservées : `wp-block-<nom>` du bloc et celles qui décrivent sa struc
   - descriptif : légende de la galerie ;
   - statut `publie`, date du contenu ;
   - documents liés à l'album dans l'ordre (`rang_lien`), la légende de chaque image devenant le descriptif de son document ;
+  - documents publiés par leur album (statut recalculé après le lien, que medias ne recalcule pas : sinon l'album public est vide) ;
   - album lié à l'article.
 - Une galerie dont une partie des images n'est pas retrouvée devient l'album des autres ; chaque image manquante est comptée au bilan, à part des médias introuvables dont le HTML d'origine est gardé (« images de galeries introuvables, absentes de leur album »). Une galerie dont aucune image n'est retrouvée ne crée pas d'album : son HTML reste, compté dans le bilan.
 - Limite : un album n'est pas couvert par les zones d'Accès restreint ; les images d'une galerie d'un contenu privé restent accessibles par l'album, comme le sont déjà les documents par leur URL.
