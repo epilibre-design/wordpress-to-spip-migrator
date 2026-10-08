@@ -26,7 +26,7 @@ Un site sous éditeur classique n'est presque pas concerné (le site réel n'a q
 |---|---|
 | Mise en page (colonnes, groupe, couverture, média et texte, boutons…) | **structure conservée**, avec les seules classes `wp-block-…` utiles ; styles en ligne, classes de couleur, de taille, attributs `aria`/`role` retirés. Le squelette SPIP stylera ces classes |
 | Galeries (bloc `gallery`, raccourci `[gallery]`) | un **objet album** du plugin Albums par galerie, toujours écrit `<albumN>` |
-| Plugins requis par le contenu | Albums dès qu'une galerie est détectée, Accès restreint dès qu'un contenu privé ou protégé est détecté : wp2spip les **télécharge et les active** au début de l'import (le SPIP de départ est vierge), puis relance l'import (§ 4) |
+| Plugins requis par le contenu | Albums dès qu'une galerie est détectée, Accès restreint dès qu'un contenu privé ou protégé est détecté, Forum dès qu'un commentaire est à importer : wp2spip les **télécharge et les active** au début de l'import (le SPIP de départ est vierge), puis relance l'import (§ 4) |
 | Contenus embarqués | l'URL seule sur sa ligne, puis la légende ; le plugin **oEmbed** (`<utilise>`) en fait un lecteur, sans lui SPIP en fait un lien |
 | Méthode | **analyse des blocs avant sale**, d'après les commentaires et leurs attributs JSON (§ 3) |
 
@@ -87,9 +87,10 @@ Avant le premier traitement, **quels que soient les traitements demandés** (`--
 |---|---|
 | Albums (`albums`) | une galerie : un bloc `wp:gallery` ou un raccourci `[gallery` dans un contenu (`post`, `page`) |
 | Accès restreint (`accesrestreint`) | un contenu (`post`, `page`) privé, ou protégé par mot de passe et publié ou programmé — ceux que publie `importer_acces` |
+| Forum (`forum`) | un commentaire à importer : approuvé ou en attente, de type `comment` ou vide (WordPress < 5.5) — ceux que retient `importer_commentaires`. Forum est livré avec SPIP (`plugins-dist`) : il est seulement activé, sans téléchargement |
 
 1. Elle détecte les plugins requis d'après ce tableau.
-2. Pour ceux qui ne sont pas actifs — le cas normal, le SPIP de départ étant vierge —, elle l'annonce, puis lance en sous-processus, avec l'exécutable SPIP-Cli en cours : `plugins:svp:telecharger <préfixe> -y` pour chacun, `plugins:activer <préfixes> -y`, puis `plugins:maj:bdd`.
+2. Pour ceux qui ne sont pas actifs — le cas normal pour Albums et Accès restreint, le SPIP de départ étant vierge —, elle l'annonce, puis lance en sous-processus, avec l'exécutable SPIP-Cli en cours : `plugins:svp:telecharger <préfixe> -y` pour chacun de ceux qui ne sont pas présents sur le disque, `plugins:activer <préfixes> -y`, puis `plugins:maj:bdd`.
 3. Le processus en cours ne connaît pas un plugin activé après son démarrage (tables, API, pipelines). La commande d'import est donc **relancée** dans un processus neuf, avec les mêmes arguments et la variable d'environnement `WP2SPIP_RELANCE=1` ; son code de sortie devient celui de la commande. Une seule relance : si un plugin requis n'est toujours pas actif, c'est un échec.
 4. **Échec** (dépôt SVP absent, réseau, plugin introuvable, plugin toujours inactif après la relance) : message qui donne les commandes à lancer à la main, et code `1`, avant tout traitement.
 
@@ -97,7 +98,7 @@ Cette étape est une fonction de la commande (`WordpressImporter::verifier_plugi
 
 `plugins:svp:telecharger` ne fonctionne qu'avec la version corrigée de SPIP-Cli (correctifs proposés en amont : sélection du plugin, autorisation, remontée des erreurs). Le message d'échec le mentionne.
 
-**Conséquence sur `importer_acces`** (spec d'ensemble, § 3.6) : Accès restreint étant activé dès qu'il est requis, le cas « plugin absent, contenus laissés non publiés » ne se produit plus dans un import normal. Il reste une sécurité : si le plugin n'est pas actif malgré tout, `importer_acces` s'arrête en échec (code `1`) au lieu de continuer, pour qu'un contenu privé ou protégé ne reste jamais sans sa zone sans que l'import le signale.
+**Conséquence sur `importer_acces` et `importer_commentaires`** (spec d'ensemble, §§ 3.6 et 3.8) : leur plugin étant activé dès qu'il est requis, les cas « plugin absent, contenus laissés non publiés » et « Forum absent, commentaires non importés » ne se produisent plus dans un import normal. Il reste une sécurité : si le plugin n'est pas actif malgré tout alors que le contenu en a besoin, le traitement s'arrête en échec (code `1`) au lieu de continuer, pour que rien ne soit perdu sans que l'import le signale.
 
 ## 5. Dépendances
 
@@ -105,6 +106,7 @@ Cette étape est une fonction de la commande (`WordpressImporter::verifier_plugi
 |---|---|---|
 | albums (≥ 4.0) | téléchargé et activé par wp2spip si une galerie est détectée (`<utilise>` dans `paquet.xml`) | galeries |
 | accesrestreint | téléchargé et activé par wp2spip si un contenu privé ou protégé est détecté (`<utilise>`, déjà déclaré) | contenus privés ou protégés → zones |
+| forum | activé par wp2spip si un commentaire est à importer (`<utilise>`, déjà déclaré) | commentaires → messages de forum |
 | oembed | `<utilise>` | lecteurs pour les contenus embarqués |
 
 ## 6. Bilan de l'import
@@ -115,7 +117,7 @@ Cette étape est une fonction de la commande (`WordpressImporter::verifier_plugi
 
 - **`tests/integration/tester_blocs.php`** (lancé par `spip php:eval`, code `1` en cas d'écart) : fragments tirés du contenu *Theme Unit Test* (image alignée et légendée, galerie avant et après 5.9, couverture, colonnes, bouton, embarqué, bloc dynamique, bloc inconnu, `[gallery]` avec et sans `ids`) et texte attendu après conversion.
 - **`verifier_identifiants.php`**, complété : aucun `<!-- wp:` ni attribut `style=` dans les textes ; classes `wp-block-…` limitées à la liste conservée ; chaque `<albumN>` désigne un album existant, lié à l'article et contenant au moins un document.
-- **WordPress 6.9 et 7.1** : import depuis un SPIP vierge sans Albums ni Accès restreint (téléchargement, activation et relance automatiques des deux), y compris avec `--traitements=importer_articles` seul, puis vérification (le contenu protégé est publié dans sa zone) ; relecture des textes des contenus *Block: …* et *WP 6.1 … blocks*.
+- **WordPress 6.9 et 7.1** : import depuis un SPIP vierge sans Albums ni Accès restreint, Forum désactivé (téléchargement, activation et relance automatiques), y compris avec `--traitements=importer_articles` seul, puis vérification (le contenu protégé est publié dans sa zone) ; relecture des textes des contenus *Block: …* et *WP 6.1 … blocks*.
 - **Site réel** : depuis un SPIP vierge sans Accès restreint, téléchargement et activation automatiques (98 contenus privés), puis export identique à la référence, hors le contenu qui a un bloc.
 - **Échec du téléchargement** simulé (dépôt SVP absent) : code `1`, aucun traitement lancé.
 

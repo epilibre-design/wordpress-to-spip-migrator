@@ -111,7 +111,7 @@ Un plugin peut donc surcharger un traitement, ou en fournir une variante pour un
 | sale (≥ 1.0.0) | `necessite` | conversion du HTML WordPress en raccourcis SPIP |
 | pages (≥ 2.0.0) | `necessite` | pages WordPress → pages uniques |
 | polyhier (≥ 4.0.0) | `necessite` | catégories multiples → rubriques secondaires |
-| forum | `utilise` | commentaires → messages de forum |
+| forum | `utilise` ; activé par wp2spip si le WordPress a des commentaires à importer (sous-projet 3, spec des blocs § 4) | commentaires → messages de forum |
 | accesrestreint | `utilise` ; téléchargé et activé par wp2spip si le WordPress a des contenus privés ou protégés (sous-projet 3, spec des blocs § 4) | contenus privés ou protégés → zones restreintes |
 
 ## 3. Fonctionnalités, traitement par traitement
@@ -231,7 +231,7 @@ Une zone dont les accès sont gérés compte par compte doit avoir l'option « t
 
 ### 3.8 `importer_commentaires`
 
-- Si Forum n'est pas actif : message, rien n'est importé.
+- Forum est activé par la commande dès qu'il y a des commentaires à importer (sous-projet 3). S'il n'est pas actif malgré tout : arrêt en échec (code `1`). Jusqu'au sous-projet 3, le comportement est : message, rien n'est importé.
 - Commentaires de type vide (WordPress < 5.5) ou `comment` (≥ 5.5) ; trackbacks, pingbacks, spam et corbeille exclus.
 - Approuvé → publié ; en attente → proposé.
 - Texte passé par sale ; auteur, email, site, adresse IP, date repris ; un commentateur ayant un compte WordPress est relié à son auteur SPIP.
