@@ -12,7 +12,8 @@ Principes :
 
 - **WordPress figé** : l'import part d'un WordPress qui ne bouge pas pendant la migration (copie du site, ou site gelé). wp2spip ne prévoit pas de suivre un WordPress qui continue d'évoluer.
 - **SPIP vierge** : le site SPIP de destination ne contient aucun contenu avant le premier import.
-- **Ré-exécutable** : un nouveau passage n'importe que ce qui ne l'a pas encore été (reprise après interruption, traitement lancé seul) ; l'option `--update` réapplique les traitements aux contenus déjà importés, par exemple après une amélioration de wp2spip.
+- **Ré-exécutable** : un nouveau passage n'importe que ce qui ne l'a pas encore été (reprise après interruption, traitement lancé seul) ; il ne modifie jamais un contenu déjà importé.
+- **Refaire un import** (par exemple après une amélioration de wp2spip) : remettre le SPIP à zéro, puis relancer un import complet. Il n'y a pas de mise à jour des contenus déjà importés : l'option `--update` est supprimée (§ 6, sous-projet 2).
 - **Identifiants conservés** (cible, § 6, sous-projet 1) : articles, pages, documents et rubriques SPIP reprennent l'identifiant de leur source WordPress.
 
 Cibles :
@@ -44,7 +45,7 @@ spip wordpress:importer [options] <dir_wordpress>
 | `-b, --base` | identifiant de la base WordPress déclarée dans SPIP comme base externe (défaut : `wordpress`) |
 | `-t, --traitements` | liste de traitements à lancer, séparés par des virgules (défaut : tous) |
 | `-i, --info` | affiche la version de WordPress et les traitements disponibles, sans rien importer |
-| `-u, --update` | met à jour les contenus déjà importés |
+| `-u, --update` | **supprimée** (§ 6, sous-projet 2) ; elle réappliquait les traitements aux contenus déjà importés |
 | `-v` | détail des anomalies par contenu (liens vers des médias non convertis…) |
 
 **Code de sortie, comportement actuel** : `1` si la commande n'est pas lancée depuis un site SPIP ou si `wp-includes/version.php` est introuvable ; `0` dans tous les autres cas. Le code `0` ne garantit donc pas un import complet :
@@ -139,7 +140,7 @@ Limite : l'adresse du site SPIP est écrasée par celle du WordPress, ce qui est
 | author, contributor | rédacteur |
 | subscriber, autre | visiteur |
 
-- Mot de passe : les mots de passe WordPress ne sont pas repris. À la création, l'auteur reçoit un mot de passe aléatoire et inconnu, non vide, ce qui lui permet d'utiliser « mot de passe oublié ». Il n'est pas réécrit par `--update`.
+- Mot de passe : les mots de passe WordPress ne sont pas repris. À la création, l'auteur reçoit un mot de passe aléatoire et inconnu, non vide, ce qui lui permet d'utiliser « mot de passe oublié ».
 
 ### 3.3 `importer_rubriques`
 
@@ -153,7 +154,6 @@ Limite : l'adresse du site SPIP est écrasée par celle du WordPress, ce qui est
 - Fichier lu dans `wp-content/uploads/` ; à défaut, téléchargé depuis son URL (`guid`), puis la copie temporaire est supprimée.
 - Le fichier est **copié** dans `IMG/` : le dossier WordPress n'est jamais modifié.
 - Titre, descriptif (contenu ou extrait du média), date ; URL propre d'après le slug WordPress.
-- `--update` met à jour les métadonnées, pas le fichier.
 
 ### 3.5 `importer_articles`
 
@@ -195,11 +195,10 @@ La recherche du document à partir d'une URL (`wp2spip_chercher_document()`) :
 **Bilan** : la commande signale les liens vers des fichiers du site restés tels quels, en distinguant les fichiers **absents de la médiathèque** (souvent des liens déjà cassés sur le site WordPress) des médias **importés mais placés là où SPIP n'a pas de raccourci** (image de fond d'un bloc « Couverture »…). Le détail par contenu s'affiche avec `-v`.
 
 **Limites connues** :
-- **liens internes vers un contenu pas encore importé** : la recherche d'un `articleN` (par `?p=`, `?page_id=` ou slug) ne trouve que les contenus SPIP déjà créés. Un lien vers un contenu traité plus tard dans le même passage garde son URL WordPress, et un nouveau passage sans `--update` ne le corrige pas, puisqu'il ne retouche pas les textes déjà importés. Les contenus étant traités par identifiant WordPress croissant, un lien vers un contenu plus ancien est converti ; seul un lien vers un contenu plus récent est concerné. Mesure sur le site réel après un seul passage : aucun lien interne vers un contenu laissé tel quel, hormis le lien vers la page d'accueil. Correction prévue : avec les identifiants conservés, un lien vers le contenu WordPress N s'écrit directement `[->articleN]`, que ce contenu soit déjà importé ou non (§ 6, sous-projet 1) ;
+- **liens internes vers un contenu pas encore importé** : la recherche d'un `articleN` (par `?p=`, `?page_id=` ou slug) ne trouve que les contenus SPIP déjà créés. Un lien vers un contenu traité plus tard dans le même passage garde son URL WordPress, et un nouveau passage ne le corrige pas, puisqu'il ne retouche pas les contenus déjà importés. Les contenus étant traités par identifiant WordPress croissant, un lien vers un contenu plus ancien est converti ; seul un lien vers un contenu plus récent est concerné. Mesure sur le site réel après un seul passage : aucun lien interne vers un contenu laissé tel quel, hormis le lien vers la page d'accueil. Correction prévue : avec les identifiants conservés, un lien vers le contenu WordPress N s'écrit directement `[->articleN]`, que ce contenu soit déjà importé ou non (§ 6, sous-projet 1) ;
 - hiérarchie des pages perdue (§ 6, sous-projet 4) ;
 - balisage des blocs de l'éditeur WordPress (`<figure class="wp-block-…">`, `<figcaption>`…) laissé dans le texte (§ 6, sous-projet 3) ;
 - un contenu sans titre reçoit le titre par défaut de SPIP (« Nouvel article N° … ») ;
-- avec `--update`, la réinsertion des URL propres déjà présentes échoue sans conséquence (doublon de clé, journalisé par SPIP).
 
 ### 3.6 `importer_acces`
 
@@ -209,7 +208,7 @@ La recherche du document à partir d'une URL (`wp2spip_chercher_document()`) :
   - « WordPress : contenus protégés par mot de passe ».
 - Les deux zones s'appliquent au site public et sont accessibles à **tout visiteur identifié** (`autoriser_si_connexion`). Les mots de passe WordPress ne sont pas repris.
 - Les zones sont créées une fois, leurs identifiants gardés en configuration (`wp2spip/zones`) et réutilisés, même si elles sont renommées.
-- Un contenu déjà lié à sa zone n'est plus modifié, sauf avec `--update`, qui retire aussi des zones les contenus redevenus publics dans WordPress.
+- Un contenu déjà lié à sa zone n'est plus modifié.
 
 **Plusieurs zones et publics différents.** L'accès aux zones repose uniquement sur Accès restreint, qui ouvre une zone soit à tout visiteur connecté (`autoriser_si_connexion`), soit aux comptes qui lui sont liés un par un. Le cœur de wp2spip se limite aux deux zones ci-dessus, ouvertes à tout visiteur connecté : WordPress ne dit pas qui doit voir un contenu privé. Pour distinguer des publics :
 
@@ -235,7 +234,7 @@ Une zone dont les accès sont gérés compte par compte doit avoir l'option « t
 - Texte passé par sale ; auteur, email, site, adresse IP, date repris ; un commentateur ayant un compte WordPress est relié à son auteur SPIP.
 - **Fils de discussion** : `id_parent` = message auquel on répond, `id_thread` = premier message du fil, y compris quand une réponse est traitée avant son parent ; un parent non importé fait commencer un nouveau fil. `date_thread` = date du dernier message publié du fil.
 - Un commentaire dont le contenu n'a pas été importé est ignoré.
-- Chaque message garde son `id_wordpress` : pas de doublon à la ré-exécution ; `--update` met à jour les messages existants.
+- Chaque message garde son `id_wordpress` : pas de doublon à la ré-exécution.
 
 ## 4. Réalisé sur la branche `compat-spip-4.4`
 
@@ -276,7 +275,7 @@ L'import WordPress télécharge les médias du contenu de test dans `wp-content/
 - Site réel : résultats **identiques en SQLite et en MySQL**, contenu par contenu (texte, titre, rubrique, statut, date) ; les 126 rubriques secondaires attendues créées ; les 98 contenus privés publiés en zone restreinte, invisibles d'un visiteur anonyme, visibles d'un visiteur identifié.
 - WordPress 6.9 et 7.1 : résultats **identiques entre les deux versions**, aux différences d'installation près (adresse du site, date d'installation) ; 118 rubriques secondaires attendues ; fils de commentaires conformes à WordPress, sans écart de parent ; contenu protégé publié en zone avec Accès restreint, non publié sans.
 - Simulation WordPress < 5.5 (types de commentaires vides) : 30 messages, aucun écart.
-- Idempotence vérifiée pour les commentaires et les zones : un second passage ne crée rien ; `--update` met à jour sans dupliquer.
+- Idempotence vérifiée pour les commentaires et les zones : un second passage ne crée rien.
 
 ### 5.3 Méthode
 
@@ -293,7 +292,7 @@ Chaque sous-projet aura sa propre spec, puis son plan de réalisation.
 | # | Sous-projet | Nature | Contenu |
 |---|---|---|---|
 | 1 | Identifiants WordPress conservés | cœur | articles et pages créés avec `id_article` = ID WordPress, documents avec `id_document` = ID du média, rubriques avec `id_rubrique` = ID de la catégorie, via le paramètre `$set` de `objet_inserer()` (vérifié en MySQL et en SQLite) ; les auteurs gardent la numérotation automatique (l'administrateur créé à l'installation de SPIP porte le n° 1) ; précondition vérifiée au lancement : aucun article, document ni rubrique non issu de WordPress, sinon erreur ; liens internes écrits directement d'après l'ID WordPress (`?p=`, `?page_id=`, et slug résolu dans `wp_posts`), ce qui supprime la limite décrite au § 3.5 |
-| 2 | Corrections et fiabilité | cœur | codes de sortie conformes au comportement cible (§ 2.1) : `importer_mots` retiré de la liste par défaut, noms inconnus de `--traitements` refusés, échec d'un traitement signalé ; titres et textes de rubriques sans entités HTML ; option pour ne pas écraser l'adresse du site ; pipeline renommé `wp2spip_traitements`, l'ancien nom restant appelé pour compatibilité ; readme mis à jour (WordPress figé, rôle de `--update`) |
+| 2 | Corrections et fiabilité | cœur | codes de sortie conformes au comportement cible (§ 2.1) : `importer_mots` retiré de la liste par défaut, noms inconnus de `--traitements` refusés, échec d'un traitement signalé ; titres et textes de rubriques sans entités HTML ; option pour ne pas écraser l'adresse du site ; pipeline renommé `wp2spip_traitements`, l'ancien nom restant appelé pour compatibilité ; suppression de l'option `--update` et des branches de mise à jour dans les traitements ; readme mis à jour (WordPress figé, refaire un import = remise à zéro puis import complet) |
 | 3 | Balisage des blocs de l'éditeur | cœur | nettoyer `<figure>`, `<figcaption>`, classes `wp-block-*` et commentaires de blocs, en gardant les légendes ; galeries vers des documents |
 | 4 | Hiérarchie des pages | cœur | conserver la structure des pages parentes et enfants (décision ouverte, § 7) |
 | 5 | Étiquettes | cœur | `importer_mots` : `post_tag` → mots-clés d'un groupe dédié, liés aux articles |
@@ -308,4 +307,3 @@ Chaque sous-projet aura sa propre spec, puis son plan de réalisation.
 1. **Hiérarchie des pages** (sous-projet 4) : rattacher chaque page à la rubrique équivalente (quand l'arbre des catégories reproduit celui des pages), ou créer une rubrique par page parente, ou garder des pages uniques avec un lien vers leur parent ?
 2. **Ordre de priorité** de la feuille de route.
 3. **Fusion** de la branche `compat-spip-4.4` dans `master`, et publication d'une version 3.0.0.
-4. **Rôle de `--update`** : avec un WordPress figé, il ne sert plus à suivre un site qui évolue, mais à réappliquer les traitements après une amélioration de wp2spip. Le garder sous cette forme, ou le remplacer par une remise à zéro du SPIP suivie d'un nouvel import complet, plus simple à garantir ?
