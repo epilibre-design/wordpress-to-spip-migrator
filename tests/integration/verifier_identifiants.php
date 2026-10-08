@@ -8,6 +8,8 @@
  *   ?p= ou ?page_id= vers le site d'origine ne reste dans les textes ;
  * - contenus privés ou protégés : jamais publiés hors d'une zone d'Accès restreint, et,
  *   si le plugin est actif, publiés dans leur zone.
+ * - hiérarchie des pages : un lien a2a sous_page de chaque page parente vers chacune de ses
+ *   pages enfants, dans l'ordre Wordpress.
  *
  * Usage, depuis le site SPIP (base Wordpress déclarée sous le nom "wordpress") :
  *   spip php:eval 'include "<wp2spip>/tests/integration/verifier_identifiants.php";'
@@ -106,6 +108,42 @@ foreach ($restreints as $restreint) {
 	}
 }
 echo count($restreints) . " contenus privés ou protégés vérifiés" . ($acces ? '' : ' (sans Accès restreint)') . "\n";
+
+// Hiérarchie des pages : chaque page dont le parent est une page a exactement un lien a2a sous_page
+// depuis sa page parente ; les liens d'une page parente suivent l'ordre Wordpress (menu_order, titre, ID),
+// avec les rangs 1 à N ; les pages liées existent dans SPIP
+include_spip('inc/wp2spip_plugins');
+$attendus = array();
+foreach (sql_allfetsel('ID, post_parent', 'wp_posts', wp2spip_where_pages_enfants(), '', 'post_parent, menu_order, post_title, ID', '', '', $base) as $wp_page) {
+	$attendus[intval($wp_page['post_parent'])][] = intval($wp_page['ID']);
+}
+if (test_plugin_actif('a2a')) {
+	$trouves = array();
+	$rangs = array();
+	foreach (sql_allfetsel('id_article, id_article_lie, rang', 'spip_articles_lies', 'type_liaison = "sous_page"', '', 'id_article, rang') as $lien) {
+		$trouves[intval($lien['id_article'])][] = intval($lien['id_article_lie']);
+		$rangs[intval($lien['id_article'])][] = intval($lien['rang']);
+	}
+	foreach (array_unique(array_merge(array_keys($attendus), array_keys($trouves))) as $id_parent) {
+		$enfants = $trouves[$id_parent] ?? array();
+		if (($attendus[$id_parent] ?? array()) !== $enfants) {
+			$echecs[] = "page $id_parent : sous-pages " . join(',', $enfants) . ', attendues ' . join(',', $attendus[$id_parent] ?? array());
+		}
+		elseif ($rangs[$id_parent] !== range(1, count($enfants))) {
+			$echecs[] = "page $id_parent : rangs de sous-pages " . join(',', $rangs[$id_parent]) . ', attendus 1 à ' . count($enfants);
+		}
+		// Page Wordpress = article SPIP de même identifiant
+		foreach (array_merge(array($id_parent), $enfants) as $id_page) {
+			if (!sql_countsel('spip_articles', array('id_article = ' . $id_page, 'id_wordpress = ' . $id_page))) {
+				$echecs[] = "page $id_page : absente de SPIP, mais attendue ou liée par sous_page";
+			}
+		}
+	}
+}
+elseif ($attendus) {
+	$echecs[] = 'hiérarchie des pages : ' . array_sum(array_map('count', $attendus)) . ' pages enfants, mais a2a n’est pas actif';
+}
+echo array_sum(array_map('count', $attendus)) . " pages enfants vérifiées\n";
 
 $url_wordpress = sql_getfetsel('option_value', 'wp_options', 'option_name="siteurl"', '', '', '', '', $base);
 foreach (sql_allfetsel('id_article, texte', 'spip_articles', 'id_wordpress > 0') as $article) {

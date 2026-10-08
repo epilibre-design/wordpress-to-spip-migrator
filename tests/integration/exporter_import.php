@@ -84,6 +84,13 @@ if (test_plugin_actif('albums')) {
 	}
 }
 
+if (test_plugin_actif('a2a')) {
+	// Hiérarchie des pages : page parente, page enfant, rang
+	foreach (sql_allfetsel('*', 'spip_articles_lies', 'type_liaison = "sous_page"') as $l) {
+		$lignes[] = array('sous_page', 'article#' . $wp($articles, $l['id_article']), 'article#' . $wp($articles, $l['id_article_lie']), $l['rang']);
+	}
+}
+
 $lignes = array_map(function ($ligne) { return join("\t", $ligne); }, $lignes);
 sort($lignes);
 echo join("\n", $lignes) . "\n";
