@@ -17,7 +17,7 @@
 - Galerie : un album par galerie, toujours écrit `<albumN>` ; titre du contenu, suivi de « (galerie n) » s'il en a plusieurs ; statut `publie`, date du contenu ; documents dans l'ordre (`rang_lien`) ; album lié à l'article.
 - Mise en page : balise d'origine avec ses seules classes `wp-block-…` ; styles, autres classes, `aria-*`, `role`, `data-*` retirés.
 - Contenu embarqué : URL seule sur sa ligne, puis la légende.
-- Plugins requis (Albums si galerie, Accès restreint si contenu privé ou protégé, Forum si commentaire) installés **avant tout traitement, quels que soient les traitements demandés** ; `plugins/auto` (`core:preparer --auto`) et dépôt standard (`plugins:svp:depoter`) préparés s'ils manquent ; un appel de `plugins:svp:telecharger` par plugin ; méta `<préfixe>_base_version` effacée après téléchargement ; une seule relance (`WP2SPIP_RELANCE=1`) ; échec : code `1`, aucun traitement, commandes à lancer à la main.
+- Plugins requis (Albums si galerie, Accès restreint si contenu privé ou protégé, Forum si commentaire) installés **avant tout traitement, quels que soient les traitements demandés** ; `plugins/auto` (créé seul, droits de `plugins/`) et dépôt standard (`plugins:svp:depoter`) préparés s'ils manquent ; un appel de `plugins:svp:telecharger` par plugin ; méta `<préfixe>_base_version` effacée après téléchargement ; une seule relance (`WP2SPIP_RELANCE=1`) ; échec : code `1`, aucun traitement, commandes à lancer à la main.
 - SPIP-Cli n'est pas modifié.
 - Ne jamais nommer le site réel de test dans les fichiers versionnés ou les messages de commit ; messages de commit sans trailer.
 - Style du code : celui de wp2spip (tabulations, `array()`, commentaires en français).
@@ -26,11 +26,11 @@
 
 Le code de ce plan a été mis au point dans un prototype, sur des SPIP 4.4.28 préparés par `outils/preparer_spip.sh` : WordPress 6.9 et 7.1 importés complets avec installation automatique des plugins, vérificateur et test des conversions à OK, échec simulé (dépôt absent) correct. Constats intégrés au plan et à la spec :
 
-1. **SVP note la version du schéma sans créer les tables.** `plugins:svp:telecharger` installe le plugin dans son propre processus, qui ne connaît pas encore ses tables : la méta `<préfixe>_base_version` est écrite, `maj_tables` ne crée rien (constaté pour Albums, Accès restreint, polyhier ; `plugins:maj:bdd` ne fait ensuite plus rien). Le script de préparation n'y échappait que parce que l'installation de wp2spip met à jour toutes les tables. Remède sans toucher à SPIP-Cli : effacer la méta, puis `plugins:maj:bdd` dans un processus neuf, qui installe vraiment le plugin.
+1. **SVP note la version du schéma sans créer les tables.** `plugins:svp:telecharger` installe le plugin dans son propre processus, qui ne connaît pas encore ses tables : la méta `<préfixe>_base_version` est écrite, `maj_tables` ne crée rien (constaté pour Albums, Accès restreint, polyhier ; `plugins:maj:bdd` ne fait ensuite plus rien). Le script de préparation n'y échappait que parce que l'installation de wp2spip met à jour toutes les tables. Remède sans toucher à SPIP-Cli : effacer la méta, puis `plugins:maj:bdd` dans un processus neuf, qui installe vraiment le plugin. Contrôle : `wp2spip_tables_manquantes()` compare les tables et champs déclarés par SPIP et ses plugins actifs à la base (sur un SPIP qui a le défaut : `spip_articles.page, spip_rubriques_liens` ; sinon : rien).
 2. **Les plugins de `plugins-dist` sont toujours actifs en SPIP 4** : Forum ne peut pas être désactivé ; le scénario « Forum désactivé » de la spec est retiré.
 3. **`proc_open()` avec `STDOUT`** fait écrire le sous-processus au début d'un fichier de sortie redirigé, par-dessus ce qui précède : les sous-commandes héritent des descripteurs (aucun n'est passé).
-4. Couvertures à l'ancien format : texte dans le HTML propre du bloc (`<p class="wp-block-cover-text">`), pas dans un enfant. Légende d'un tableau collée à sa dernière ligne : syntaxe de tableau SPIP cassée. Le vérificateur ne peut pas interdire `style=` (blocs « HTML personnalisé », contenus classiques) ; `<!-- wp:` peut apparaître légitimement dans un bloc de code.
-5. Un SPIP installé sans `outils/preparer_spip.sh` (dont ceux de `tests/integration/`) n'a ni `plugins/auto` ni dépôt : SVP refuse alors de télécharger (« Le répertoire de paquets plugins/auto/ n'est pas accessible », « Le plugin … n'est pas référencé »). L'import les prépare avec les commandes de SPIP-Cli : `core:preparer --auto` et `plugins:svp:depoter` (dépôt standard) ; ensuite, `plugins:svp:telecharger` télécharge, active et installe chaque plugin avec ses dépendances.
+4. Une galerie du contenu 1031 cite une image (763) absente du WordPress de test : une galerie partiellement retrouvée devient l'album des images retrouvées, chaque image manquante comptée au bilan. Un bloc dynamique qui a du contenu enregistré garde ce contenu. Couvertures à l'ancien format : texte dans le HTML propre du bloc (`<p class="wp-block-cover-text">`), pas dans un enfant. Légende d'un tableau collée à sa dernière ligne : syntaxe de tableau SPIP cassée. Le vérificateur ne peut pas interdire `style=` (blocs « HTML personnalisé », contenus classiques) ; `<!-- wp:` peut apparaître légitimement dans un bloc de code.
+5. Un SPIP installé sans `outils/preparer_spip.sh` (dont ceux de `tests/integration/`) n'a ni `plugins/auto` ni dépôt : SVP refuse alors de télécharger (« Le répertoire de paquets plugins/auto/ n'est pas accessible », « Le plugin … n'est pas référencé »). L'import crée `plugins/auto` (seul : `core:preparer --auto` changerait aussi les droits de `config`, `IMG`, `local` et `tmp`) et déclare le dépôt standard par `plugins:svp:depoter` ; ensuite, `plugins:svp:telecharger` télécharge, active et installe chaque plugin avec ses dépendances.
 
 ## Environnement
 
@@ -60,25 +60,88 @@ Expected : `code 0`, `OK`.
 
 ---
 
-### Task 2 : script de préparation — schémas réellement installés
+### Task 2 : script de préparation — tables réellement créées
 
 **Files :**
-- Modify : `outils/preparer_spip.sh` (après la boucle `plugins:svp:telecharger`)
+- Create : `inc/wp2spip_plugins.php` (contrôle des tables ; complété à la Task 3)
+- Modify : `outils/preparer_spip.sh` (après la boucle `plugins:svp:telecharger` ; avant l'étape « Base externe du WordPress »)
 
 **Interfaces :**
-- Produces : après téléchargement, les méta `<préfixe>_base_version` de sale, pages et polyhier sont effacées, et `plugins:maj:bdd` les installe dans un processus neuf.
+- Produces : `wp2spip_tables_manquantes(): array` (tables « spip_x » et champs « spip_x.champ » déclarés par SPIP et ses plugins actifs, absents de la base) ; dans le script, méta `<préfixe>_base_version` de sale, pages et polyhier effacées après téléchargement, et arrêt si une table ou un champ manque après `plugins:maj:bdd`.
 
-- [ ] **Step 1 : constater le défaut**
+- [ ] **Step 1 : contrôle des tables**
 
-Sur un SPIP préparé par le script dans l'état actuel, `$ESSAIS/spip-sqlite` (tests du sous-projet 11) : le journal `$ESSAIS/sqlite.log` ne montre pas `Installation du plugin PolyHierarchy` ni `Installation du plugin Pages` dans la sortie de `plugins:maj:bdd` (leurs tables n'existent que grâce à l'installation de wp2spip) :
+`inc/wp2spip_plugins.php` :
 
-```bash
-sed 's/<[^>]*>//g' "$ESSAIS/sqlite.log" | grep -c "Installation du plugin PolyHierarchy\|Installation du plugin Pages"
+```php
+<?php
+
+/**
+ * Plugins requis par le contenu Wordpress
+ *
+ * La commande d'import les télécharge et les active avant le premier traitement
+ * (WordpressImporter::verifier_plugins()). Les critères sont ceux des traitements qui en ont besoin.
+ */
+
+if (!defined('_ECRIRE_INC_VERSION')) {
+	return;
+}
+
+/**
+ * Tables et champs déclarés par SPIP et ses plugins actifs, mais absents de la base
+ *
+ * Un plugin installé par SVP (plugins:svp:telecharger) dans un processus qui ne connaissait pas encore ses tables
+ * a la version de son schéma notée sans que ses tables soient créées : ce contrôle le révèle.
+ *
+ * @return array tables (« spip_albums ») et champs (« spip_articles.page ») manquants
+ */
+function wp2spip_tables_manquantes() {
+	include_spip('base/objets');
+	include_spip('base/serial');
+	include_spip('base/auxiliaires');
+	$manquants = array();
+	foreach (array_merge(lister_tables_principales(), lister_tables_auxiliaires()) as $table => $description) {
+		if (empty($description['field'])) {
+			continue;
+		}
+		if (!$existante = sql_showtable($table, true)) {
+			$manquants[] = $table;
+			continue;
+		}
+		foreach (array_keys($description['field']) as $champ) {
+			if (!isset($existante['field'][$champ])) {
+				$manquants[] = "$table.$champ";
+			}
+		}
+	}
+	return $manquants;
+}
 ```
 
-Expected : `0`.
+- [ ] **Step 2 : reproduire le défaut, et son remède**
 
-- [ ] **Step 2 : effacer les méta notées par SVP**
+Sur un SPIP neuf, sans wp2spip, `plugins:svp:telecharger` installe polyhier et pages sans créer leurs tables ; effacer leur méta puis lancer `plugins:maj:bdd` les crée :
+
+```bash
+s="$ESSAIS/spip-defaut-svp"
+rm -rf "$s"
+(cd "$ESSAIS" && "$SPIP_CLI" core:telecharger spip -R 4.4 -d spip-defaut-svp > /dev/null)
+cd "$s"
+"$SPIP_CLI" core:preparer --auto --droits 775 > /dev/null
+"$SPIP_CLI" core:installer --db-server sqlite3 --db-database spip --admin-pass Essai-Defaut-1 --admin-email admin@example.org > /dev/null
+"$SPIP_CLI" plugins:svp:depoter https://plugins.spip.net/depots/principal.xml > /dev/null
+"$SPIP_CLI" plugins:svp:telecharger polyhier -y > /dev/null
+"$SPIP_CLI" plugins:svp:telecharger pages -y > /dev/null
+"$SPIP_CLI" php:eval "include '$WP2SPIP/inc/wp2spip_plugins.php'; echo join(', ', wp2spip_tables_manquantes()) ?: 'aucun';"; echo
+"$SPIP_CLI" php:eval 'include_spip("inc/meta"); effacer_meta("polyhier_base_version"); effacer_meta("pages_base_version");'
+"$SPIP_CLI" plugins:maj:bdd > /dev/null
+"$SPIP_CLI" php:eval "include '$WP2SPIP/inc/wp2spip_plugins.php'; echo join(', ', wp2spip_tables_manquantes()) ?: 'aucun';"; echo
+cd "$WP2SPIP"
+```
+
+Expected : `spip_articles.page, spip_rubriques_liens`, puis `aucun`.
+
+- [ ] **Step 3 : le script efface les méta notées par SVP et contrôle les tables**
 
 Dans `outils/preparer_spip.sh`, après :
 
@@ -98,22 +161,36 @@ ajouter :
 ) || erreur "effacement des versions de schéma notées par plugins:svp:telecharger"
 ```
 
-- [ ] **Step 3 : tests de la préparation**
-
-Run : `tests/preparation/tester_preparer_spip.sh --complet` (réseau, une dizaine de minutes ; en arrière-plan)
-Expected : `0 échec(s)`, code `0` ; et cette fois :
+et juste avant `etape "Base externe du WordPress"` :
 
 ```bash
+# Tables et champs déclarés par les plugins actifs, mais absents de la base : la version d'un schéma peut être notée
+# sans que ses tables soient créées (plugins installés par SVP)
+tables_manquantes=$(spip_cli php:eval 'include_spip("inc/wp2spip_plugins"); echo join(", ", wp2spip_tables_manquantes());') \
+	|| erreur "contrôle des tables de la base impossible"
+[ -z "$tables_manquantes" ] || erreur "tables ou champs absents de la base après plugins:maj:bdd : $tables_manquantes"
+
+```
+
+- [ ] **Step 4 : tests de la préparation**
+
+Run : `tests/preparation/tester_preparer_spip.sh --complet` (réseau, une dizaine de minutes ; en arrière-plan)
+Expected : `0 échec(s)`, code `0` ; puis :
+
+```bash
+for spip in spip-sqlite spip-mysql spip-partagee; do
+	(cd "$ESSAIS/$spip" && "$SPIP_CLI" php:eval 'include_spip("inc/wp2spip_plugins"); echo join(", ", wp2spip_tables_manquantes()) ?: "aucun", "\n";')
+done
 sed 's/<[^>]*>//g' "$ESSAIS/sqlite.log" | grep -c "Installation du plugin PolyHierarchy\|Installation du plugin Pages"
 ```
 
-Expected : `2`.
+Expected : `aucun` trois fois, puis `2` (pages et polyhier installés par `plugins:maj:bdd`, et non plus rattrapés par l'installation de wp2spip).
 
-- [ ] **Step 4 : commit**
+- [ ] **Step 5 : commit**
 
 ```bash
-git add outils/preparer_spip.sh
-git commit -m "Préparation : installer réellement les plugins téléchargés par SVP, qui notait leur schéma sans créer leurs tables"
+git add inc/wp2spip_plugins.php outils/preparer_spip.sh
+git commit -m "Préparation : installer réellement les plugins téléchargés par SVP, qui notait leur schéma sans créer leurs tables, et contrôler les tables"
 ```
 
 ---
@@ -121,14 +198,14 @@ git commit -m "Préparation : installer réellement les plugins téléchargés p
 ### Task 3 : plugins requis par le contenu, téléchargés et activés par l'import
 
 **Files :**
-- Create : `inc/wp2spip_plugins.php`
+- Modify : `inc/wp2spip_plugins.php` (créé à la Task 2)
 - Modify : `spip-cli/WordpressImporter.php` (propriété, début de `execute()`, avant la boucle des traitements, nouvelles méthodes)
 - Modify : `wp2spip/importer_acces.php` (début de `wp2spip_importer_acces_dist()`)
 - Modify : `wp2spip/importer_commentaires.php` (début de `wp2spip_importer_commentaires_dist()`)
 - Modify : `paquet.xml`
 
 **Interfaces :**
-- Produces : `wp2spip_where_contenus_restreints(): array`, `wp2spip_where_commentaires(): array`, `wp2spip_where_galeries(): array` (conditions SQL sur `wp_posts` / `wp_comments`) ; `wp2spip_plugins_requis(string $base): array` (préfixe => `nom`, `table`, `dist`, `raison`), pipeline `wp2spip_plugins_requis` ; `wp2spip_plugin_pret(string $prefixe, array $plugin): bool` ; `wp2spip_plugin_present(string $prefixe): bool` ; `WordpressImporter::verifier_plugins(): ?int`, `preparer_telechargement(array $manquants): ?int` (`plugins/auto` et dépôt s'ils manquent ; constante `_WP2SPIP_DEPOT_SVP`), `echec_plugins()`, `lancer_spip_cli(array $arguments, array $environnement = array()): int`.
+- Produces : `wp2spip_where_contenus_restreints(): array`, `wp2spip_where_commentaires(): array`, `wp2spip_where_galeries(): array` (conditions SQL sur `wp_posts` / `wp_comments`) ; `wp2spip_plugins_requis(string $base): array` (préfixe => `nom`, `table`, `dist`, `raison`), pipeline `wp2spip_plugins_requis` ; `wp2spip_plugin_pret(string $prefixe, array $plugin): bool` ; `wp2spip_plugin_present(string $prefixe): bool` ; `WordpressImporter::verifier_plugins(): ?int`, `echec_plugins()`, `lancer_spip_cli(array $arguments, array $environnement = array()): int`.
 
 - [ ] **Step 1 : constater l'état actuel**
 
@@ -160,7 +237,7 @@ remettre_plugins() {
 
 - [ ] **Step 2 : détection des plugins requis**
 
-`inc/wp2spip_plugins.php` :
+Remplacer le contenu de `inc/wp2spip_plugins.php` par (le contrôle des tables de la Task 2 y reste) :
 
 ```php
 <?php
@@ -251,6 +328,36 @@ function wp2spip_plugins_requis($base) {
 function wp2spip_plugin_pret($prefixe, $plugin) {
 	include_spip('inc/plugin');
 	return test_plugin_actif($prefixe) and (empty($plugin['table']) or sql_showtable($plugin['table'], true));
+}
+
+/**
+ * Tables et champs déclarés par SPIP et ses plugins actifs, mais absents de la base
+ *
+ * Un plugin installé par SVP (plugins:svp:telecharger) dans un processus qui ne connaissait pas encore ses tables
+ * a la version de son schéma notée sans que ses tables soient créées : ce contrôle le révèle.
+ *
+ * @return array tables (« spip_albums ») et champs (« spip_articles.page ») manquants
+ */
+function wp2spip_tables_manquantes() {
+	include_spip('base/objets');
+	include_spip('base/serial');
+	include_spip('base/auxiliaires');
+	$manquants = array();
+	foreach (array_merge(lister_tables_principales(), lister_tables_auxiliaires()) as $table => $description) {
+		if (empty($description['field'])) {
+			continue;
+		}
+		if (!$existante = sql_showtable($table, true)) {
+			$manquants[] = $table;
+			continue;
+		}
+		foreach (array_keys($description['field']) as $champ) {
+			if (!isset($existante['field'][$champ])) {
+				$manquants[] = "$table.$champ";
+			}
+		}
+	}
+	return $manquants;
 }
 
 /**
@@ -462,6 +569,11 @@ Dans `spip-cli/WordpressImporter.php` :
 			ARRAY_FILTER_USE_BOTH
 		);
 		if (!$manquants) {
+			// Après l'installation (relance), toutes les tables déclarées doivent exister
+			if (getenv('WP2SPIP_RELANCE') and $tables = wp2spip_tables_manquantes()) {
+				$this->output->writeln('<error>Tables ou champs absents de la base après l’installation des plugins : ' . join(', ', $tables) . '.</error>');
+				return Command::FAILURE;
+			}
 			return null;
 		}
 		if (getenv('WP2SPIP_RELANCE')) {
@@ -503,8 +615,8 @@ Dans `spip-cli/WordpressImporter.php` :
 	/**
 	 * Dossier plugins/auto et dépôt de plugins, préparés s'ils manquent
 	 *
-	 * core:preparer --auto crée plugins/auto ; il aligne aussi les droits des dossiers d'écriture de SPIP
-	 * sur ceux qu'on lui donne (ici ceux de plugins/), et crée lib/ et .htaccess s'ils manquent.
+	 * Seul plugins/auto est créé, avec les droits de plugins/ : core:preparer --auto alignerait aussi les droits
+	 * de config, IMG, local et tmp, ce qui pourrait les rendre inaccessibles au serveur web d'un site déjà installé.
 	 *
 	 * @param array $manquants plugins requis non prêts
 	 * @return int|null null si le téléchargement est possible, sinon le code d'échec
@@ -512,13 +624,15 @@ Dans `spip-cli/WordpressImporter.php` :
 	protected function preparer_telechargement(array $manquants): ?int {
 		include_spip('inc/plugin');
 		if (!is_dir(_DIR_PLUGINS_AUTO)) {
-			$droits = substr(sprintf('%o', fileperms(_DIR_PLUGINS)), -3);
-			$this->output->writeln("<info>Création de plugins/auto, où SVP télécharge les plugins (droits $droits).</info>");
-			$this->lancer_spip_cli(array('core:preparer', '--auto', '--droits', $droits));
-			clearstatcache();
-			if (!is_dir(_DIR_PLUGINS_AUTO) or !is_writable(_DIR_PLUGINS_AUTO)) {
-				return $this->echec_plugins($manquants, 'plugins/auto absent ou non accessible en écriture après core:preparer --auto');
+			$droits = fileperms(_DIR_PLUGINS) & 0777;
+			$this->output->writeln('<info>Création de plugins/auto, où SVP télécharge les plugins (droits ' . decoct($droits) . ').</info>');
+			if (@mkdir(_DIR_PLUGINS_AUTO)) {
+				@chmod(_DIR_PLUGINS_AUTO, $droits);
 			}
+			clearstatcache();
+		}
+		if (!is_dir(_DIR_PLUGINS_AUTO) or !is_writable(_DIR_PLUGINS_AUTO)) {
+			return $this->echec_plugins($manquants, 'plugins/auto absent ou non accessible en écriture');
 		}
 		if (!sql_countsel('spip_depots')) {
 			$this->output->writeln('<info>Aucun dépôt de plugins : ajout de ' . _WP2SPIP_DEPOT_SVP . '.</info>');
@@ -542,7 +656,7 @@ Dans `spip-cli/WordpressImporter.php` :
 		$lignes = array(
 			"<error>Plugins requis par le contenu Wordpress non installés ($raison) : $prefixes.</error>",
 			'Aucun traitement n’a été lancé. Pour les installer à la main, depuis le dossier du SPIP :',
-			'  spip core:preparer --auto    (si plugins/auto n’existe pas)',
+			'  mkdir plugins/auto    (si plugins/auto n’existe pas ; accessible en écriture)',
 			'  spip plugins:svp:depoter ' . _WP2SPIP_DEPOT_SVP . '    (si aucun dépôt n’est déclaré)',
 		);
 		foreach ($manquants as $prefixe => $plugin) {
@@ -628,7 +742,7 @@ rm config/mes_options.php
 cd "$WP2SPIP"
 ```
 
-Expected : `code 1`, `0` traitement lancé, et le message : `Plugins requis par le contenu Wordpress non installés (dépôt de plugins impossible à ajouter) : albums accesrestreint.`, suivi des commandes à lancer à la main (`core:preparer --auto`, `plugins:svp:depoter …`, `plugins:svp:telecharger albums -y`, effacement de la méta, …, `plugins:activer albums accesrestreint -y`, `plugins:maj:bdd`).
+Expected : `code 1`, `0` traitement lancé, et le message : `Plugins requis par le contenu Wordpress non installés (dépôt de plugins impossible à ajouter) : albums accesrestreint.`, suivi des commandes à lancer à la main (`mkdir plugins/auto`, `plugins:svp:depoter …`, `plugins:svp:telecharger albums -y`, effacement de la méta, …, `plugins:activer albums accesrestreint -y`, `plugins:maj:bdd`).
 
 - [ ] **Step 9 : SPIP sans `plugins/auto` ni dépôt**
 
@@ -782,9 +896,17 @@ HTML,
 		'albums' => array(array('titre' => 'Essai', 'descriptif' => '', 'documents' => array(611, 616, 617, 754, 755, 756, 757, 758, 759, 760, 761, 762, 764, 765, 766, 767, 768, 769, 770, 771, 807, 1687, 1691))),
 	),
 	array(
+		'nom' => 'galerie dont une image manque : album des autres, image manquante signalée au bilan',
+		'contenu' => '[gallery ids="770,999999,771"]',
+		'attendu' => '<albumN>',
+		'albums' => array(array('titre' => 'Essai', 'descriptif' => '', 'documents' => array(770, 771))),
+		'introuvables' => 1,
+	),
+	array(
 		'nom' => 'galerie dont aucune image n’est retrouvée : pas d’album, HTML gardé',
 		'contenu' => '[gallery ids="999999"]',
 		'attendu' => '[gallery ids="999999"]',
+		'introuvables' => 1,
 	),
 	array(
 		'nom' => 'couverture, ancien format : texte dans le HTML du bloc',
@@ -869,6 +991,11 @@ HTML,
 		'attendu' => 'Texte',
 	),
 	array(
+		'nom' => 'bloc dynamique qui a du contenu enregistré : contenu gardé',
+		'contenu' => "<!-- wp:query {\"queryId\":2} -->\n<div class=\"wp-block-query\"><!-- wp:post-title /-->\n\n<!-- wp:query-no-results -->\n<!-- wp:paragraph -->\n<p>Aucun résultat</p>\n<!-- /wp:paragraph -->\n<!-- /wp:query-no-results --></div>\n<!-- /wp:query -->",
+		'attendu' => "<div class=\"wp-block-query\">\n\nAucun résultat\n\n</div>",
+	),
+	array(
 		'nom' => 'bloc inconnu : contenu gardé, passé par sale',
 		'contenu' => "<!-- wp:mon-extension/encart {\"couleur\":\"rouge\"} -->\n<div class=\"encart\"><p>Un encart</p></div>\n<!-- /wp:mon-extension/encart -->",
 		'attendu' => "<div class=\"encart\">Un encart\n\n</div>",
@@ -919,6 +1046,9 @@ foreach ($cas as $test) {
 	}
 	if (count($contexte['albums']) != count($test['albums'] ?? array())) {
 		$ecarts[] = count($contexte['albums']) . ' albums créés';
+	}
+	if ($contexte['bilan']['medias_introuvables'] != ($test['introuvables'] ?? 0)) {
+		$ecarts[] = $contexte['bilan']['medias_introuvables'] . ' médias introuvables au bilan, ' . ($test['introuvables'] ?? 0) . ' attendus';
 	}
 	foreach ($test['descriptifs'] ?? array() as $id_document => $descriptif) {
 		if (($obtenu_descriptif = sql_getfetsel('descriptif', 'spip_documents', 'id_document = ' . $id_document)) !== $descriptif) {
@@ -1210,7 +1340,23 @@ function wp2spip_bloc_vide($bloc, &$contexte) {
 	return '';
 }
 
+/**
+ * Bloc dynamique : retiré s'il n'a rien enregistré, sinon son contenu enregistré est gardé
+ *
+ * @param array $bloc
+ * @param array $contexte
+ * @return string
+ */
 function wp2spip_bloc_retirer($bloc, &$contexte) {
+	$interieur = wp2spip_blocs_interieur($bloc, $contexte);
+	// Contenu enregistré : du texte, ou un média, une fois les marqueurs réinsérés (des balises de structure vides ne comptent pas)
+	$apercu = wp2spip_restaurer_blocs($interieur, $contexte);
+	if (
+		trim(html_entity_decode(strip_tags($apercu))) !== ''
+		or preg_match('/<(?:img|doc|emb|album)\d+|<(?:img|iframe|video|audio)\b/i', $apercu)
+	) {
+		return $interieur;
+	}
 	$contexte['bilan']['dynamiques'][$bloc['nom']] = ($contexte['bilan']['dynamiques'][$bloc['nom']] ?? 0) + 1;
 	return '';
 }
@@ -1422,10 +1568,13 @@ function wp2spip_convertir_raccourci_gallery($raccourci, $attributs, &$contexte)
  * @return int id_album, ou 0 si aucune image n'est retrouvée
  */
 function wp2spip_creer_album($images, $legende, &$contexte) {
-	$images = array_values(array_filter($images, fn($image) => $image[0] > 0));
-	if (!$images) {
+	$trouvees = array_values(array_filter($images, fn($image) => $image[0] > 0));
+	if (!$trouvees) {
 		return 0;
 	}
+	// Images introuvables dans la médiathèque : l'album est créé sans elles, chacune est signalée au bilan
+	$contexte['bilan']['medias_introuvables'] += count($images) - count($trouvees);
+	$images = $trouvees;
 	include_spip('action/editer_objet');
 	include_spip('action/editer_liens');
 	$contexte['galerie']++;
@@ -1600,7 +1749,7 @@ function wp2spip_afficher_bilan_blocs($command, $bilan) {
 - [ ] **Step 5 : lancer le test**
 
 Run : `(cd "$ESSAIS/spip-blocs" && "$SPIP_CLI" php:eval "include '$WP2SPIP/tests/integration/tester_blocs.php';"); echo "code $?"`
-Expected : 17 lignes `ok`, puis `OK`, `code 0`. Relancé une seconde fois : même résultat (les albums et légendes des essais sont retirés à la fin).
+Expected : 19 lignes `ok`, puis `OK`, `code 0`. Relancé une seconde fois : même résultat (les albums et légendes des essais sont retirés à la fin).
 
 - [ ] **Step 6 : commit**
 
@@ -1695,7 +1844,7 @@ grep "Blocs convertis\|albums créés\|blocs dynamiques\|blocs inconnus\|médias
 (cd "$ESSAIS/spip-blocs" && "$SPIP_CLI" php:eval 'echo sql_countsel("spip_articles", "texte like \"%<!-- wp:%\""), " ", sql_countsel("spip_albums"), "\n";')
 ```
 
-Expected : `code 0` ; `Blocs convertis : [gallery] (12), audio (2), button (12), buttons (1), column (38), columns (12), cover (21), embed (5), file (3), gallery (10), group (24), image (14), media-text (6), more (2), nextpage (2), pullquote (4), quote (8), spacer (4), table (4), video (3).` ; `22 albums créés pour les galeries.` ; `54 blocs dynamiques retirés …` ; aucune ligne de blocs inconnus ni de médias introuvables ; puis `1 22` (seul reste un `<!-- wp:code` écrit dans le texte d'un bloc de code, contenu 1779).
+Expected : `code 0` ; `Blocs convertis : [gallery] (12), audio (2), button (12), buttons (1), column (40), columns (13), cover (21), embed (5), file (3), gallery (10), group (25), image (14), media-text (6), more (2), nextpage (2), pullquote (4), quote (8), spacer (4), table (4), video (3).` (les enfants des blocs dynamiques sont convertis avant de savoir si le bloc a du contenu, d'où quelques colonnes et groupes comptés puis retirés) ; `22 albums créés pour les galeries.` ; `107 blocs dynamiques retirés …` ; `1 médias de blocs ou de galeries introuvables …` (l'image 763, citée par la galerie du contenu 1031, n'existe pas dans le WordPress de test) ; aucune ligne de blocs inconnus ; puis `1 22` (seul reste un `<!-- wp:code` écrit dans le texte d'un bloc de code, contenu 1779).
 
 - [ ] **Step 4 : relecture des textes**
 
@@ -1824,7 +1973,7 @@ Expected, pour chacun : `code 0`, `2` plugins requis (Albums, Accès restreint),
 
 - [ ] **Step 2 : SPIP de test des WordPress 6.9 et 7.1**
 
-Ces SPIP, montés à la main, n'ont ni `plugins/auto` ni dépôt : le premier import les prépare (`core:preparer --auto`, qui crée aussi `.htaccess` et aligne les droits des dossiers d'écriture sur ceux de `plugins/`, et dépôt standard), puis installe Albums (et Accès restreint pour le 7.1). `remise_a_zero.sh` ne touche pas à `plugins/auto` : aux imports suivants, les plugins y sont déjà et n'ont plus qu'à être activés.
+Ces SPIP, montés à la main, n'ont ni `plugins/auto` ni dépôt : le premier import crée `plugins/auto` et déclare le dépôt standard, puis installe Albums (et Accès restreint pour le 7.1). `remise_a_zero.sh` ne touche pas à `plugins/auto` : aux imports suivants, les plugins y sont déjà et n'ont plus qu'à être activés.
 
 ```bash
 for n in 6 7; do
@@ -1894,7 +2043,7 @@ Dans `readme.md`, juste avant `## Refaire un import` :
 Les blocs de l'éditeur Wordpress sont convertis : images en `<imgN>` avec leur alignement (la légende devient le descriptif du document), médias en `<docN>`, mise en page (colonnes, groupes, couvertures, boutons…) gardée avec ses seules classes `wp-block-…`, que le squelette peut styler, contenus embarqués en URL seule sur sa ligne (le plugin oEmbed en fait un lecteur). Chaque galerie (bloc ou raccourci `[gallery]`) devient un album du plugin Albums, inséré par `<albumN>`. Les blocs dynamiques (derniers articles, recherche…), qui n'enregistrent rien dans le contenu, sont retirés. Le bilan de `importer_articles` détaille ces conversions.
 
 ## Plugins requis
-Avant le premier traitement, l'import télécharge et active les plugins dont le contenu a besoin : Albums s'il y a une galerie, Accès restreint s'il y a des contenus privés ou protégés, Forum s'il y a des commentaires ; puis il se relance. S'ils manquent, il crée le dossier `plugins/auto` (`spip core:preparer --auto`, qui aligne aussi les droits des dossiers d'écriture de SPIP sur ceux de `plugins/`) et déclare le dépôt standard `https://plugins.spip.net/depots/principal.xml` (constante `_WP2SPIP_DEPOT_SVP`, modifiable dans `mes_options.php`). Il faut SPIP-Cli avec les correctifs de `plugins:svp:telecharger`. En cas d'échec, rien n'est importé et les commandes à lancer à la main sont affichées.
+Avant le premier traitement, l'import télécharge et active les plugins dont le contenu a besoin : Albums s'il y a une galerie, Accès restreint s'il y a des contenus privés ou protégés, Forum s'il y a des commentaires ; puis il se relance. S'ils manquent, il crée le dossier `plugins/auto` (avec les droits de `plugins/`) et déclare le dépôt standard `https://plugins.spip.net/depots/principal.xml` (constante `_WP2SPIP_DEPOT_SVP`, modifiable dans `mes_options.php`). Il faut SPIP-Cli avec les correctifs de `plugins:svp:telecharger`. En cas d'échec, rien n'est importé et les commandes à lancer à la main sont affichées.
 ````
 
 Et dans la section « Pour les devs », ajouter :
