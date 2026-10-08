@@ -33,10 +33,17 @@ function wp2spip_importer_documents_dist($command) {
 		include_spip('action/ajouter_documents');
 		include_spip('inc/distant');
 		include_spip('inc/flock');
+		include_spip('inc/wp2spip');
 		$ajouter_un_document = charger_fonction('ajouter_un_document', 'action');
+		
+		// Chaque document prend l'identifiant de son média : ils doivent tous être libres
+		if (!wp2spip_verifier_identifiants($command, 'document', array_column($wp_attachments, 'ID'))) {
+			return false;
+		}
 		
 		$nb_attachments = count($wp_attachments);
 		$nb_import = 0;
+		$nb_refuses = 0;
 		$command->output->writeln("$nb_attachments documents joints à importer.");
 		
 		$progressBar = new ProgressBar($command->output, $nb_attachments);
@@ -59,13 +66,14 @@ function wp2spip_importer_documents_dist($command) {
 			}
 			
 			if (is_readable($chemin)) {
+				$id_document = $id_wordpress;
+				
 				// On compose le document SPIP
 				$document = array(
 					'titre' => $wp_attachment['post_title'],
 					'descriptif' => sale($wp_attachment['post_content'] ?: $wp_attachment['post_excerpt']),
 					'date' => $wp_attachment['post_date'],
 					'maj' => $wp_attachment['post_modified'],
-					'id_wordpress' => $id_wordpress,
 				);
 				
 				// On compose le FILE
@@ -76,21 +84,30 @@ function wp2spip_importer_documents_dist($command) {
 					'mode' => 'auto',
 				);
 				
-				// Si ça n'a pas déjà été importé c'est un ajout
-				if (!$id_document = sql_getfetsel('id_document', 'spip_documents', 'id_wordpress = '.$id_wordpress)) {
-					// On ajoute le document avec la fonction dédiée
-					if ($id_document = $ajouter_un_document('new', $file, null, null, 'auto')) {
-						// INSUP
-						autoriser_exception('modifier', 'document', $id_document, true);
-						autoriser_exception('instituer', 'document', $id_document, true);
+				// Document créé vide avec l'identifiant du média et son id_wordpress, en une seule insertion,
+				// puis le fichier installé dedans : ajouter_un_document() met à jour un document existant
+				if (objet_inserer('document', null, array('id_document' => $id_document, 'id_wordpress' => $id_wordpress)) != $id_document) {
+					return wp2spip_erreur_insertion($command, 'document', $id_document);
+				}
+				$retour = $ajouter_un_document($id_document, $file, null, null, 'auto');
+				
+				// Fichier refusé (type non autorisé, taille…) : pas de document vide
+				if (intval($retour) !== $id_document) {
+					sql_delete('spip_documents', 'id_document = ' . $id_document);
+					$nb_refuses++;
+					if ($command->output->isVerbose()) {
+						$command->output->writeln("\nMédia Wordpress $id_wordpress refusé : " . (is_string($retour) ? $retour : basename($chemin)));
 					}
 				}
-				
-				// Si on a un id_document, c'est qu'on vient d'insérer ou qu'on doit mettre à jour
-				if ($id_document) {
-					if ($ok = objet_modifier('document', $id_document, $document)) {
-						$nb_import++;
+				else {
+					// INSUP
+					autoriser_exception('modifier', 'document', $id_document, true);
+					autoriser_exception('instituer', 'document', $id_document, true);
+					
+					if ($erreur = objet_modifier('document', $id_document, $document)) {
+						return wp2spip_erreur_modification($command, 'document', $id_document, $erreur);
 					}
+					$nb_import++;
 					
 					// Ajouter l'URL libre
 					if ($wp_attachment['post_name']) {
@@ -104,12 +121,11 @@ function wp2spip_importer_documents_dist($command) {
 							)
 						);
 					}
-					
-					// Si distant, on supprime la copie locale temporaire
-					if ($distant) {
-						supprimer_fichier($chemin);
-						$distant = false;
-					}
+				}
+				
+				// Si distant, on supprime la copie locale temporaire
+				if ($distant) {
+					supprimer_fichier($chemin);
 				}
 			}
 			
@@ -118,5 +134,8 @@ function wp2spip_importer_documents_dist($command) {
 		
 		// Une ligne vide à la fin
 		$command->output->writeln('');
+		if ($nb_refuses) {
+			$command->output->writeln("$nb_refuses médias refusés par SPIP (type de fichier non autorisé…), non importés (détail avec -v).");
+		}
 	}
 }
