@@ -112,7 +112,7 @@ Un plugin peut donc surcharger un traitement, ou en fournir une variante pour un
 | pages (≥ 2.0.0) | `necessite` | pages WordPress → pages uniques |
 | polyhier (≥ 4.0.0) | `necessite` | catégories multiples → rubriques secondaires |
 | forum | `utilise` | commentaires → messages de forum |
-| accesrestreint | `utilise` | contenus privés ou protégés → zones restreintes |
+| accesrestreint | `utilise` ; téléchargé et activé par wp2spip si le WordPress a des contenus privés ou protégés (sous-projet 3, spec des blocs § 4) | contenus privés ou protégés → zones restreintes |
 
 ## 3. Fonctionnalités, traitement par traitement
 
@@ -204,7 +204,7 @@ La recherche du document à partir d'une URL (`wp2spip_chercher_document()`) :
 
 ### 3.6 `importer_acces`
 
-- Si Accès restreint n'est pas actif : message, et les contenus privés ou protégés restent non publiés.
+- Accès restreint est téléchargé et activé par la commande dès que le WordPress a des contenus privés ou protégés (sous-projet 3). S'il n'est pas actif malgré tout : arrêt en échec (code `1`). Jusqu'au sous-projet 3, le comportement est : message, et les contenus privés ou protégés restent non publiés.
 - S'il est actif : chaque contenu **privé**, ou **protégé par mot de passe** et publié/programmé, est lié à une zone, puis publié (date WordPress conservée) ; si l'association ou la publication échoue, le traitement s'arrête en échec :
   - « WordPress : contenus privés » ;
   - « WordPress : contenus protégés par mot de passe ».
