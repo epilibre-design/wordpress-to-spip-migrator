@@ -74,7 +74,7 @@ L'import est une suite de **traitements**, exécutés dans cet ordre :
 8. `importer_polyhierarchie`
 9. `importer_commentaires`
 
-`importer_mots` (étiquettes) viendra avec le sous-projet 5, entre `importer_rubriques` et `importer_documents`.
+`importer_mots` (étiquettes) viendra avec le sous-projet 5, entre `importer_hierarchie_pages` et `importer_acces` : il lie les mots aux articles, qui doivent donc exister (spec `2026-10-09-wp2spip-etiquettes-design.md`).
 
 Les contenus WordPress sont lus dans l'ordre de leur identifiant : deux imports d'un même WordPress produisent le même résultat.
 
@@ -319,7 +319,7 @@ Chaque sous-projet aura sa propre spec, puis son plan de réalisation.
 | 11 | Préparation d'un SPIP (réalisé **avant** le 3) — **réalisé** | outil | script `outils/preparer_spip.sh` qui télécharge et installe SPIP, ses plugins et wp2spip, déclare la base WordPress, puis peut lancer l'import, en s'appuyant sur les commandes actuelles de SPIP-Cli et en contrôlant le résultat de chaque étape (spec `2026-10-08-wp2spip-preparation-spip-design.md`) ; médias de nouveau importés sur SPIP 4.4.28 (medias 4.4.15 refusait tous les fichiers en ligne de commande) |
 | 3 | Balisage des blocs de l'éditeur — **réalisé** | cœur | nettoyer `<figure>`, `<figcaption>`, classes `wp-block-*` et commentaires de blocs, en gardant les légendes ; galeries vers des documents |
 | 4 | Hiérarchie des pages — **réalisé** | cœur | conserver la structure des pages parentes et enfants : liens a2a `sous_page` entre pages uniques, a2a installé par l'import (spec `2026-10-08-wp2spip-hierarchie-pages-design.md`) |
-| 5 | Étiquettes | cœur | `importer_mots` : `post_tag` → mots-clés d'un groupe dédié, liés aux articles |
+| 5 | Étiquettes | cœur | `importer_mots` : `post_tag` → mots-clés d'un groupe dédié, liés aux articles (spec `2026-10-09-wp2spip-etiquettes-design.md`) |
 | 6 | Préfixe des tables | cœur | option `--prefixe` (défaut `wp_`), y compris pour la méta des rôles (`<prefixe>capabilities`) |
 | 7 | Tests automatisés | cœur | tests PHPUnit des fonctions de conversion, et tests d'intégration sur le contenu *Theme Unit Test* |
 | 8 | `wp2spip_yoast` | extension | catégorie principale Yoast comme rubrique principale (traitement inséré après `importer_articles`, avant `importer_polyhierarchie`) ; ensuite, titre SEO et méta-description |

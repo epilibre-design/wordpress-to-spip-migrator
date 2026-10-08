@@ -1674,7 +1674,7 @@ Chacun suit le cycle de la spec (§ 6) : spec détaillée, relecture, puis plan 
 
 ### Task 15 : sous-projet 5 — étiquettes (`importer_mots`)
 
-- [ ] Spec : `post_tag` → mots-clés d'un groupe dédié, liés aux articles ; réintégrer `importer_mots` dans la liste par défaut, entre `importer_rubriques` et `importer_documents`.
+- [x] Spec : `docs/superpowers/specs/2026-10-09-wp2spip-etiquettes-design.md` (`post_tag` → mots-clés du groupe « Étiquettes », `id_mot` = `term_id` ; `importer_mots` entre `importer_hierarchie_pages` et `importer_acces`, après la création des articles ; échec si un contenu lié manque).
 - [ ] Plan, réalisation ; validation : 114 étiquettes du contenu de test, liens conformes à `wp_term_relationships`.
 
 ### Task 16 : sous-projet 6 — préfixe des tables
