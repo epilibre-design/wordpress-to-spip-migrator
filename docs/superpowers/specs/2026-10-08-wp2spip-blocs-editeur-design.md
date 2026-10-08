@@ -2,7 +2,7 @@
 
 Date : 2026-10-08
 Spec d'ensemble : `2026-10-08-wp2spip-ensemble-design.md`, § 6, sous-projet 3.
-Statut : design validé, à planifier.
+Statut : design validé, planifié (plan : `docs/superpowers/plans/2026-10-08-wp2spip-blocs-editeur.md`).
 
 ## 1. Constat
 
@@ -37,7 +37,7 @@ Un site sous éditeur classique n'est presque pas concerné (le site réel n'a q
 `importer_articles` passe le contenu brut à `wp2spip_convertir_blocs()` **avant** sale :
 
 1. **Analyse** : le contenu est découpé en arbre de blocs, comme le fait `parse_blocks()` de WordPress : nom (`core/` implicite), attributs JSON, HTML interne, blocs enfants ; les blocs auto-fermants (`<!-- wp:nom /-->`) sont pris en compte ; le HTML hors bloc est gardé tel quel. Un contenu sans `<!-- wp:` n'est pas modifié.
-2. **Conversion** : chaque bloc est confié à la fonction de son type, qui reçoit le bloc (nom, attributs, HTML interne, enfants déjà convertis) et retourne du texte.
+2. **Conversion** : chaque bloc est confié à la fonction de son type, qui reçoit le bloc tel qu'analysé (nom, attributs, morceaux : son HTML propre et ses blocs enfants, dans l'ordre) et retourne du texte ; elle convertit elle-même les enfants qu'elle garde (`wp2spip_blocs_interieur()`), ce qui permet à une galerie de lire ses images plutôt que leur conversion.
 3. **Protection** : ce qu'une conversion produit en raccourcis SPIP ou en balises de structure est remplacé par un marqueur (`wp2spipbloc<N>`, sur sa propre ligne) le temps du passage par sale, puis réinséré ; le texte libre à l'intérieur des blocs passe par sale comme aujourd'hui.
 
 Fichier : `inc/wp2spip_blocs.php` (analyseur, aiguillage, conversions). Les conversions existantes de `importer_articles` (liens, `[caption]`, `<img>`, lecteurs audio et vidéo) s'appliquent ensuite inchangées au texte obtenu.
@@ -54,9 +54,9 @@ Les identifiants des attributs (`id`, `ids`, `data-id`) et des classes `wp-image
 |---|---|
 | `image` | `<imgN\|alignement>` (attribut `align` : left, right, center ; wide et full → center) ; légende (`figcaption`) → descriptif du document ; lien sur l'image → `[<imgN\|alignement>->lien]` (lien interne converti comme les autres) |
 | `gallery` | album (§ 3.4) → `<albumN>` ; légende de la galerie → descriptif de l'album |
-| `cover` | `<div class="wp-block-cover">` contenant `<docN>` de l'image ou de la vidéo de fond, puis le texte du bloc |
-| `media-text` | `<div class="wp-block-media-text">` contenant `<docN>` puis le texte |
-| `columns`, `column`, `group`, `buttons`, `pullquote`, `table`, `quote` | balise d'origine avec sa seule classe `wp-block-…` (et `is-style-…` retiré) ; contenu converti |
+| `cover` | `<div class="wp-block-cover">` contenant `<docN>` de l'image ou de la vidéo de fond, puis le texte du bloc : blocs enfants, ou HTML propre du bloc (ancien format, `<p class="wp-block-cover-text">`), sans l'enveloppe, le média ni le voile décoratif |
+| `media-text` | `<div class="wp-block-media-text">` contenant `<docN>` puis le texte, extrait de la même façon |
+| `columns`, `column`, `group`, `buttons`, `pullquote`, `table`, `quote` | balise englobante d'origine avec ses seules classes `wp-block-…` ; HTML propre nettoyé (classes `wp-block-…` seules, et seuls attributs `href`, `src`, `alt`, `colspan`, `rowspan`, `scope`) ; enfants convertis ; une légende (`figcaption`, d'un tableau…) dans son propre paragraphe, pour ne pas casser la dernière ligne d'un tableau SPIP |
 | `button` | `[texte->url]` dans `<div class="wp-block-button">` |
 | `audio`, `video`, `file` | `<docN>` |
 | `embed`, `core-embed/*` | URL seule entre deux lignes vides, puis la légende |
@@ -87,16 +87,21 @@ Avant le premier traitement, **quels que soient les traitements demandés** (`--
 |---|---|
 | Albums (`albums`) | une galerie : un bloc `wp:gallery` ou un raccourci `[gallery` dans un contenu (`post`, `page`) |
 | Accès restreint (`accesrestreint`) | un contenu (`post`, `page`) privé, ou protégé par mot de passe et publié ou programmé — ceux que publie `importer_acces` |
-| Forum (`forum`) | un commentaire à importer : approuvé ou en attente, de type `comment` ou vide (WordPress < 5.5) — ceux que retient `importer_commentaires`. Forum est livré avec SPIP (`plugins-dist`) : il est seulement activé, sans téléchargement |
+| Forum (`forum`) | un commentaire à importer : approuvé ou en attente, de type `comment` ou vide (WordPress < 5.5) — ceux que retient `importer_commentaires`. Forum est livré avec SPIP (`plugins-dist`) et toujours actif en SPIP 4 (les plugins de `plugins-dist` ne peuvent pas être désactivés) : il n'est activé que s'il ne l'est pas, sans téléchargement |
 
 1. Elle détecte les plugins requis d'après ce tableau.
-2. Pour ceux qui ne sont pas actifs — le cas normal pour Albums et Accès restreint, le SPIP de départ étant vierge —, elle l'annonce, puis lance en sous-processus, avec l'exécutable SPIP-Cli en cours : `plugins:svp:telecharger <préfixe> -y` pour chacun de ceux qui ne sont pas présents sur le disque, `plugins:activer <préfixes> -y`, puis `plugins:maj:bdd`.
+2. Pour ceux qui ne sont pas prêts (actifs, et leur table créée) — le cas normal pour Albums et Accès restreint, le SPIP de départ étant vierge —, elle l'annonce, puis lance en sous-processus, avec l'exécutable SPIP-Cli en cours, qui héritent de ses entrée et sorties :
+   - pour chacun de ceux qui ne sont pas présents sur le disque, `plugins:svp:telecharger <préfixe> -y`, **un appel par plugin** (dans un même appel, SPIP-Cli retente les téléchargements des précédents), suivi d'un contrôle sur le disque (le code de sortie de cette commande ne dit pas si le téléchargement a réussi) ;
+   - puis l'effacement de la méta `<préfixe>_base_version` de chaque plugin téléchargé : SVP l'installe dans un processus qui ne connaît pas encore ses tables, si bien que la version de son schéma est notée **sans que ses tables soient créées** (constaté pour Albums, Accès restreint et polyhier) ; effacée, elle fait installer le plugin par `plugins:maj:bdd`, dans un processus neuf ;
+   - `plugins:activer <préfixes> -y`, puis `plugins:maj:bdd`.
 3. Le processus en cours ne connaît pas un plugin activé après son démarrage (tables, API, pipelines). La commande d'import est donc **relancée** dans un processus neuf, avec les mêmes arguments et la variable d'environnement `WP2SPIP_RELANCE=1` ; son code de sortie devient celui de la commande. Une seule relance : si un plugin requis n'est toujours pas actif, c'est un échec.
 4. **Échec** (dépôt SVP absent, réseau, plugin introuvable, plugin toujours inactif après la relance) : message qui donne les commandes à lancer à la main, et code `1`, avant tout traitement.
 
-Cette étape est une fonction de la commande (`WordpressImporter::verifier_plugins()`), pas un traitement de la liste : elle ne peut pas être écartée par `--traitements`. La liste des plugins requis et leurs règles de détection sont extensibles par le pipeline `wp2spip_plugins_requis` (une extension de wp2spip peut y déclarer les siens, par exemple Champs Extras).
+Les critères de détection sont ceux des traitements (`inc/wp2spip_plugins.php`, partagés avec `importer_acces` et `importer_commentaires`). Cette étape est une fonction de la commande (`WordpressImporter::verifier_plugins()`), pas un traitement de la liste : elle ne peut pas être écartée par `--traitements`. La liste des plugins requis et leurs règles de détection sont extensibles par le pipeline `wp2spip_plugins_requis` (une extension de wp2spip peut y déclarer les siens, par exemple Champs Extras).
 
 `plugins:svp:telecharger` ne fonctionne qu'avec la version corrigée de SPIP-Cli (correctifs proposés en amont : sélection du plugin, autorisation, remontée des erreurs). Le message d'échec le mentionne.
+
+**Script de préparation** (sous-projet 11) : il installe sale, pages et polyhier par `plugins:svp:telecharger`, et souffre du même défaut ; ses tables n'existaient que parce que l'installation de wp2spip met à jour toutes les tables (`maj_tables(true)`). Il efface lui aussi la méta de chaque plugin téléchargé avant `plugins:activer` et `plugins:maj:bdd`, si bien que son contrôle des schémas porte sur une installation réelle.
 
 **Conséquence sur `importer_acces` et `importer_commentaires`** (spec d'ensemble, §§ 3.6 et 3.8) : leur plugin étant activé dès qu'il est requis, les cas « plugin absent, contenus laissés non publiés » et « Forum absent, commentaires non importés » ne se produisent plus dans un import normal. Il reste une sécurité : si le plugin n'est pas actif malgré tout alors que le contenu en a besoin, le traitement s'arrête en échec (code `1`) au lieu de continuer, pour que rien ne soit perdu sans que l'import le signale.
 
@@ -115,12 +120,12 @@ Cette étape est une fonction de la commande (`WordpressImporter::verifier_plugi
 
 ## 7. Validation
 
-- **`tests/integration/tester_blocs.php`** (lancé par `spip php:eval`, code `1` en cas d'écart) : fragments tirés du contenu *Theme Unit Test* (image alignée et légendée, galerie avant et après 5.9, couverture, colonnes, bouton, embarqué, bloc dynamique, bloc inconnu, `[gallery]` avec et sans `ids`) et texte attendu après conversion.
-- **`verifier_identifiants.php`**, complété : aucun `<!-- wp:` ni attribut `style=` dans les textes ; classes `wp-block-…` limitées à la liste conservée ; chaque `<albumN>` désigne un album existant, lié à l'article et contenant au moins un document.
-- **Installation des plugins** : depuis un SPIP vierge sans Albums ni Accès restreint, Forum désactivé, `--traitements=importer_articles` seul : les trois plugins sont téléchargés ou activés et la commande est relancée (le contenu final n'est pas vérifié dans ce scénario : ni les documents ni les zones ne sont importés) ;
-- **WordPress 6.9 et 7.1** : import complet depuis un SPIP vierge sans Albums ni Accès restreint, Forum désactivé (téléchargement, activation et relance automatiques), puis vérification du contenu (albums complets, contenu protégé publié dans sa zone, commentaires importés) ; relecture des textes des contenus *Block: …* et *WP 6.1 … blocks*.
-- **Site réel** : depuis un SPIP vierge sans Accès restreint, téléchargement et activation automatiques (98 contenus privés), puis export identique à la référence, hors le contenu qui a un bloc.
-- **Échec du téléchargement** simulé (dépôt SVP absent) : code `1`, aucun traitement lancé.
+- **`tests/integration/tester_blocs.php`** (lancé par `spip php:eval`, code `1` en cas d'écart) : fragments tirés du contenu *Theme Unit Test* (image alignée et légendée, galerie avant et après 5.9, couverture des deux formats, colonnes, tableau légendé, bouton, embarqué, vidéo, blocs dynamiques, bloc inconnu, contenu sans bloc, `[gallery]` avec et sans `ids`, galerie sans image retrouvée) et texte attendu après conversion ; les albums et légendes des essais ne restent pas dans le site.
+- **`verifier_identifiants.php`**, complété : aucun `<!-- wp:` hors des blocs de code ; aucune classe de présentation `has-…` ou `is-…` ; chaque `<albumN>` désigne un album existant, lié à l'article et contenant au moins un document. Pas de règle sur `style=` : le HTML d'un bloc « HTML personnalisé », et celui des contenus de l'éditeur classique, sont gardés tels quels. **`exporter_import.php`** exporte aussi les albums (titre, descriptif, statut, date, article, documents dans l'ordre).
+- **Installation des plugins** : depuis un SPIP préparé par `outils/preparer_spip.sh` (sans Albums ni Accès restreint), `--traitements=importer_articles` seul : les plugins sont téléchargés, installés avec leurs tables, et la commande est relancée (le contenu final n'est pas vérifié dans ce scénario : ni les documents ni les zones ne sont importés). Forum, toujours actif en SPIP 4, n'est pas concerné.
+- **WordPress 6.9 et 7.1** : `outils/preparer_spip.sh --importer` depuis un dossier vide (téléchargement, installation et relance automatiques), puis vérificateur et `tester_blocs.php` à OK ; relecture des textes des contenus *Block: …* et *WP 6.1 … blocks*. Les SPIP de test de `tests/integration/` reçoivent un dépôt SVP dans de nouveaux états vierges, pour que l'import y installe aussi les plugins requis.
+- **Site réel** : préparation et import depuis un dossier vide (téléchargement et activation automatiques d'Accès restreint, 98 contenus privés), vérificateur à OK ; et, sur son SPIP de test, export identique à celui de la version précédente de wp2spip, hors le contenu qui a un bloc.
+- **Échec du téléchargement** simulé (dépôt SVP absent) : code `1`, aucun traitement lancé, message qui donne les commandes à lancer à la main.
 
 ## 8. Hors périmètre
 

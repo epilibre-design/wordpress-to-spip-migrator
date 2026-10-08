@@ -1661,8 +1661,9 @@ Chacun suit le cycle de la spec (§ 6) : spec détaillée, relecture, puis plan 
 
 ### Task 13 : sous-projet 3 — balisage des blocs de l'éditeur
 
-- [ ] Spec : nettoyage de `<figure>`, `<figcaption>`, classes `wp-block-*`, commentaires `<!-- wp:… -->` ; légendes gardées ; galeries → documents liés et modèle SPIP ; images de fond des blocs « Couverture ».
-- [ ] Plan, réalisation, validation sur WP 6.9 / 7.1 (le contenu *Theme Unit Test* contient ces blocs) : plus aucun `wp-block-` ni `<!-- wp:` dans `spip_articles.texte`.
+- [x] Spec : `docs/superpowers/specs/2026-10-08-wp2spip-blocs-editeur-design.md` (blocs convertis avant sale, structure gardée avec les seules classes `wp-block-…`, galeries → albums `<albumN>`, embarqués en URL, plugins requis téléchargés et activés par l'import puis relance).
+- [x] Plan : `docs/superpowers/plans/2026-10-08-wp2spip-blocs-editeur.md` (code mis au point sur un prototype ; SVP notait le schéma des plugins sans créer leurs tables, corrigé aussi dans le script de préparation).
+- [ ] Réalisation ; validation sur WP 6.9 / 7.1 depuis un dossier vide et sur leurs SPIP de test, et sur le site réel : vérificateur (plus de `<!-- wp:` hors code, ni de classe `has-…`/`is-…`, albums complets) et test des conversions à OK.
 
 ### Task 14 : sous-projet 4 — hiérarchie des pages
 
