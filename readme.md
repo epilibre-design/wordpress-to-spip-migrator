@@ -43,6 +43,11 @@ Help:
 ## Importer un site qui continue de vivre
 Par défaut quand on lance la commande plusieurs fois, les contenus déjà importés ne le sont pas plusieurs fois. Avec l'option `--update` cela permet de mettre à jour le contenu déjà importé avec le contenu plus à jour du Wordpress, si jamais il continuait d'évoluer.
 
+## Contenus privés et protégés par mot de passe
+Les contenus privés ou protégés par mot de passe dans Wordpress ne sont jamais publiés tels quels.
+
+Si le plugin [Accès restreint](https://contrib.spip.net/Acces-Restreint-3-0) est actif, ils sont publiés dans une zone réservée aux visiteurs identifiés (une zone pour les contenus privés, une pour les contenus protégés). Les mots de passe Wordpress ne sont pas repris. Sinon, ils restent non publiés.
+
 ## Pour les devs
 Chaque contenu possible à importer est implémenté dans des traitements `wp2spip_<traitement>` dans des fichiers `wp2spip/<traitement>.php`.
 

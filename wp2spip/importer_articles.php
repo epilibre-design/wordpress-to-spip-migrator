@@ -205,10 +205,16 @@ function wp2spip_importer_articles_dist($command) {
 				'draft' => 'prepa',
 				'pending' => 'prop',
 				'future' => 'publie', // publié mais à une date future
+				'private' => 'prepa', // réservé aux éditeurs : publié ensuite dans une zone par importer_acces
 				'trash' => 'poubelle',
 			);
 			if (isset($correspondance_statuts[$wp_post['post_status']])) {
 				$statut = $correspondance_statuts[$wp_post['post_status']];
+			}
+			// Un contenu protégé par mot de passe ne doit pas devenir public :
+			// importer_acces le publiera dans une zone restreinte si Accès restreint est actif
+			if ($statut == 'publie' and $wp_post['post_password'] !== '') {
+				$statut = 'prepa';
 			}
 			
 			// On compose l'article SPIP

@@ -22,4 +22,5 @@
 	<necessite nom="pages" compatibilite="[2.0.0;]" />
 	<necessite nom="polyhier" compatibilite="[4.0.0;]" />
 	<utilise nom="forum" />
+	<utilise nom="accesrestreint" />
 </paquet>
