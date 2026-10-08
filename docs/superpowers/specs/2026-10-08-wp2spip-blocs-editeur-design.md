@@ -117,7 +117,8 @@ Cette étape est une fonction de la commande (`WordpressImporter::verifier_plugi
 
 - **`tests/integration/tester_blocs.php`** (lancé par `spip php:eval`, code `1` en cas d'écart) : fragments tirés du contenu *Theme Unit Test* (image alignée et légendée, galerie avant et après 5.9, couverture, colonnes, bouton, embarqué, bloc dynamique, bloc inconnu, `[gallery]` avec et sans `ids`) et texte attendu après conversion.
 - **`verifier_identifiants.php`**, complété : aucun `<!-- wp:` ni attribut `style=` dans les textes ; classes `wp-block-…` limitées à la liste conservée ; chaque `<albumN>` désigne un album existant, lié à l'article et contenant au moins un document.
-- **WordPress 6.9 et 7.1** : import depuis un SPIP vierge sans Albums ni Accès restreint, Forum désactivé (téléchargement, activation et relance automatiques), y compris avec `--traitements=importer_articles` seul, puis vérification (le contenu protégé est publié dans sa zone) ; relecture des textes des contenus *Block: …* et *WP 6.1 … blocks*.
+- **Installation des plugins** : depuis un SPIP vierge sans Albums ni Accès restreint, Forum désactivé, `--traitements=importer_articles` seul : les trois plugins sont téléchargés ou activés et la commande est relancée (le contenu final n'est pas vérifié dans ce scénario : ni les documents ni les zones ne sont importés) ;
+- **WordPress 6.9 et 7.1** : import complet depuis un SPIP vierge sans Albums ni Accès restreint, Forum désactivé (téléchargement, activation et relance automatiques), puis vérification du contenu (albums complets, contenu protégé publié dans sa zone, commentaires importés) ; relecture des textes des contenus *Block: …* et *WP 6.1 … blocks*.
 - **Site réel** : depuis un SPIP vierge sans Accès restreint, téléchargement et activation automatiques (98 contenus privés), puis export identique à la référence, hors le contenu qui a un bloc.
 - **Échec du téléchargement** simulé (dépôt SVP absent) : code `1`, aucun traitement lancé.
 
