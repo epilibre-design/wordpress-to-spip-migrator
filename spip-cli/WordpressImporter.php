@@ -91,7 +91,6 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 			'importer_metas',
 			'importer_auteurs',
 			'importer_rubriques',
-			'importer_mots',
 			'importer_documents',
 			'importer_articles',
 			'importer_acces',
@@ -118,21 +117,30 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 		
 		// Peut-être qu'on veut lancer seulement certains traitements
 		if ($traitements_ok = $input->getOption('traitements')) {
-			$traitements_ok = array_map('trim', explode(',', $traitements_ok));
-			$traitements_ok = array_intersect($traitements_disponibles, $traitements_ok);
+			$traitements_ok = array_filter(array_map('trim', explode(',', $traitements_ok)));
+			if ($inconnus = array_diff($traitements_ok, $traitements_disponibles)) {
+				$output->writeln('<error>Traitements inconnus : ' . join(', ', $inconnus) . '. Traitements disponibles : ' . join(', ', $traitements_disponibles) . '</error>');
+				return Command::FAILURE;
+			}
+			// Toujours dans l'ordre de la liste : les traitements dépendent des précédents
+			$traitements_ok = array_values(array_intersect($traitements_disponibles, $traitements_ok));
 		}
 		else {
 			$traitements_ok = $traitements_disponibles;
 		}
 		
+		// Un traitement en échec arrête l'import : les suivants dépendent de lui (les articles des rubriques…)
 		foreach ($traitements_ok as $traitement) {
-			$this->appliquer_traitement($traitement);
+			if (!$this->appliquer_traitement($traitement)) {
+				$output->writeln("\n<error>Import arrêté : le traitement « $traitement » a échoué.</error>");
+				return Command::FAILURE;
+			}
 		}
 		
 		return Command::SUCCESS;
 	}
 	
-	protected function appliquer_traitement($traitement) {
+	protected function appliquer_traitement($traitement): bool {
 		$decoupe_version = explode('.', $this->wp_version);
 		$version_X = $decoupe_version[0];
 		$version_Y = $decoupe_version[1] ?? 0;
@@ -153,12 +161,11 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 		// Sinon rien, on peut pas faire cette opération
 		else {
 			$this->output->writeln("\n<error>Aucune fonction implémentée pour le traitement « $traitement » pour cette version {$this->wp_version}.</error>");
+			return false;
 		}
 		
-		// On lance le traitement trouvé
-		if ($fonction) {
-			$this->output->writeln("\n<info>Lancement du traitement « $traitement »…</info>");
-			$fonction($this);
-		}
+		// On lance le traitement trouvé : il signale un échec en retournant false
+		$this->output->writeln("\n<info>Lancement du traitement « $traitement »…</info>");
+		return $fonction($this) !== false;
 	}
 }
