@@ -1670,7 +1670,7 @@ Chacun suit le cycle de la spec (§ 6) : spec détaillée, relecture, puis plan 
 - [x] Décision préalable (spec § 7) : pages uniques liées par a2a (type `sous_page`, parent → enfant, ordre WordPress), a2a installé par l'import si besoin ; pas de squelette fourni.
 - [x] Spec : `docs/superpowers/specs/2026-10-08-wp2spip-hierarchie-pages-design.md`.
 - [x] Plan : `docs/superpowers/plans/2026-10-08-wp2spip-hierarchie-pages.md` (code mis au point sur un prototype : installation d'a2a, liens dans l'ordre WordPress, relance sans doublon, conflit et page absente en échec, boucles d'exemple vérifiées).
-- [ ] Réalisation ; validation : les 13 pages enfants du contenu de test et les 18 du site réel retrouvent leur parent, dans l'ordre WordPress.
+- [x] Réalisation ; validation : les 13 pages enfants du contenu de test et les 18 du site réel retrouvent leur parent, dans l'ordre WordPress. Résultat : WP 6.9 et 7.1 depuis un dossier vide et sur leurs SPIP de test : a2a installé par l'import, 13 liens pour 5 pages parentes, vérificateur, test « sans page enfant » et test des conversions à OK ; export WP 6.9 identique à la référence, plus 13 lignes `sous_page` ; site réel sur son SPIP de test (`plugins/auto` et dépôt créés par l'import) et depuis un dossier vide (miroir du WordPress pour les accès locaux) : 18 liens pour 5 pages parentes, rangs par titre, vérificateur à OK, export identique plus 18 lignes `sous_page` ; garde, conflit, page absente et dépôt injoignable en échec (code 1) ; tests de la préparation à 0 échec.
 
 ### Task 15 : sous-projet 5 — étiquettes (`importer_mots`)
 

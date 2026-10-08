@@ -69,9 +69,10 @@ L'import est une suite de **traitements**, exécutés dans cet ordre :
 3. `importer_rubriques`
 4. `importer_documents`
 5. `importer_articles`
-6. `importer_acces`
-7. `importer_polyhierarchie`
-8. `importer_commentaires`
+6. `importer_hierarchie_pages`
+7. `importer_acces`
+8. `importer_polyhierarchie`
+9. `importer_commentaires`
 
 `importer_mots` (étiquettes) viendra avec le sous-projet 5, entre `importer_rubriques` et `importer_documents`.
 
@@ -113,6 +114,7 @@ Un plugin peut donc surcharger un traitement, ou en fournir une variante pour un
 | polyhier (≥ 4.0.0) | `necessite` | catégories multiples → rubriques secondaires |
 | forum | `utilise` ; activé par wp2spip si le WordPress a des commentaires à importer (sous-projet 3, spec des blocs § 4) | commentaires → messages de forum |
 | accesrestreint | `utilise` ; téléchargé et activé par wp2spip si le WordPress a des contenus privés ou protégés (sous-projet 3, spec des blocs § 4) | contenus privés ou protégés → zones restreintes |
+| a2a | `utilise` ; téléchargé et activé par wp2spip si le WordPress a des pages enfants (sous-projet 4) | hiérarchie des pages → liens `sous_page` entre pages uniques |
 
 ## 3. Fonctionnalités, traitement par traitement
 
@@ -198,7 +200,6 @@ La recherche du document à partir d'une URL (`wp2spip_chercher_document()`) :
 
 **Limites connues** :
 - **slug ambigu** : un lien désigné par son slug est résolu dans `wp_posts`. Si plusieurs contenus ont ce slug (pages de parents différents, article et page), le chemin complet de la page doit terminer l'URL ; s'il reste plusieurs candidats, le lien est laissé tel quel plutôt que de viser peut-être le mauvais contenu ;
-- hiérarchie des pages perdue (§ 6, sous-projet 4) ;
 - un contenu sans titre reçoit le titre par défaut de SPIP (« Nouvel article N° … ») ;
 
 ### 3.6 `importer_acces`
@@ -237,6 +238,14 @@ Une zone dont les accès sont gérés compte par compte doit avoir l'option « t
 - **Fils de discussion** : `id_parent` = message auquel on répond, `id_thread` = premier message du fil, y compris quand une réponse est traitée avant son parent ; un parent non importé fait commencer un nouveau fil. `date_thread` = date du dernier message publié du fil.
 - Un commentaire dont le contenu n'a pas été importé est ignoré.
 - Chaque message garde son `id_wordpress` : pas de doublon à la ré-exécution.
+
+### 3.9 `importer_hierarchie_pages`
+
+- Exécuté juste après `importer_articles`.
+- Un lien a2a de type `sous_page` de chaque page parente vers chacune de ses pages enfants (pages dont le parent est une page), rang = ordre WordPress (`menu_order`, titre, ID) ; la page parente se retrouve en lisant le lien à l'envers. Aucun squelette n'est fourni.
+- Type `sous_page` ajouté à la configuration d'a2a (`a2a/types_liaisons`), sans toucher aux autres réglages.
+- Un lien déjà présent n'est pas recréé. Échec (code `1`) si une page enfant ou parente manque dans SPIP, ou si a2a ne crée pas un lien (pages déjà liées par un autre type, liaisons multiples désactivées) ; tous les liens possibles sont créés avant.
+- Détail : spec `2026-10-08-wp2spip-hierarchie-pages-design.md`.
 
 ## 4. Réalisé sur la branche `compat-spip-4.4`
 
@@ -309,7 +318,7 @@ Chaque sous-projet aura sa propre spec, puis son plan de réalisation.
 | 2 | Corrections et fiabilité — **réalisé** | cœur | codes de sortie conformes au comportement cible (§ 2.1) : `importer_mots` retiré de la liste par défaut, noms inconnus de `--traitements` refusés, échec d'un traitement signalé ; contenus lus dans l'ordre de leur identifiant WordPress (`ORDER BY`), pour un traitement reproductible ; titres et textes de rubriques sans entités HTML ; option pour ne pas écraser l'adresse du site ; pipeline renommé `wp2spip_traitements`, l'ancien nom restant appelé pour compatibilité ; suppression de l'option `--update` et des branches de mise à jour dans les traitements ; readme mis à jour (WordPress figé, refaire un import = remise à zéro puis import complet) |
 | 11 | Préparation d'un SPIP (réalisé **avant** le 3) — **réalisé** | outil | script `outils/preparer_spip.sh` qui télécharge et installe SPIP, ses plugins et wp2spip, déclare la base WordPress, puis peut lancer l'import, en s'appuyant sur les commandes actuelles de SPIP-Cli et en contrôlant le résultat de chaque étape (spec `2026-10-08-wp2spip-preparation-spip-design.md`) ; médias de nouveau importés sur SPIP 4.4.28 (medias 4.4.15 refusait tous les fichiers en ligne de commande) |
 | 3 | Balisage des blocs de l'éditeur — **réalisé** | cœur | nettoyer `<figure>`, `<figcaption>`, classes `wp-block-*` et commentaires de blocs, en gardant les légendes ; galeries vers des documents |
-| 4 | Hiérarchie des pages | cœur | conserver la structure des pages parentes et enfants : liens a2a `sous_page` entre pages uniques, a2a installé par l'import (spec `2026-10-08-wp2spip-hierarchie-pages-design.md`) |
+| 4 | Hiérarchie des pages — **réalisé** | cœur | conserver la structure des pages parentes et enfants : liens a2a `sous_page` entre pages uniques, a2a installé par l'import (spec `2026-10-08-wp2spip-hierarchie-pages-design.md`) |
 | 5 | Étiquettes | cœur | `importer_mots` : `post_tag` → mots-clés d'un groupe dédié, liés aux articles |
 | 6 | Préfixe des tables | cœur | option `--prefixe` (défaut `wp_`), y compris pour la méta des rôles (`<prefixe>capabilities`) |
 | 7 | Tests automatisés | cœur | tests PHPUnit des fonctions de conversion, et tests d'intégration sur le contenu *Theme Unit Test* |

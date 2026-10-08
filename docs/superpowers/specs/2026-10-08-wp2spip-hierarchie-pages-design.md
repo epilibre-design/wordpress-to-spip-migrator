@@ -2,7 +2,7 @@
 
 Date : 2026-10-08
 Spec d'ensemble : `2026-10-08-wp2spip-ensemble-design.md`, § 6, sous-projet 4, et § 7, question 1.
-Statut : design validé, planifié (plan : `docs/superpowers/plans/2026-10-08-wp2spip-hierarchie-pages.md`).
+Statut : réalisé (plan : `docs/superpowers/plans/2026-10-08-wp2spip-hierarchie-pages.md`).
 
 ## 1. Constat
 

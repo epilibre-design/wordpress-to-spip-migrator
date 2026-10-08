@@ -55,7 +55,7 @@ Il faut SPIP-Cli avec les correctifs de `plugins:svp:telecharger` (sélection du
 Les blocs de l'éditeur Wordpress sont convertis : images en `<imgN>` avec leur alignement (la légende devient le descriptif du document), médias en `<docN>`, mise en page (colonnes, groupes, couvertures, boutons…) gardée avec ses seules classes `wp-block-…`, que le squelette peut styler, contenus embarqués en URL seule sur sa ligne (le plugin oEmbed en fait un lecteur). Chaque galerie (bloc ou raccourci `[gallery]`) devient un album du plugin Albums, inséré par `<albumN>`. Les blocs dynamiques (derniers articles, recherche…), qui n'enregistrent rien dans le contenu, sont retirés. Le bilan de `importer_articles` détaille ces conversions.
 
 ## Plugins requis
-Avant le premier traitement, l'import télécharge et active les plugins dont le contenu a besoin : Albums s'il y a une galerie, Accès restreint s'il y a des contenus privés ou protégés, Forum s'il y a des commentaires ; puis il se relance. S'ils manquent, il crée le dossier `plugins/auto` (avec les droits de `plugins/`) et déclare le dépôt standard `https://plugins.spip.net/depots/principal.xml` (constante `_WP2SPIP_DEPOT_SVP`, modifiable dans `mes_options.php`). Il faut SPIP-Cli avec les correctifs de `plugins:svp:telecharger`. En cas d'échec, rien n'est importé et les commandes à lancer à la main sont affichées.
+Avant le premier traitement, l'import télécharge et active les plugins dont le contenu a besoin : Albums s'il y a une galerie, Accès restreint s'il y a des contenus privés ou protégés, Forum s'il y a des commentaires, a2a s'il y a des pages enfants ; puis il se relance. S'ils manquent, il crée le dossier `plugins/auto` (avec les droits de `plugins/`) et déclare le dépôt standard `https://plugins.spip.net/depots/principal.xml` (constante `_WP2SPIP_DEPOT_SVP`, modifiable dans `mes_options.php`). Il faut SPIP-Cli avec les correctifs de `plugins:svp:telecharger`. En cas d'échec, rien n'est importé et les commandes à lancer à la main sont affichées.
 
 ## Refaire un import
 L'import part d'un Wordpress figé : une copie du site, ou un site qui n'évolue plus pendant la migration. Relancer la commande n'importe que les contenus pas encore importés, et ne modifie pas ceux qui le sont déjà.
@@ -76,6 +76,23 @@ Par défaut, l'adresse du site SPIP prend celle du Wordpress. L'option `--garder
 Les contenus privés ou protégés par mot de passe dans Wordpress ne sont jamais publiés tels quels.
 
 Ils sont publiés dans une zone du plugin [Accès restreint](https://contrib.spip.net/Acces-Restreint-3-0), que l'import installe (voir « Plugins requis »), réservée aux visiteurs identifiés (une zone pour les contenus privés, une pour les contenus protégés). Les mots de passe Wordpress ne sont pas repris.
+
+## Hiérarchie des pages
+Les pages Wordpress deviennent des pages uniques (plugin Pages), sans rubrique. Leur hiérarchie est gardée par des liens du plugin [a2a](https://contrib.spip.net/Le-plugin-a2a-pour-lier-des-articles), que l'import installe s'il y a des pages enfants : un lien de type `sous_page` de chaque page parente vers chacune de ses pages enfants, dont le rang suit l'ordre Wordpress (ordre de la page, puis titre). wp2spip ne fournit pas de squelette : à chaque site d'exploiter ces liens, par exemple ainsi :
+
+```html
+<!-- Sous-pages d'une page, dans l'ordre Wordpress -->
+<BOUCLE_sous_pages(ARTICLES_LIES){id_article}{type_liaison=sous_page}{par rang}>
+	<BOUCLE_sous_page(ARTICLES){id_article=#ID_ARTICLE_LIE}><a href="#URL_ARTICLE">#TITRE</a></BOUCLE_sous_page>
+</BOUCLE_sous_pages>
+
+<!-- Page parente d'une page -->
+<BOUCLE_parente(ARTICLES_LIES){id_article_lie=#ID_ARTICLE}{type_liaison=sous_page}>
+	<BOUCLE_page_parente(ARTICLES){id_article}><a href="#URL_ARTICLE">#TITRE</a></BOUCLE_page_parente>
+</BOUCLE_parente>
+```
+
+Le type `sous_page` est ajouté à la configuration d'a2a ; il y reste après la désinstallation de wp2spip. Si une page manque dans SPIP, ou si a2a ne crée pas un lien (les deux pages déjà liées par un autre type, liaisons multiples désactivées), le traitement `importer_hierarchie_pages` échoue et la commande retourne le code de sortie 1.
 
 ## Pour les devs
 Chaque contenu possible à importer est implémenté dans des traitements `wp2spip_<traitement>` dans des fichiers `wp2spip/<traitement>.php`.
