@@ -1679,8 +1679,8 @@ Chacun suit le cycle de la spec (§ 6) : spec détaillée, relecture, puis plan 
 
 ### Task 16 : sous-projet 6 — préfixe des tables
 
-- [ ] Spec : option `--prefixe` (défaut `wp_`), y compris la méta `<prefixe>capabilities`.
-- [ ] Plan, réalisation ; validation : un WordPress de test installé avec un autre préfixe (`wp config create --dbprefix=…`) importé à l'identique.
+- [x] Spec : `docs/superpowers/specs/2026-10-09-wp2spip-prefixe-tables-design.md` (préfixe lu dans `wp-config.php`, `--prefixe` pour le remplacer, exigé s'il est introuvable ; tables contrôlées avant tout traitement ; SPIP amorcé avec un autre préfixe refusé).
+- [ ] Plan, réalisation ; validation : copie du WordPress 6.9 sous le préfixe `wpx_` (base `jetable`) importée à l'identique.
 
 ### Task 17 : sous-projet 7 — tests automatisés
 

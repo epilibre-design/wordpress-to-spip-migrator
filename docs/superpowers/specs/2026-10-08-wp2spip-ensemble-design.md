@@ -320,7 +320,7 @@ Chaque sous-projet aura sa propre spec, puis son plan de réalisation.
 | 3 | Balisage des blocs de l'éditeur — **réalisé** | cœur | nettoyer `<figure>`, `<figcaption>`, classes `wp-block-*` et commentaires de blocs, en gardant les légendes ; galeries vers des documents |
 | 4 | Hiérarchie des pages — **réalisé** | cœur | conserver la structure des pages parentes et enfants : liens a2a `sous_page` entre pages uniques, a2a installé par l'import (spec `2026-10-08-wp2spip-hierarchie-pages-design.md`) |
 | 5 | Étiquettes | cœur | `importer_mots` : `post_tag` → mots-clés d'un groupe dédié, liés aux articles (spec `2026-10-09-wp2spip-etiquettes-design.md`) |
-| 6 | Préfixe des tables | cœur | option `--prefixe` (défaut `wp_`), y compris pour la méta des rôles (`<prefixe>capabilities`) |
+| 6 | Préfixe des tables | cœur | préfixe lu dans `wp-config.php`, option `--prefixe` pour le remplacer (exigée si `wp-config.php` ne permet pas de le lire), y compris pour la méta des rôles (`<prefixe>capabilities`) ; tables contrôlées avant tout traitement (spec `2026-10-09-wp2spip-prefixe-tables-design.md`) |
 | 7 | Tests automatisés | cœur | tests PHPUnit des fonctions de conversion, et tests d'intégration sur le contenu *Theme Unit Test* |
 | 8 | `wp2spip_yoast` | extension | catégorie principale Yoast comme rubrique principale (traitement inséré après `importer_articles`, avant `importer_polyhierarchie`) ; ensuite, titre SEO et méta-description |
 | 9 | `wp2spip_acf` | extension | champs ACF → Champs Extras (vraisemblablement via Champs Extras Interface, à vérifier), d'après leurs définitions (`acf-field`) ; correspondances vers des champs natifs quand elles existent (lien hypertexte de l'article, mot-clé technique) |
