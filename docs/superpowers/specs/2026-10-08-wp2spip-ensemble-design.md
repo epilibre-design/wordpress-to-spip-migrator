@@ -191,6 +191,16 @@ La recherche du document à partir d'une URL (`wp2spip_chercher_document()`) :
 - Les zones sont créées une fois, leurs identifiants gardés en configuration (`wp2spip/zones`) et réutilisés, même si elles sont renommées.
 - Un contenu déjà lié à sa zone n'est plus modifié, sauf avec `--update`, qui retire aussi des zones les contenus redevenus publics dans WordPress.
 
+**Plusieurs zones et publics différents.** L'accès aux zones repose uniquement sur Accès restreint, qui ouvre une zone soit à tout visiteur connecté (`autoriser_si_connexion`), soit aux comptes qui lui sont liés un par un. Le cœur de wp2spip se limite aux deux zones ci-dessus, ouvertes à tout visiteur connecté : WordPress ne dit pas qui doit voir un contenu privé. Pour distinguer des publics :
+
+| Situation du site WordPress | Zones | Accès |
+|---|---|---|
+| seulement des contenus privés ou protégés | les 2 zones par défaut | tout visiteur connecté |
+| une extension de gestion de membres (niveaux d'accès) | une zone par niveau, créée par une extension `wp2spip_<extension>` qui relit ces niveaux | comptes liés automatiquement d'après WordPress |
+| des espaces réservés à des publics distincts, sans extension de membres | zones créées à la main après l'import (par exemple une par rubrique réservée) | comptes liés à la main à chaque zone |
+
+Une zone dont les accès sont gérés compte par compte doit avoir l'option « toute personne connectée » désactivée : avec l'option active, la zone est ouverte à tout visiteur connecté, comptes liés ou non. Les extensions liées au référencement, comme `wp2spip_yoast`, ne gèrent pas d'accès.
+
 ### 3.7 `importer_polyhierarchie`
 
 - Pour chaque article importé, les catégories WordPress autres que la rubrique principale deviennent des **rubriques secondaires** (`polyhier_set_parents()`).
