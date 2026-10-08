@@ -70,6 +70,13 @@ foreach (sql_allfetsel('id_article, texte', 'spip_articles', 'id_wordpress > 0',
 		) {
 			$echecs[] = "article $id : album $id_album absent, non lié à l'article, ou vide";
 		}
+		elseif ($non_publies = sql_allfetsel(
+			'L.id_document',
+			'spip_documents_liens AS L JOIN spip_documents AS D ON D.id_document = L.id_document',
+			array('L.objet = "album"', 'L.id_objet = ' . intval($id_album), 'D.statut != "publie"')
+		)) {
+			$echecs[] = "article $id : album $id_album avec des documents non publiés (" . join(', ', array_column($non_publies, 'id_document')) . ')';
+		}
 	}
 }
 

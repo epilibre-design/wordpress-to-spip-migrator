@@ -485,6 +485,7 @@ function wp2spip_creer_album($images, $legende, &$contexte) {
 	$images = $trouvees;
 	include_spip('action/editer_objet');
 	include_spip('action/editer_liens');
+	include_spip('action/editer_document');
 	$contexte['galerie']++;
 	$titre = $contexte['titre'] . (($contexte['nb_galeries'] > 1) ? " (galerie {$contexte['galerie']})" : '');
 	$id_album = intval(objet_inserer('album', null, array(
@@ -498,6 +499,8 @@ function wp2spip_creer_album($images, $legende, &$contexte) {
 	}
 	foreach ($images as $rang => $image) {
 		objet_associer(array('document' => $image[0]), array('album' => $id_album), array('rang_lien' => $rang + 1));
+		// Le lien ne recalcule pas le statut du document : publié par son album, sans quoi l'album public serait vide
+		document_instituer($image[0]);
 		wp2spip_bloc_legender($image[0], $image[1]);
 	}
 	$contexte['albums'][] = $id_album;
