@@ -26,7 +26,7 @@ Le script et ses tests ont été mis au point dans un prototype avant ce plan : 
 
 1. `plugins:svp:telecharger sale pages polyhier` en un seul appel retente, pour chaque préfixe, les téléchargements des préfixes précédents (« Impossible de déballer ») : **un appel par préfixe**.
 2. Depuis medias 4.4.15 (SPIP 4.4.28, correctif de sécurité #4919), `ajouter_un_document()` vérifie `autoriser('joindredocument')`, refusé en ligne de commande : **tous les médias sont refusés** (« Impossible d'enregistrer le document … en base de données »). Les sites de test, en SPIP 4.4.21, ne le montrent pas. `autoriser()` reçoit un identifiant `null`, cherché sous la clé `''` : l'exception doit être posée sur `'*'`.
-3. Le vérificateur ne compte pas les documents : il était à OK avec 0 document importé sur 37. Et `php:eval` peut retourner `0` en affichant une page d'erreur de SPIP : les tests exigent la dernière ligne `OK`.
+3. Le vérificateur ne contrôle pas les documents : il était à OK avec 0 document importé sur 37. Et `php:eval` peut retourner `0` en affichant une page d'erreur de SPIP : les tests exigent la dernière ligne `OK`.
 
 ## Environnement
 
@@ -35,28 +35,28 @@ Variables de `tests/integration/environnement.sh` (plan général, « Environnem
 | Variable | Contenu |
 |---|---|
 | `ESSAIS` | dossier de travail des tests de préparation (SPIP créés puis laissés pour inspection) ; il reçoit des copies de `wp-config.php` : `chmod 700` |
-| `BASE_PREP_MYSQL` | base MySQL vide réservée au scénario « MySQL distincte », accessible au login MySQL du `wp-config.php` du WordPress 7.1 |
+| `BASE_PREP_MYSQL` | base MySQL **jetable**, réservée aux tests, accessible au login MySQL des `wp-config.php` des WordPress de test : SPIP du scénario « MySQL distincte », puis copie des tables du WordPress 6.9 pour le scénario « base partagée ». Les tests la vident ; ils n'écrivent jamais dans les bases des WordPress ni des SPIP de test |
 
 Exporter d'abord `WP2SPIP`, puis `source "$WP2SPIP/tests/integration/environnement.sh"`.
 
 ---
 
-### Task 1 : le vérificateur compte les documents
+### Task 1 : le vérificateur contrôle les documents
 
 **Files :**
 - Modify : `tests/integration/verifier_identifiants.php` (après la comparaison des rubriques)
 
 **Interfaces :**
-- Produces : un échec `documents : N importés pour M médias Wordpress` quand le nombre de `spip_documents` importés diffère de celui des `wp_posts` de type `attachment`.
+- Produces : les médias que `importer_documents` sélectionne (`wp_posts` de type `attachment` au statut `inherit`) comparés, par identifiant, aux `spip_documents` importés (`id_wordpress`) : échec `documents : N médias Wordpress non importés (…)` ou `documents : N documents sans média Wordpress correspondant (…)`, avec les dix premiers identifiants.
 
 - [ ] **Step 1 : relever l'état actuel**
 
-Sur les quatre sites de test, les nombres sont aujourd'hui égaux (relevé du prototype : 1612 / 1612 pour le site réel, 37 / 37 pour les WordPress 6.9 et 7.1) :
+Sur les quatre sites de test, tous les médias sont aujourd'hui importés (relevé du prototype : 1612 / 1612 pour le site réel, 37 / 37 pour les WordPress 6.9 et 7.1 ; toutes leurs pièces jointes sont au statut `inherit`) :
 
 ```bash
 source "$WP2SPIP/tests/integration/environnement.sh"
 for s in "$SPIP_REEL_SQLITE" "$SPIP_REEL_MYSQL" "$SPIP_WP6" "$SPIP_WP7"; do
-	(cd "$s" && "$SPIP_CLI" php:eval 'echo sql_countsel("spip_documents", "id_wordpress > 0"), " / ", sql_countsel("wp_posts", "post_type = \"attachment\"", "", "", "wordpress"), "\n";')
+	(cd "$s" && "$SPIP_CLI" php:eval 'echo sql_countsel("spip_documents", "id_wordpress > 0"), " / ", sql_countsel("wp_posts", "post_type = \"attachment\" and post_status = \"inherit\"", "", "", "wordpress"), "\n";')
 done
 ```
 
@@ -67,10 +67,14 @@ Expected : quatre lignes `N / N`. Un site remis à zéro sans être réimporté 
 Dans `tests/integration/verifier_identifiants.php`, juste après le bloc qui se termine par `$echecs[] = "rubriques : $nb_spip importées pour $nb_wp catégories Wordpress";` et son `}` :
 
 ```php
-$nb_wp = sql_countsel('wp_posts', 'post_type = ' . sql_quote('attachment'), '', '', $base);
-$nb_spip = sql_countsel('spip_documents', 'id_wordpress > 0');
-if ($nb_wp != $nb_spip) {
-	$echecs[] = "documents : $nb_spip importés pour $nb_wp médias Wordpress";
+// Médias : ceux que importer_documents sélectionne (pièces jointes au statut inherit), comparés par identifiant
+$ids_wp = array_map('intval', array_column(sql_allfetsel('ID', 'wp_posts', array('post_type = "attachment"', 'post_status = "inherit"'), '', '', '', '', $base), 'ID'));
+$ids_spip = array_map('intval', array_column(sql_allfetsel('id_wordpress', 'spip_documents', 'id_wordpress > 0'), 'id_wordpress'));
+if ($manquants = array_diff($ids_wp, $ids_spip)) {
+	$echecs[] = 'documents : ' . count($manquants) . ' médias Wordpress non importés (' . join(', ', array_slice($manquants, 0, 10)) . (count($manquants) > 10 ? '…' : '') . ')';
+}
+if ($en_trop = array_diff($ids_spip, $ids_wp)) {
+	$echecs[] = 'documents : ' . count($en_trop) . ' documents sans média Wordpress correspondant (' . join(', ', array_slice($en_trop, 0, 10)) . (count($en_trop) > 10 ? '…' : '') . ')';
 }
 ```
 
@@ -88,7 +92,7 @@ Expected : `OK` quatre fois.
 
 ```bash
 git add tests/integration/verifier_identifiants.php
-git commit -m "Vérificateur : comparer le nombre de documents importés à celui des médias Wordpress"
+git commit -m "Vérificateur : comparer, par identifiant, les documents importés aux médias Wordpress"
 ```
 
 ---
@@ -110,10 +114,10 @@ git commit -m "Vérificateur : comparer le nombre de documents importés à celu
 
 ```bash
 
-# Tests de outils/preparer_spip.sh (tests/preparation/) : dossier de travail, et base MySQL vide
-# réservée au scénario « MySQL distincte », accessible au login MySQL du WordPress 7.1
+# Tests de outils/preparer_spip.sh (tests/preparation/) : dossier de travail, et base MySQL jetable,
+# vidée par les tests, accessible au login MySQL des WordPress de test
 export ESSAIS=/chemin/vers/essais-preparation
-export BASE_PREP_MYSQL=base_preparation
+export BASE_PREP_MYSQL=base_jetable
 ```
 
 Reporter ces deux lignes, avec les valeurs de la machine, dans `tests/integration/environnement.sh` (non versionné) ; `ESSAIS` hors de tout dépôt, par exemple à côté de `$SAUVEGARDES`.
@@ -127,8 +131,8 @@ Reporter ces deux lignes, avec les valeurs de la machine, dans `tests/integratio
 # Tests de outils/preparer_spip.sh
 # Usage : tester_preparer_spip.sh [--complet]
 #   sans option : cas d'erreur (rapides, sans réseau) ;
-#   --complet : en plus, préparations complètes avec import (réseau, plusieurs minutes),
-#               qui recréent les tables SPIP de $BASE_WP6 puis remettent $SPIP_WP6 à zéro
+#   --complet : en plus, préparations complètes avec import (réseau, plusieurs minutes)
+# Aucune écriture dans les bases des WordPress de test : seulement dans $BASE_PREP_MYSQL, base jetable dédiée
 # Variables : tests/integration/environnement.sh (dont ESSAIS, dossier de travail, et BASE_PREP_MYSQL, base vide réservée à ces essais)
 set -uo pipefail
 source "$(dirname "$0")/../integration/environnement.sh"
@@ -178,9 +182,9 @@ erreur_attendue "préfixe autre que wp_" "seul wp_ est géré" --wordpress "$ESS
 faux_wordpress "$ESSAIS/wp-refuse" "s/define( *'DB_PASSWORD', *'[^']*' *)/define( 'DB_PASSWORD', 'mauvais-mot-de-passe' )/"
 erreur_attendue "accès MySQL refusés" "illisible avec les accès de wp-config.php" --wordpress "$ESSAIS/wp-refuse"
 erreur_attendue "base du WordPress sans --base-partagee" "ajouter --base-partagee" --wordpress "$WP6" --base-spip "mysql:$BASE_WP6"
-mysql $MYSQL_OPTIONS "$BASE_WP6" -e "create table if not exists spip_essai_preparation (id int)"
-erreur_attendue "base contenant des tables spip_" "contient déjà des tables spip_" --wordpress "$WP6" --base-spip "mysql:$BASE_WP6" --base-partagee
-mysql $MYSQL_OPTIONS "$BASE_WP6" -e "drop table spip_essai_preparation"
+mysql $MYSQL_OPTIONS "$BASE_PREP_MYSQL" -e "create table if not exists spip_essai_preparation (id int)"
+erreur_attendue "base contenant des tables spip_" "contient déjà des tables spip_" --wordpress "$WP6" --base-spip "mysql:$BASE_PREP_MYSQL"
+mysql $MYSQL_OPTIONS "$BASE_PREP_MYSQL" -e "drop table spip_essai_preparation"
 faux_wordpress "$ESSAIS/wp-port" "s/define( *'DB_HOST', *'\([^']*\)' *)/define( 'DB_HOST', '\1:3306' )/"
 erreur_attendue "WordPress sur un port, sans --sql-hote" "donner --sql-hote" --wordpress "$ESSAIS/wp-port" --base-spip "mysql:$BASE_PREP_MYSQL"
 erreur_attendue "SPIP-Cli introuvable" "SPIP-Cli introuvable" --wordpress "$WP6" --spip-cli "$ESSAIS/spip-cli-inexistant"
@@ -592,17 +596,17 @@ git commit -m "Script de préparation d'un SPIP depuis un dossier vide, avec ses
 
 **Files :**
 - Modify : `tests/preparation/tester_preparer_spip.sh` (ajout à la fin)
-- Modify : `wp2spip/importer_documents.php` (après `charger_fonction('ajouter_un_document', 'action')`)
+- Modify : `wp2spip/importer_documents.php` (appel de `$ajouter_un_document`)
 
 **Interfaces :**
 - Consumes : `outils/preparer_spip.sh` (Task 2), comparaison des documents du vérificateur (Task 1).
 
-- [ ] **Step 1 : base MySQL des essais (par Tony, en administrateur MySQL)**
+- [ ] **Step 1 : base MySQL jetable des essais**
 
-Créer la base `$BASE_PREP_MYSQL`, vide, accessible au login MySQL du `wp-config.php` du WordPress 7.1 (remplacer `<base>` et `<login>`) :
+Elle est créée par un administrateur MySQL (fait sur la machine de test : base `jetable`), accessible au login MySQL des `wp-config.php` des WordPress de test, par exemple :
 
 ```bash
-! sudo mysql -e "CREATE DATABASE <base> CHARACTER SET utf8mb4; GRANT ALL PRIVILEGES ON <base>.* TO '<login>'@'localhost';"
+sudo mysql -e "CREATE DATABASE <base> CHARACTER SET utf8mb4; GRANT ALL PRIVILEGES ON <base>.* TO '<login>'@'localhost';"
 ```
 
 Vérifier : `mysql $MYSQL_OPTIONS -N "$BASE_PREP_MYSQL" -e "select 1"` affiche `1`.
@@ -640,10 +644,11 @@ import_verifie() { # import_verifie <dossier SPIP>
 		&& [ "$(tail -n 1 "$ESSAIS/verification.txt")" = OK ]
 }
 
-supprimer_tables_spip() { # supprimer_tables_spip <base MySQL>
+# Vide la base jetable des essais : toutes ses tables
+vider_base_essais() {
 	local tables
-	tables=$(mysql $MYSQL_OPTIONS -N "$1" -e "show tables like 'spip\\_%'" | paste -sd, -)
-	[ -z "$tables" ] || mysql $MYSQL_OPTIONS "$1" -e "drop table $tables"
+	tables=$(mysql $MYSQL_OPTIONS -N "$BASE_PREP_MYSQL" -e "show tables" | paste -sd, -)
+	[ -z "$tables" ] || mysql $MYSQL_OPTIONS "$BASE_PREP_MYSQL" -e "drop table $tables"
 }
 
 # Plugin introuvable sur le dépôt : arrêt après l'installation de SPIP, avec un message qui le dit
@@ -675,7 +680,7 @@ resultat "SQLite : vérificateur à OK ($(tail -1 "$ESSAIS/verification.txt"))" 
 # MySQL distincte, WordPress 7.1, wp2spip copié, mot de passe choisi par SPIP_ADMIN_PASS
 spip="$ESSAIS/spip-mysql"
 rm -rf "$spip"
-supprimer_tables_spip "$BASE_PREP_MYSQL"
+vider_base_essais
 pass_admin="Admin-$RANDOM-$RANDOM"
 SPIP_ADMIN_PASS=$pass_admin "$preparer" --spip "$spip" --wordpress "$WP7" --spip-cli "$SPIP_CLI" --base-spip "mysql:$BASE_PREP_MYSQL" --importer >"$ESSAIS/mysql.log" 2>&1
 code=$?
@@ -690,11 +695,19 @@ resultat "MySQL distincte : administrateur authentifié avec le mot de passe de 
 import_verifie "$spip"
 resultat "MySQL distincte : vérificateur à OK ($(tail -1 "$ESSAIS/verification.txt"))" $?
 
-# Base partagée avec le WordPress 6.9 (comme les sites de test) ; $SPIP_WP6 est remis à zéro ensuite
+# Base partagée (comme les sites de test), sur une copie jetable du WordPress 6.9 : ses tables wp_ copiées
+# dans $BASE_PREP_MYSQL, et un dossier WordPress dont wp-config.php désigne cette base (fichiers en liens)
 spip="$ESSAIS/spip-partagee"
+wordpress="$ESSAIS/wp6-jetable"
 rm -rf "$spip"
-supprimer_tables_spip "$BASE_WP6"
-"$preparer" --spip "$spip" --wordpress "$WP6" --spip-cli "$SPIP_CLI" --base-spip "mysql:$BASE_WP6" --base-partagee --importer >"$ESSAIS/partagee.log" 2>&1
+vider_base_essais
+tables_wp=$(mysql $MYSQL_OPTIONS -N "$BASE_WP6" -e "show tables like 'wp\\_%'")
+mysqldump $MYSQL_OPTIONS --no-tablespaces "$BASE_WP6" $tables_wp | mysql $MYSQL_OPTIONS "$BASE_PREP_MYSQL"
+resultat "base partagée : tables du WordPress 6.9 copiées dans $BASE_PREP_MYSQL" $?
+faux_wordpress "$wordpress" "s/define( *'DB_NAME', *'[^']*' *)/define( 'DB_NAME', '$BASE_PREP_MYSQL' )/"
+ln -s "$WP6/wp-includes" "$wordpress/wp-includes"
+ln -s "$WP6/wp-content" "$wordpress/wp-content"
+"$preparer" --spip "$spip" --wordpress "$wordpress" --spip-cli "$SPIP_CLI" --base-spip "mysql:$BASE_PREP_MYSQL" --base-partagee --importer >"$ESSAIS/partagee.log" 2>&1
 code=$?
 [ "$code" -eq 0 ]
 resultat "base partagée, WordPress 6.9 : code 0 (code $code, journal $ESSAIS/partagee.log)" $?
@@ -702,8 +715,6 @@ plugins_prets "$spip"
 resultat "base partagée : plugins sous plugins/auto et actifs" $?
 import_verifie "$spip"
 resultat "base partagée : vérificateur à OK ($(tail -1 "$ESSAIS/verification.txt"))" $?
-"$WP2SPIP/tests/integration/remise_a_zero.sh" "$SPIP_WP6" "$SAUVEGARDES/vierge-wp6-v2.sql.gz" "$BASE_WP6" >/dev/null
-resultat "base partagée : $SPIP_WP6 remis à zéro" $?
 
 echo "$echecs échec(s)"
 [ "$echecs" -eq 0 ]
@@ -712,17 +723,28 @@ echo "$echecs échec(s)"
 - [ ] **Step 3 : lancer les tests complets, qui échouent sur les médias**
 
 Run : `tests/preparation/tester_preparer_spip.sh --complet` (réseau, une dizaine de minutes)
-Expected : les cas d'erreur et `plugin introuvable` à `ok` ; les trois préparations à `code 0`, plugins et administrateur à `ok` ; mais les trois `vérificateur à OK` en `ECHEC`, avec `documents : 0 importés pour 37 médias Wordpress` dans `$ESSAIS/verification.txt` (SPIP 4.4.28 téléchargé : medias 4.4.15 refuse les fichiers). Le journal `$ESSAIS/sqlite.log` montre `37 médias refusés par SPIP`.
+Expected : les cas d'erreur, `plugin introuvable` et la copie des tables du WordPress 6.9 à `ok` ; les trois préparations à `code 0`, plugins et administrateur à `ok` ; mais les trois `vérificateur à OK` en `ECHEC`, avec `documents : 37 médias Wordpress non importés (…)` dans `$ESSAIS/verification.txt` (SPIP 4.4.28 téléchargé : medias 4.4.15 refuse les fichiers). Le journal `$ESSAIS/sqlite.log` montre `37 médias refusés par SPIP`.
 
 - [ ] **Step 4 : exception d'autorisation pour les documents**
 
-Dans `wp2spip/importer_documents.php`, après la ligne `$ajouter_un_document = charger_fonction('ajouter_un_document', 'action');` :
+L'exception ne vaut que pour l'appel de `ajouter_un_document()`, et elle est levée aussitôt après, même en cas d'erreur. Dans `wp2spip/importer_documents.php`, remplacer la ligne :
 
 ```php
-		// ajouter_un_document() de SPIP 4.4 récent vérifie autoriser('joindredocument') : en ligne de commande, sans
-		// auteur connecté, tous les fichiers seraient refusés. Document joint à aucun objet : type vide, identifiant
-		// null (que autoriser() cherche sous la clé '', d'où l'exception générique '*')
-		autoriser_exception('joindredocument', '', '*', true);
+				$retour = $ajouter_un_document($id_document, $file, null, null, 'auto');
+```
+
+par :
+
+```php
+				// ajouter_un_document() de SPIP 4.4 récent vérifie autoriser('joindredocument') : en ligne de commande, sans
+				// auteur connecté, tous les fichiers seraient refusés. Document joint à aucun objet : type vide, identifiant
+				// null (que autoriser() cherche sous la clé '', d'où l'exception générique '*'), levée aussitôt après
+				autoriser_exception('joindredocument', '', '*', true);
+				try {
+					$retour = $ajouter_un_document($id_document, $file, null, null, 'auto');
+				} finally {
+					autoriser_exception('joindredocument', '', '*', false);
+				}
 ```
 
 - [ ] **Step 5 : non-régression sur SPIP 4.4.21**
@@ -745,8 +767,6 @@ Expected : `code 0`, `IDENTIQUE`, `OK`.
 
 Run : `tests/preparation/tester_preparer_spip.sh --complet`
 Expected : toutes les lignes à `ok`, dont les trois `vérificateur à OK (OK)`, puis `0 échec(s)`, code `0`. Contrôler aussi qu'aucun appel de `plugins:svp:telecharger` n'a échoué : `grep -c "en échec\|Impossible de déballer" "$ESSAIS"/sqlite.log "$ESSAIS"/mysql.log "$ESSAIS"/partagee.log` affiche `0` pour chaque journal.
-
-Le scénario « base partagée » supprime les tables SPIP de `$BASE_WP6`, puis remet `$SPIP_WP6` à zéro : le réimporter si on en a besoin ensuite (Step 5).
 
 - [ ] **Step 7 : commit**
 
