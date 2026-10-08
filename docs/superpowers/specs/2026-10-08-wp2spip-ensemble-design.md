@@ -40,7 +40,19 @@ spip wordpress:importer [options] <dir_wordpress>
 | `-u, --update` | met à jour les contenus déjà importés |
 | `-v` | détail des anomalies par contenu (liens vers des médias non convertis…) |
 
-La commande retourne `0` en cas de succès, `1` si elle n'est pas lancée depuis un site SPIP ou si `wp-includes/version.php` est introuvable.
+**Code de sortie, comportement actuel** : `1` si la commande n'est pas lancée depuis un site SPIP ou si `wp-includes/version.php` est introuvable ; `0` dans tous les autres cas. Le code `0` ne garantit donc pas un import complet :
+
+- un traitement introuvable (c'est le cas d'`importer_mots`, § 2.2) affiche une erreur, puis la commande continue et retourne `0` ;
+- un nom inconnu passé à `--traitements` est ignoré sans message ; si aucun nom n'est valide, rien n'est lancé et la commande retourne `0` ;
+- un traitement n'a aucun moyen de signaler un échec.
+
+**Code de sortie, comportement cible** (§ 6, sous-projet 1) :
+
+- la liste par défaut ne contient que des traitements implémentés ;
+- un nom inconnu passé à `--traitements` est une erreur : message, aucun traitement lancé, code `1` ;
+- un traitement introuvable est une erreur : message, arrêt, code `1` ;
+- un traitement peut signaler un échec en retournant `false` : la commande s'arrête (les traitements suivants dépendent des précédents, par exemple les articles des rubriques) et retourne `1` ;
+- sinon, `0`.
 
 ### 2.2 Traitements
 
@@ -49,7 +61,7 @@ L'import est une suite de **traitements**, exécutés dans cet ordre :
 1. `importer_metas`
 2. `importer_auteurs`
 3. `importer_rubriques`
-4. `importer_mots` (non implémenté, § 6)
+4. `importer_mots` : **n'existe pas encore** (§ 6, sous-projet 4). Il figure pourtant dans la liste par défaut : la commande affiche une erreur à son tour, puis continue. Il en sera retiré tant qu'il n'est pas implémenté (§ 6, sous-projet 1).
 5. `importer_documents`
 6. `importer_articles`
 7. `importer_acces`
@@ -176,6 +188,7 @@ La recherche du document à partir d'une URL (`wp2spip_chercher_document()`) :
 **Bilan** : la commande signale les liens vers des fichiers du site restés tels quels, en distinguant les fichiers **absents de la médiathèque** (souvent des liens déjà cassés sur le site WordPress) des médias **importés mais placés là où SPIP n'a pas de raccourci** (image de fond d'un bloc « Couverture »…). Le détail par contenu s'affiche avec `-v`.
 
 **Limites connues** :
+- **liens internes vers un contenu pas encore importé** : la recherche d'un `articleN` (par `?p=`, `?page_id=` ou slug) ne trouve que les contenus SPIP déjà créés. Un lien vers un contenu traité plus tard dans le même passage garde son URL WordPress, et un nouveau passage sans `--update` ne le corrige pas, puisqu'il ne retouche pas les textes déjà importés. Les contenus étant traités par identifiant WordPress croissant, un lien vers un contenu plus ancien est converti ; seul un lien vers un contenu plus récent est concerné. Mesure sur le site réel après un seul passage : aucun lien interne vers un contenu laissé tel quel, hormis le lien vers la page d'accueil. Correction prévue : une passe de résolution des liens en fin d'import (§ 6, sous-projet 1) ;
 - hiérarchie des pages perdue (§ 6, sous-projet 3) ;
 - balisage des blocs de l'éditeur WordPress (`<figure class="wp-block-…">`, `<figcaption>`…) laissé dans le texte (§ 6, sous-projet 2) ;
 - un contenu sans titre reçoit le titre par défaut de SPIP (« Nouvel article N° … ») ;
@@ -272,7 +285,7 @@ Chaque sous-projet aura sa propre spec, puis son plan de réalisation.
 
 | # | Sous-projet | Nature | Contenu |
 |---|---|---|---|
-| 1 | Petites corrections | cœur | titres et textes de rubriques sans entités HTML ; option pour ne pas écraser l'adresse du site ; pipeline renommé `wp2spip_traitements`, l'ancien nom restant appelé pour compatibilité |
+| 1 | Corrections et fiabilité | cœur | codes de sortie conformes au comportement cible (§ 2.1) : `importer_mots` retiré de la liste par défaut, noms inconnus de `--traitements` refusés, échec d'un traitement signalé ; passe de résolution des liens internes en fin d'import, sur tous les contenus importés (y compris lors des passages précédents), pour les liens vers un contenu importé après celui qui le cite (§ 3.5) ; titres et textes de rubriques sans entités HTML ; option pour ne pas écraser l'adresse du site ; pipeline renommé `wp2spip_traitements`, l'ancien nom restant appelé pour compatibilité |
 | 2 | Balisage des blocs de l'éditeur | cœur | nettoyer `<figure>`, `<figcaption>`, classes `wp-block-*` et commentaires de blocs, en gardant les légendes ; galeries vers des documents |
 | 3 | Hiérarchie des pages | cœur | conserver la structure des pages parentes et enfants (décision ouverte, § 7) |
 | 4 | Étiquettes | cœur | `importer_mots` : `post_tag` → mots-clés d'un groupe dédié, liés aux articles |
