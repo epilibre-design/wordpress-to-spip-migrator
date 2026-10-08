@@ -65,6 +65,24 @@ if (test_plugin_actif('accesrestreint')) {
 		$lignes[] = array('zone', $l['titre'], 'article#' . $wp($articles, $l['id_objet']));
 	}
 }
+if (test_plugin_actif('albums')) {
+	// Albums des galeries : article lié et documents dans leur ordre
+	foreach (sql_allfetsel('*', 'spip_albums', '', '', 'id_album') as $album) {
+		$id_album = intval($album['id_album']);
+		$lies = sql_allfetsel('id_objet', 'spip_albums_liens', array('id_album = ' . $id_album, 'objet = "article"'), '', 'id_objet');
+		$images = sql_allfetsel('id_document', 'spip_documents_liens', array('objet = "album"', 'id_objet = ' . $id_album), '', 'rang_lien');
+		$lignes[] = array(
+			'album',
+			'spip' . $id_album,
+			$album['titre'],
+			$normaliser($album['descriptif']),
+			$album['statut'],
+			$album['date'],
+			join(',', array_map(fn($id) => 'article#' . $wp($articles, $id), array_column($lies, 'id_objet'))),
+			join(',', array_map(fn($id) => $wp($documents, $id), array_column($images, 'id_document'))),
+		);
+	}
+}
 
 $lignes = array_map(function ($ligne) { return join("\t", $ligne); }, $lignes);
 sort($lignes);

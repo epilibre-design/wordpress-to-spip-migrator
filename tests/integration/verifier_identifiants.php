@@ -49,6 +49,30 @@ if ($en_trop = array_diff($ids_spip, $ids_wp)) {
 	$echecs[] = 'documents : ' . count($en_trop) . ' documents sans média Wordpress correspondant (' . join(', ', array_slice($en_trop, 0, 10)) . (count($en_trop) > 10 ? '…' : '') . ')';
 }
 
+// Blocs de l'éditeur : plus de commentaire <!-- wp: hors des blocs de code, plus de classe de présentation
+// has-… ou is-… ; chaque <albumN> désigne un album existant, lié à l'article et qui contient un document
+$avec_albums = (bool) sql_showtable('spip_albums', true);
+foreach (sql_allfetsel('id_article, texte', 'spip_articles', 'id_wordpress > 0', '', 'id_article') as $article) {
+	$id = intval($article['id_article']);
+	$hors_code = preg_replace('#<(code|cadre)\b.*?</\1>#is', '', $article['texte']);
+	if (strpos($hors_code, '<!-- wp:') !== false) {
+		$echecs[] = "article $id : commentaire de bloc <!-- wp: restant";
+	}
+	if (preg_match('/\bclass=["\'][^"\']*\b(?:has|is)-[a-z0-9-]+/i', $hors_code, $trouve)) {
+		$echecs[] = "article $id : classe de présentation restante ($trouve[0])";
+	}
+	preg_match_all('/<album(\d+)>/', $article['texte'], $trouves);
+	foreach (array_unique($trouves[1]) as $id_album) {
+		if (
+			!$avec_albums
+			or !sql_countsel('spip_albums_liens', array('id_album = ' . intval($id_album), 'objet = "article"', 'id_objet = ' . $id))
+			or !sql_countsel('spip_documents_liens', array('objet = "album"', 'id_objet = ' . intval($id_album)))
+		) {
+			$echecs[] = "article $id : album $id_album absent, non lié à l'article, ou vide";
+		}
+	}
+}
+
 // Contenus privés ou protégés par mot de passe : jamais publiés hors d'une zone ;
 // avec Accès restreint, les privés et les protégés publiés ou programmés sont publiés dans une zone
 include_spip('inc/plugin');
