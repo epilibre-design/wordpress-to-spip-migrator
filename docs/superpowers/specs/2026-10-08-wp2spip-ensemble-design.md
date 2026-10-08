@@ -321,4 +321,4 @@ Chaque sous-projet aura sa propre spec, puis son plan de réalisation.
 
 1. **Hiérarchie des pages** (sous-projet 4) : rattacher chaque page à la rubrique équivalente (quand l'arbre des catégories reproduit celui des pages), ou créer une rubrique par page parente, ou garder des pages uniques avec un lien vers leur parent ?
 2. **Ordre de priorité** de la feuille de route.
-3. **Fusion** de la branche `compat-spip-4.4` dans `master`, et publication d'une version 3.0.0.
+3. **Branche principale** : décidé — `compat-spip-4.4` devient la branche principale du dépôt (branche par défaut), sans fusion dans `master` ; le dépôt d'origine, abandonné, ne reçoit pas de demande de fusion. Reste ouverte : la publication d'une version 3.0.0.

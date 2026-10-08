@@ -1702,5 +1702,5 @@ Chacun suit le cycle de la spec (§ 6) : spec détaillée, relecture, puis plan 
 
 ### Task 21 : publication
 
-- [ ] Décisions (spec § 7) : ordre des sous-projets 3 à 10, fusion de `compat-spip-4.4` dans `master`, version 3.0.0.
-- [ ] Fusion, étiquette `v3.0.0`, push — uniquement sur demande explicite.
+- [ ] Décisions (spec § 7) : ordre des sous-projets 3 à 10, version 3.0.0. Décidé : `compat-spip-4.4` est la branche principale (branche par défaut du dépôt), sans fusion dans `master` ; pas de demande de fusion vers le dépôt d'origine, abandonné.
+- [ ] `compat-spip-4.4` branche par défaut du dépôt ; étiquette `v3.0.0`, push — uniquement sur demande explicite.
