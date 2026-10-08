@@ -339,38 +339,150 @@ function wp2spip_importer_articles_dist($command) {
 /**
  * Cherche si un lien peut être remplacé par un contenu interne au SPIP
  * 
- * Cela peut être un document si c'est un upload WP, ou un article interne.
+ * Cela peut être un document si c'est un fichier ou la page d'un média Wordpress,
+ * ou un article : les articles et pages SPIP ont l'identifiant de leur contenu Wordpress,
+ * le lien s'écrit donc directement, que le contenu visé soit déjà importé ou non.
  * 
  * @param string $lien
+ * @param string $url_wordpress
  * @param string $base
- * @return string Retourne le lien interne au SPIP, doc123 ou article123
+ * @return string Retourne le lien interne au SPIP, document123 ou article123, ou le lien inchangé
  */
 function wp2spip_chercher_lien($lien, $url_wordpress, $base='wordpress') {
 	// Seulement si c'est une URL relative OU qu'elle pointe sur le site d'origine
-	if (wp2spip_url_du_site($lien, $url_wordpress)) {
-		// Si c'est un document du site d'origine
-		if ($id_document = wp2spip_chercher_document($lien, $url_wordpress, $base)) {
-			$lien = "document$id_document";
-		}
-		// Si on trouve un id de post directement easy
-		elseif (
-			($id_wordpress = intval(parametre_url($lien, 'page_id')) or $id_wordpress = intval(parametre_url($lien, 'p')))
-			and $id_article = sql_getfetsel('id_article', 'spip_articles', 'id_wordpress = '.$id_wordpress)
-		) {
-			$lien = "article$id_article";
-		}
-		// Sinon faut chercher une sorte de slug (pas pour un fichier d'uploads introuvable, qui n'est pas une page)
-		elseif (
-			strpos($lien, '/wp-content/uploads/') === false
-			and $chemin = parse_url($lien, PHP_URL_PATH)
-			and $slug = trim(basename($chemin), '/')
-			and $url = sql_fetsel('type, id_objet', 'spip_urls', 'url='.sql_quote($slug))
-		) {
-			$lien = $url['type'] . $url['id_objet'];
-		}
+	if (!wp2spip_url_du_site($lien, $url_wordpress)) {
+		return $lien;
+	}
+	// Un fichier de la médiathèque
+	if ($id_document = wp2spip_chercher_document($lien, $url_wordpress, $base)) {
+		return "document$id_document";
+	}
+	// Un fichier d'uploads introuvable n'est pas une page
+	if (strpos($lien, '/wp-content/uploads/') !== false) {
+		return $lien;
+	}
+	
+	// Un contenu, désigné par son identifiant (?p=, ?page_id=) ou par son chemin
+	$contenus = wp2spip_index_contenus($base);
+	$id_wordpress = intval(parametre_url($lien, 'page_id')) ?: intval(parametre_url($lien, 'p'));
+	if (
+		!$id_wordpress
+		and $chemin = trim((string) parse_url($lien, PHP_URL_PATH), '/')
+	) {
+		$id_wordpress = wp2spip_chercher_slug($chemin, $contenus);
+	}
+	
+	switch ($contenus['types'][$id_wordpress] ?? '') {
+		case 'post':
+		case 'page':
+			return "article$id_wordpress";
+		case 'attachment':
+			// La page d'un média : son document, s'il a été importé
+			if ($id_document = intval(sql_getfetsel('id_document', 'spip_documents', 'id_wordpress = ' . $id_wordpress))) {
+				return "document$id_document";
+			}
 	}
 	
 	return $lien;
+}
+
+/**
+ * Index des contenus Wordpress qu'un lien peut désigner
+ *
+ * @param string $base
+ * @return array array(
+ *     'types' => array(ID => post_type),
+ *     'slugs' => array(slug normalisé => array(ID, …)),
+ *     'chemins' => array(ID => chemin normalisé : slug, ou parent/enfant pour une page)
+ * )
+ */
+function wp2spip_index_contenus($base = 'wordpress') {
+	static $index = array();
+	if (isset($index[$base])) {
+		return $index[$base];
+	}
+	$index[$base] = array('types' => array(), 'slugs' => array(), 'chemins' => array());
+
+	$contenus = sql_allfetsel(
+		'ID, post_type, post_name, post_parent',
+		'wp_posts',
+		sql_in('post_type', array('post', 'page', 'attachment')),
+		'',
+		'ID',
+		'',
+		'',
+		$base
+	);
+	$types = array_column($contenus, 'post_type', 'ID');
+	$noms = array_column($contenus, 'post_name', 'ID');
+	$parents = array_column($contenus, 'post_parent', 'ID');
+
+	foreach ($contenus as $contenu) {
+		$id = intval($contenu['ID']);
+		$index[$base]['types'][$id] = $contenu['post_type'];
+		if ($contenu['post_name'] === '') {
+			continue;
+		}
+		$slug = wp2spip_normaliser_slug($contenu['post_name']);
+		$index[$base]['slugs'][$slug][] = $id;
+
+		// Une page enfant a pour chemin celui de ses parents : parent/enfant
+		$chemin = $slug;
+		$parent = intval($contenu['post_parent']);
+		$vus = array();
+		while (
+			$contenu['post_type'] == 'page'
+			and $parent
+			and ($types[$parent] ?? '') == 'page'
+			and !isset($vus[$parent])
+		) {
+			$vus[$parent] = true;
+			$chemin = wp2spip_normaliser_slug($noms[$parent]) . '/' . $chemin;
+			$parent = intval($parents[$parent]);
+		}
+		$index[$base]['chemins'][$id] = $chemin;
+	}
+
+	return $index[$base];
+}
+
+/**
+ * Contenu désigné par le chemin d'une URL
+ *
+ * Le dernier segment est le slug. Si plusieurs contenus ont ce slug (pages de parents
+ * différents, article et page…), on garde ceux dont le chemin complet termine l'URL,
+ * et parmi eux le plus long (parent/enfant plutôt qu'enfant). Toujours ambigu : 0,
+ * le lien reste tel quel plutôt que de viser peut-être le mauvais contenu.
+ *
+ * @param string $chemin chemin de l'URL, sans / au début ni à la fin
+ * @param array $contenus index de wp2spip_index_contenus()
+ * @return int ID Wordpress, ou 0
+ */
+function wp2spip_chercher_slug($chemin, $contenus) {
+	$chemin = join('/', array_map('wp2spip_normaliser_slug', explode('/', $chemin)));
+	$candidats = $contenus['slugs'][basename($chemin)] ?? array();
+	if (count($candidats) > 1) {
+		$longueurs = array();
+		foreach ($candidats as $id) {
+			$complet = $contenus['chemins'][$id];
+			if ($chemin === $complet or substr($chemin, -strlen($complet) - 1) === "/$complet") {
+				$longueurs[$id] = strlen($complet);
+			}
+		}
+		$candidats = $longueurs ? array_keys($longueurs, max($longueurs)) : array();
+	}
+	return (count($candidats) == 1) ? intval($candidats[0]) : 0;
+}
+
+/**
+ * Forme comparable d'un slug : Wordpress stocke les caractères non ASCII encodés en minuscules (%c3%a9),
+ * les liens les écrivent encodés en majuscules ou en clair
+ *
+ * @param string $slug
+ * @return string
+ */
+function wp2spip_normaliser_slug($slug) {
+	return strtolower(rawurlencode(rawurldecode($slug)));
 }
 
 /**
