@@ -76,7 +76,7 @@ Classes conservées : `wp-block-<nom>` du bloc et celles qui décrivent sa struc
   - statut `publie`, date du contenu ;
   - documents liés à l'album dans l'ordre (`rang_lien`), la légende de chaque image devenant le descriptif de son document ;
   - album lié à l'article.
-- Une galerie dont une partie des images n'est pas retrouvée devient l'album des autres ; chaque image manquante est comptée dans le bilan des médias introuvables. Une galerie dont aucune image n'est retrouvée ne crée pas d'album : son HTML reste, compté dans le bilan.
+- Une galerie dont une partie des images n'est pas retrouvée devient l'album des autres ; chaque image manquante est comptée au bilan, à part des médias introuvables dont le HTML d'origine est gardé (« images de galeries introuvables, absentes de leur album »). Une galerie dont aucune image n'est retrouvée ne crée pas d'album : son HTML reste, compté dans le bilan.
 - Limite : un album n'est pas couvert par les zones d'Accès restreint ; les images d'une galerie d'un contenu privé restent accessibles par l'album, comme le sont déjà les documents par leur URL.
 
 ## 4. Téléchargement et activation des plugins requis
@@ -117,11 +117,11 @@ Les critères de détection sont ceux des traitements (`inc/wp2spip_plugins.php`
 
 ## 6. Bilan de l'import
 
-`importer_articles` ajoute à son bilan : nombre de blocs convertis par type, albums créés, blocs dynamiques retirés, blocs inconnus (détail par contenu avec `-v`).
+`importer_articles` ajoute à son bilan : nombre de blocs convertis par type, albums créés, blocs dynamiques retirés, blocs inconnus (détail par contenu avec `-v`), médias introuvables dont le HTML d'origine est gardé, et images de galeries introuvables, absentes de leur album.
 
 ## 7. Validation
 
-- **`tests/integration/tester_blocs.php`** (lancé par `spip php:eval`, code `1` en cas d'écart) : fragments tirés du contenu *Theme Unit Test* (image alignée et légendée, galerie avant et après 5.9, couverture des deux formats, colonnes, tableau légendé, bouton, embarqué, vidéo, blocs dynamiques, bloc dynamique qui a du contenu enregistré, bloc inconnu, contenu sans bloc, `[gallery]` avec et sans `ids`, galerie dont une image manque, galerie sans image retrouvée) et texte attendu après conversion ; les albums et légendes des essais ne restent pas dans le site.
+- **`tests/integration/tester_blocs.php`** (lancé par `spip php:eval`, code `1` en cas d'écart) : fragments tirés du contenu *Theme Unit Test* (image alignée et légendée, galerie avant et après 5.9, couverture des deux formats, colonnes, tableau légendé, bouton, embarqué, vidéo, blocs dynamiques, bloc dynamique qui a du contenu enregistré, bloc réutilisable `wp:block` compté comme inconnu, bloc inconnu, contenu sans bloc, `[gallery]` avec et sans `ids`, galerie dont une image manque, galerie sans image retrouvée) et texte attendu après conversion ; les albums et légendes des essais ne restent pas dans le site.
 - **`verifier_identifiants.php`**, complété : aucun `<!-- wp:` hors des blocs de code ; aucune classe de présentation `has-…` ou `is-…` ; chaque `<albumN>` désigne un album existant, lié à l'article et contenant au moins un document. Pas de règle sur `style=` : le HTML d'un bloc « HTML personnalisé », et celui des contenus de l'éditeur classique, sont gardés tels quels. **`exporter_import.php`** exporte aussi les albums (titre, descriptif, statut, date, article, documents dans l'ordre).
 - **Installation des plugins** : depuis un SPIP préparé par `outils/preparer_spip.sh` (sans Albums ni Accès restreint), `--traitements=importer_articles` seul : les plugins sont téléchargés, installés avec leurs tables, et la commande est relancée (le contenu final n'est pas vérifié dans ce scénario : ni les documents ni les zones ne sont importés). Forum, toujours actif en SPIP 4, n'est pas concerné.
 - **WordPress 6.9 et 7.1** : `outils/preparer_spip.sh --importer` depuis un dossier vide (téléchargement, installation et relance automatiques), puis vérificateur et `tester_blocs.php` à OK ; relecture des textes des contenus *Block: …* et *WP 6.1 … blocks*. Sur les SPIP de test de `tests/integration/` (états vierges v2, sans `plugins/auto` ni dépôt), l'import prépare l'un et l'autre, puis installe les plugins requis.

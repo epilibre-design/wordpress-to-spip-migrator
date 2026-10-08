@@ -798,7 +798,7 @@ git commit -m "Import : télécharger et activer les plugins requis par le conte
 
 **Interfaces :**
 - Consumes : `wp2spip_chercher_document($url, $url_wordpress, $base): int` (`wp2spip/importer_articles.php`) ; Albums actif.
-- Produces : `wp2spip_contexte_blocs($command, array $wp_post, string $url_wordpress): array` ; `wp2spip_convertir_blocs(string $contenu, array &$contexte): string` (avant sale) ; `wp2spip_restaurer_blocs(string $texte, array $contexte): string` (après sale) ; `wp2spip_lier_albums(array $contexte, int $id_article)` ; `wp2spip_cumuler_bilan_blocs(array $bilan, array $contexte): array` ; `wp2spip_afficher_bilan_blocs($command, array $bilan)` ; le contexte porte `albums` (identifiants créés) et `bilan` (`convertis`, `dynamiques`, `inconnus` : type => nombre ; `medias_introuvables`) ; pipeline `wp2spip_bloc`.
+- Produces : `wp2spip_contexte_blocs($command, array $wp_post, string $url_wordpress): array` ; `wp2spip_convertir_blocs(string $contenu, array &$contexte): string` (avant sale) ; `wp2spip_restaurer_blocs(string $texte, array $contexte): string` (après sale) ; `wp2spip_lier_albums(array $contexte, int $id_article)` ; `wp2spip_cumuler_bilan_blocs(array $bilan, array $contexte): array` ; `wp2spip_afficher_bilan_blocs($command, array $bilan)` ; le contexte porte `albums` (identifiants créés) et `bilan` (`convertis`, `dynamiques`, `inconnus` : type => nombre ; `medias_introuvables` : HTML d'origine gardé ; `images_retirees` : images de galerie absentes de leur album) ; pipeline `wp2spip_bloc`.
 
 - [ ] **Step 1 : SPIP d'essai des conversions**
 
@@ -900,7 +900,7 @@ HTML,
 		'contenu' => '[gallery ids="770,999999,771"]',
 		'attendu' => '<albumN>',
 		'albums' => array(array('titre' => 'Essai', 'descriptif' => '', 'documents' => array(770, 771))),
-		'introuvables' => 1,
+		'retirees' => 1,
 	),
 	array(
 		'nom' => 'galerie dont aucune image n’est retrouvée : pas d’album, HTML gardé',
@@ -996,6 +996,12 @@ HTML,
 		'attendu' => "<div class=\"wp-block-query\">\n\nAucun résultat\n\n</div>",
 	),
 	array(
+		'nom' => 'bloc réutilisable (wp:block) : traité comme un bloc inconnu',
+		'contenu' => "<p>Avant</p>\n\n<!-- wp:block {\"ref\":123} /-->",
+		'attendu' => 'Avant',
+		'inconnus' => array('core/block' => 1),
+	),
+	array(
 		'nom' => 'bloc inconnu : contenu gardé, passé par sale',
 		'contenu' => "<!-- wp:mon-extension/encart {\"couleur\":\"rouge\"} -->\n<div class=\"encart\"><p>Un encart</p></div>\n<!-- /wp:mon-extension/encart -->",
 		'attendu' => "<div class=\"encart\">Un encart\n\n</div>",
@@ -1048,7 +1054,13 @@ foreach ($cas as $test) {
 		$ecarts[] = count($contexte['albums']) . ' albums créés';
 	}
 	if ($contexte['bilan']['medias_introuvables'] != ($test['introuvables'] ?? 0)) {
-		$ecarts[] = $contexte['bilan']['medias_introuvables'] . ' médias introuvables au bilan, ' . ($test['introuvables'] ?? 0) . ' attendus';
+		$ecarts[] = $contexte['bilan']['medias_introuvables'] . ' médias introuvables (HTML gardé) au bilan, ' . ($test['introuvables'] ?? 0) . ' attendus';
+	}
+	if ($contexte['bilan']['images_retirees'] != ($test['retirees'] ?? 0)) {
+		$ecarts[] = $contexte['bilan']['images_retirees'] . ' images retirées de leur album au bilan, ' . ($test['retirees'] ?? 0) . ' attendues';
+	}
+	if (isset($test['inconnus']) and $contexte['bilan']['inconnus'] !== $test['inconnus']) {
+		$ecarts[] = 'blocs inconnus au bilan : ' . json_encode($contexte['bilan']['inconnus']);
 	}
 	foreach ($test['descriptifs'] ?? array() as $id_document => $descriptif) {
 		if (($obtenu_descriptif = sql_getfetsel('descriptif', 'spip_documents', 'id_document = ' . $id_document)) !== $descriptif) {
@@ -1129,7 +1141,7 @@ function wp2spip_contexte_blocs($command, $wp_post, $url_wordpress) {
 		'galerie' => 0,
 		'albums' => array(),
 		'protections' => array(),
-		'bilan' => array('convertis' => array(), 'dynamiques' => array(), 'inconnus' => array(), 'medias_introuvables' => 0),
+		'bilan' => array('convertis' => array(), 'dynamiques' => array(), 'inconnus' => array(), 'medias_introuvables' => 0, 'images_retirees' => 0),
 	);
 }
 
@@ -1326,7 +1338,7 @@ function wp2spip_bloc_dynamique($type) {
 	$dynamiques = array(
 		'query', 'latest-posts', 'latest-comments', 'archives', 'categories', 'calendar', 'tag-cloud', 'rss',
 		'search', 'page-list', 'navigation', 'social-links', 'social-link', 'loginout', 'avatar', 'read-more',
-		'term-description', 'block', 'template-part', 'pattern', 'widget-group', 'legacy-widget', 'home-link',
+		'term-description', 'template-part', 'pattern', 'widget-group', 'legacy-widget', 'home-link',
 		'navigation-link', 'navigation-submenu',
 	);
 	return in_array($type, $dynamiques) or preg_match('/^(post-|comment|query-|site-)/', $type);
@@ -1573,7 +1585,7 @@ function wp2spip_creer_album($images, $legende, &$contexte) {
 		return 0;
 	}
 	// Images introuvables dans la médiathèque : l'album est créé sans elles, chacune est signalée au bilan
-	$contexte['bilan']['medias_introuvables'] += count($images) - count($trouvees);
+	$contexte['bilan']['images_retirees'] += count($images) - count($trouvees);
 	$images = $trouvees;
 	include_spip('action/editer_objet');
 	include_spip('action/editer_liens');
@@ -1713,6 +1725,7 @@ function wp2spip_cumuler_bilan_blocs($bilan, $contexte) {
 		}
 	}
 	$bilan['medias_introuvables'] += $contexte['bilan']['medias_introuvables'];
+	$bilan['images_retirees'] += $contexte['bilan']['images_retirees'];
 	$bilan['albums'] += count($contexte['albums']);
 	return $bilan;
 }
@@ -1743,13 +1756,16 @@ function wp2spip_afficher_bilan_blocs($command, $bilan) {
 	if ($bilan['medias_introuvables']) {
 		$command->output->writeln("{$bilan['medias_introuvables']} médias de blocs ou de galeries introuvables dans la médiathèque, HTML d’origine gardé.");
 	}
+	if ($bilan['images_retirees']) {
+		$command->output->writeln("{$bilan['images_retirees']} images de galeries introuvables dans la médiathèque, absentes de leur album.");
+	}
 }
 ```
 
 - [ ] **Step 5 : lancer le test**
 
 Run : `(cd "$ESSAIS/spip-blocs" && "$SPIP_CLI" php:eval "include '$WP2SPIP/tests/integration/tester_blocs.php';"); echo "code $?"`
-Expected : 19 lignes `ok`, puis `OK`, `code 0`. Relancé une seconde fois : même résultat (les albums et légendes des essais sont retirés à la fin).
+Expected : 20 lignes `ok`, puis `OK`, `code 0`. Relancé une seconde fois : même résultat (les albums et légendes des essais sont retirés à la fin).
 
 - [ ] **Step 6 : commit**
 
@@ -1791,7 +1807,7 @@ Dans `wp2spip/importer_articles.php` :
 2. après `$nb_liens_non_convertis = 0;` :
 
 ```php
-		$bilan_blocs = array('convertis' => array(), 'dynamiques' => array(), 'inconnus' => array(), 'medias_introuvables' => 0, 'albums' => 0);
+		$bilan_blocs = array('convertis' => array(), 'dynamiques' => array(), 'inconnus' => array(), 'medias_introuvables' => 0, 'images_retirees' => 0, 'albums' => 0);
 ```
 
 3. remplacer :
@@ -1844,7 +1860,7 @@ grep "Blocs convertis\|albums créés\|blocs dynamiques\|blocs inconnus\|médias
 (cd "$ESSAIS/spip-blocs" && "$SPIP_CLI" php:eval 'echo sql_countsel("spip_articles", "texte like \"%<!-- wp:%\""), " ", sql_countsel("spip_albums"), "\n";')
 ```
 
-Expected : `code 0` ; `Blocs convertis : [gallery] (12), audio (2), button (12), buttons (1), column (40), columns (13), cover (21), embed (5), file (3), gallery (10), group (25), image (14), media-text (6), more (2), nextpage (2), pullquote (4), quote (8), spacer (4), table (4), video (3).` (les enfants des blocs dynamiques sont convertis avant de savoir si le bloc a du contenu, d'où quelques colonnes et groupes comptés puis retirés) ; `22 albums créés pour les galeries.` ; `107 blocs dynamiques retirés …` ; `1 médias de blocs ou de galeries introuvables …` (l'image 763, citée par la galerie du contenu 1031, n'existe pas dans le WordPress de test) ; aucune ligne de blocs inconnus ; puis `1 22` (seul reste un `<!-- wp:code` écrit dans le texte d'un bloc de code, contenu 1779).
+Expected : `code 0` ; `Blocs convertis : [gallery] (12), audio (2), button (12), buttons (1), column (40), columns (13), cover (21), embed (5), file (3), gallery (10), group (25), image (14), media-text (6), more (2), nextpage (2), pullquote (4), quote (8), spacer (4), table (4), video (3).` (les enfants des blocs dynamiques sont convertis avant de savoir si le bloc a du contenu, d'où quelques colonnes et groupes comptés puis retirés) ; `22 albums créés pour les galeries.` ; `107 blocs dynamiques retirés …` ; `1 images de galeries introuvables dans la médiathèque, absentes de leur album.` (l'image 763, citée par la galerie du contenu 1031, n'existe pas dans le WordPress de test) ; aucune ligne de blocs inconnus ni de médias introuvables ; puis `1 22` (seul reste un `<!-- wp:code` écrit dans le texte d'un bloc de code, contenu 1779).
 
 - [ ] **Step 4 : relecture des textes**
 
