@@ -37,3 +37,6 @@ prive/themes/spip/images/wp2spip-16.png -text
 prive/themes/spip/images/wp2spip.png -text
 /docs export-ignore
 /tests export-ignore
+/scripts export-ignore
+/phpunit.xml export-ignore
+/composer.lock export-ignore
