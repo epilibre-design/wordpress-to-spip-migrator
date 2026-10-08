@@ -53,6 +53,19 @@ function wp2spip_where_galeries() {
 }
 
 /**
+ * Pages dont le parent est une page : celles que lie importer_hierarchie_pages
+ *
+ * @return array conditions sur wp_posts
+ */
+function wp2spip_where_pages_enfants() {
+	return array(
+		'post_type = "page"',
+		'post_parent > 0',
+		'post_parent IN (SELECT ID FROM wp_posts WHERE post_type = "page")',
+	);
+}
+
+/**
  * Plugins requis par le contenu Wordpress
  *
  * Le pipeline wp2spip_plugins_requis reçoit la base Wordpress (args) et la liste (data) :
@@ -72,6 +85,9 @@ function wp2spip_plugins_requis($base) {
 	}
 	if ($nb = sql_countsel('wp_comments', wp2spip_where_commentaires(), '', '', $base)) {
 		$requis['forum'] = array('nom' => 'Forum', 'table' => 'spip_forum', 'dist' => true, 'raison' => "$nb commentaires");
+	}
+	if ($nb = sql_countsel('wp_posts', wp2spip_where_pages_enfants(), '', '', $base)) {
+		$requis['a2a'] = array('nom' => 'A2A', 'table' => 'spip_articles_lies', 'dist' => false, 'raison' => "$nb pages enfants");
 	}
 	return pipeline('wp2spip_plugins_requis', array('args' => array('base' => $base), 'data' => $requis));
 }

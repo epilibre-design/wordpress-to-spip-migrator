@@ -30,4 +30,5 @@
 	<utilise nom="accesrestreint" />
 	<utilise nom="albums" compatibilite="[4.0.0;]" />
 	<utilise nom="oembed" />
+	<utilise nom="a2a" compatibilite="[4.2.0;]" />
 </paquet>
