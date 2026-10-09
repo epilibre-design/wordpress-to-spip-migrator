@@ -405,8 +405,6 @@
           
         
       
-        
-      
     
     
     
@@ -436,11 +434,6 @@
 
             </a>
             
-              
-              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
           </div>
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
@@ -450,29 +443,6 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../etat-projet/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    État du projet
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
               
             
           </ul>
@@ -1580,7 +1550,6 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  
                   
 
 
@@ -1598,11 +1567,11 @@
 <p>Une copie ancienne ou mise à niveau peut encore présenter des situations héritées. La conservation d’identifiants des rubriques exige de qualifier ces cas ; l’objectif « WP4 » ne permet pas de supposer que toutes les structures anciennes ont déjà été normalisées.</p>
 <h2 id="44-metadonnees-des-termes">4.4 : métadonnées des termes<a class="headerlink" href="#44-metadonnees-des-termes" title="Permanent link">&para;</a></h2>
 <p>La table <code>termmeta</code> et les API de métadonnées de termes permettent d’associer des valeurs supplémentaires aux catégories et autres taxonomies. Le modèle de base conserve ses tables de termes et de relations ; cette nouvelle couche peut porter des données importantes pour le site.</p>
-<p>La révision documentée importe les catégories, les étiquettes, leurs descriptions et leurs relations aux contenus, mais n’effectue pas un transfert général de <code>termmeta</code>. Les valeurs propres au thème ou aux extensions demandent une stratégie dédiée.</p>
+<p>wp2spip importe les catégories, les étiquettes, leurs descriptions et leurs relations aux contenus, mais n’effectue pas un transfert général de <code>termmeta</code>. Les valeurs propres au thème ou aux extensions demandent une stratégie dédiée.</p>
 <h2 id="medias-et-shortcodes">Médias et shortcodes<a class="headerlink" href="#medias-et-shortcodes" title="Permanent link">&para;</a></h2>
 <p>Images, légendes et galeries utilisent HTML et des shortcodes tels que <code>[caption]</code> et <code>[gallery]</code>. Le migrateur dispose de conversions pour plusieurs formes natives. Les shortcodes des extensions ne sont pas couverts simplement parce qu’ils se trouvent dans le même texte.</p>
 <h2 id="couverture-et-controle">Couverture et contrôle<a class="headerlink" href="#couverture-et-controle" title="Permanent link">&para;</a></h2>
-<p>La spec d’ensemble vise <strong>4.9 à 7.x</strong> et rapporte un essai en 4.9. Elle ne démontre pas toute la plage 4.0–4.8. Qualifier ces versions, les termes partagés, les shortcodes et les relations fait partie du travail nécessaire pour l’objectif WordPress 4 complet.</p>
+<p>Le moteur vise <strong>4.9 à 7.x</strong>, avec un essai en 4.9 ; la plage 4.0–4.8 n’est pas démontrée. Qualifier ces versions, les termes partagés, les shortcodes et les relations fait partie du travail nécessaire pour l’objectif WordPress 4 complet.</p>
 <p>Sources : <a href="https://github.com/WordPress/WordPress/blob/87bf150016e042bc3e21f2f1cb9de44042b8cdb1/wp-includes/taxonomy.php">séparation des termes, 4.2</a>, <a href="https://github.com/WordPress/WordPress/blob/f6a29831c76d2dbe82e9ae673539f910654c58a4/wp-admin/includes/schema.php">schéma 4.4</a>, <a href="https://github.com/WordPress/WordPress/blob/f6a29831c76d2dbe82e9ae673539f910654c58a4/wp-includes/taxonomy.php">API des termes 4.4</a>, <a href="https://github.com/WordPress/WordPress/blob/29ffbff370968ae48a1b7a34e35c8b8e75cf0f91/wp-includes/post.php">types en 4.9</a>, <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/docs/superpowers/specs/2026-10-08-wp2spip-ensemble-design.md">spec d’ensemble</a>.</p>
 
 
@@ -1617,13 +1586,6 @@
 
 
                 
-  
-  <aside class="documented-revision" aria-label="Version du code documentée">
-    <strong>Révision documentée</strong>
-    <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/commit/dc1963eb54b317e7e9e7b445bfee81199a7804bb"><code>dc1963eb54b317e7e9e7b445bfee81199a7804bb</code></a>
-    <span>Branche main · Revue du 2026-10-09 · Version 3.0.0 (état test)</span>
-  </aside>
-
               </article>
             </div>
           

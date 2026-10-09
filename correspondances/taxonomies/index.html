@@ -405,8 +405,6 @@
           
         
       
-        
-      
     
     
     
@@ -436,11 +434,6 @@
 
             </a>
             
-              
-              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
           </div>
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
@@ -450,29 +443,6 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../etat-projet/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    État du projet
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
               
             
           </ul>
@@ -941,9 +911,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#categories-implemente" class="md-nav__link">
+  <a href="#categories" class="md-nav__link">
     <span class="md-ellipsis">
-      Catégories : implémenté
+      Catégories
     </span>
   </a>
   
@@ -959,9 +929,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#etiquettes-implemente" class="md-nav__link">
+  <a href="#etiquettes" class="md-nav__link">
     <span class="md-ellipsis">
-      Étiquettes : implémenté
+      Étiquettes
     </span>
   </a>
   
@@ -1524,9 +1494,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#categories-implemente" class="md-nav__link">
+  <a href="#categories" class="md-nav__link">
     <span class="md-ellipsis">
-      Catégories : implémenté
+      Catégories
     </span>
   </a>
   
@@ -1542,9 +1512,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#etiquettes-implemente" class="md-nav__link">
+  <a href="#etiquettes" class="md-nav__link">
     <span class="md-ellipsis">
-      Étiquettes : implémenté
+      Étiquettes
     </span>
   </a>
   
@@ -1580,7 +1550,6 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  
                   
 
 
@@ -1590,7 +1559,7 @@
 
 <h1 id="categories-et-etiquettes">Catégories et étiquettes<a class="headerlink" href="#categories-et-etiquettes" title="Permanent link">&para;</a></h1>
 <p>Une taxonomie relie des <strong>termes</strong> à des contenus. Son nom (<code>category</code>, <code>post_tag</code>…) est distinct de l’identifiant du terme et de celui de la relation taxonomique.</p>
-<h2 id="categories-implemente">Catégories : implémenté<a class="headerlink" href="#categories-implemente" title="Permanent link">&para;</a></h2>
+<h2 id="categories">Catégories<a class="headerlink" href="#categories" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -1636,7 +1605,7 @@
   B[Article SPIP 42] --&gt; R1[Rubrique principale 12]
   B --&gt; R2[Rubrique secondaire 18]</code></pre>
 <p>Avec <a href="../../comprendre/extensions/#yoast-seo">wp2spip_yoast</a> active, la catégorie principale choisie dans Yoast peut remplacer ce choix avant le calcul des rubriques secondaires. Le cœur seul conserve la règle ci-dessus.</p>
-<h2 id="etiquettes-implemente">Étiquettes : implémenté<a class="headerlink" href="#etiquettes-implemente" title="Permanent link">&para;</a></h2>
+<h2 id="etiquettes">Étiquettes<a class="headerlink" href="#etiquettes" title="Permanent link">&para;</a></h2>
 <p>Le traitement <code>importer_mots</code> suit les articles et la hiérarchie des pages. Il crée un groupe « Étiquettes », puis un mot-clé par terme <code>post_tag</code>.</p>
 <table>
 <thead>
@@ -1667,7 +1636,7 @@
 <p>Les étiquettes sans contenu sont également reprises. Le moteur lit les relations réelles, sans filtrer sur <code>term_taxonomy.count</code>, qui peut ignorer les contenus privés. Il active les mots-clés sur les articles (<code>articles_mots = oui</code>). À la relance, il garde les mots déjà tracés et ajoute les liens manquants.</p>
 <p>Une collision d’identifiant, un mot issu d’une étiquette déplacé hors du groupe, un groupe tracé supprimé ou un contenu étiqueté absent de SPIP fait échouer le traitement. Certains mots ou liens peuvent déjà avoir été créés : remettre la destination à zéro pour refaire l’import complet.</p>
 <h2 id="autres-taxonomies-et-metadonnees">Autres taxonomies et métadonnées<a class="headerlink" href="#autres-taxonomies-et-metadonnees" title="Permanent link">&para;</a></h2>
-<p>Formats d’article, taxonomies personnalisées et métadonnées de termes (<code>termmeta</code>) ne sont pas convertis de façon générale par cette révision. Leur présence dans la base n’implique pas qu’elles soient utilisées par le moteur.</p>
+<p>Formats d’article, taxonomies personnalisées et métadonnées de termes (<code>termmeta</code>) ne sont pas convertis de façon générale par wp2spip. Leur présence dans la base n’implique pas qu’elles soient utilisées par le moteur.</p>
 <h2 id="controler">Contrôler<a class="headerlink" href="#controler" title="Permanent link">&para;</a></h2>
 <p>Comparer les parents de rubriques et l’ensemble des catégories de plusieurs articles. Vérifier les catégories sans article principal, les étiquettes sans contenu, les liens sur les pages et les contenus privés. Les taxonomies personnalisées restent à adapter.</p>
 <p>Sources : <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/wp2spip/importer_rubriques.php">rubriques</a>, <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/wp2spip/importer_polyhierarchie.php">polyhiérarchie</a>, <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/wp2spip/importer_mots.php">étiquettes</a>, <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/tests/integration/MotsTest.php">tests des mots-clés</a>, <a href="../../wordpress/modele/">modèle WordPress</a>.</p>
@@ -1684,13 +1653,6 @@
 
 
                 
-  
-  <aside class="documented-revision" aria-label="Version du code documentée">
-    <strong>Révision documentée</strong>
-    <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/commit/dc1963eb54b317e7e9e7b445bfee81199a7804bb"><code>dc1963eb54b317e7e9e7b445bfee81199a7804bb</code></a>
-    <span>Branche main · Revue du 2026-10-09 · Version 3.0.0 (état test)</span>
-  </aside>
-
               </article>
             </div>
           

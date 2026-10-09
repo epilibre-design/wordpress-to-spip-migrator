@@ -405,8 +405,6 @@
           
         
       
-        
-      
     
     
     
@@ -436,11 +434,6 @@
 
             </a>
             
-              
-              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
           </div>
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
@@ -450,29 +443,6 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../etat-projet/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    État du projet
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
               
             
           </ul>
@@ -1598,7 +1568,6 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  
                   
 
 
@@ -1611,9 +1580,7 @@
 <p>Sur une machine de développement :</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>--branch<span class="w"> </span>main<span class="w"> </span>https://github.com/epilibre-design/wordpress-to-spip-migrator.git
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>wordpress-to-spip-migrator
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>git<span class="w"> </span>rev-parse<span class="w"> </span>HEAD
 </code></pre></div>
-<p>Comparer le SHA obtenu à la révision affichée sur ce site. La branche peut avoir avancé : pour reproduire exactement la version décrite, utiliser un checkout propre au commit documenté. Ne pas réinitialiser un dossier contenant des modifications locales.</p>
 <h2 id="installation-dans-un-spip-existant">Installation dans un SPIP existant<a class="headerlink" href="#installation-dans-un-spip-existant" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Préparer une destination SPIP vierge, hors ligne.</li>
@@ -1638,7 +1605,7 @@
 <p>L’environnement de tests installe SPIP-Cli avec Composer puis lui applique <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/tests/spip-cli.patch">le patch fourni</a>. Ce patch corrige la sélection du plugin, les autorisations et la gestion des erreurs de téléchargement. Une installation indépendante doit disposer des mêmes corrections ; ne pas supposer qu’un autre exécutable <code>spip</code> du PATH est corrigé.</p>
 <p>Le script <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/scripts/install-spip-test.sh">install-spip-test.sh</a> applique ce patch dans <code>vendor/</code>, pas dans un SPIP-Cli système.</p>
 <h2 id="avant-le-premier-import">Avant le premier import<a class="headerlink" href="#avant-le-premier-import" title="Permanent link">&para;</a></h2>
-<p>Vérifier les accès à la base source, les fichiers médias, les plugins et le préfixe. Préparer un plan pour les fonctions <a href="../../etat-projet/">non implémentées</a>, puis suivre <a href="../../migrer/audit/">l’audit</a>.</p>
+<p>Vérifier les accès à la base source, les fichiers médias, les plugins et le préfixe. Préparer un plan pour les données <a href="../../correspondances/">non converties</a>, puis suivre <a href="../../migrer/audit/">l’audit</a>.</p>
 
 
 
@@ -1652,13 +1619,6 @@
 
 
                 
-  
-  <aside class="documented-revision" aria-label="Version du code documentée">
-    <strong>Révision documentée</strong>
-    <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/commit/dc1963eb54b317e7e9e7b445bfee81199a7804bb"><code>dc1963eb54b317e7e9e7b445bfee81199a7804bb</code></a>
-    <span>Branche main · Revue du 2026-10-09 · Version 3.0.0 (état test)</span>
-  </aside>
-
               </article>
             </div>
           

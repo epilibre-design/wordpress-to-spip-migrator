@@ -405,8 +405,6 @@
           
         
       
-        
-      
     
     
     
@@ -436,11 +434,6 @@
 
             </a>
             
-              
-              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
           </div>
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
@@ -450,29 +443,6 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../etat-projet/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    État du projet
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
               
             
           </ul>
@@ -1562,7 +1532,6 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  
                   
 
 
@@ -1571,7 +1540,7 @@
 
 
 <h1 id="articles-et-pages">Articles et pages<a class="headerlink" href="#articles-et-pages" title="Permanent link">&para;</a></h1>
-<p><strong>État : implémenté</strong>, pour les lignes <code>posts</code> de types <code>post</code> et <code>page</code>. Les révisions et types personnalisés ne font pas partie de cette sélection.</p>
+<p>Le moteur importe les lignes <code>posts</code> de types <code>post</code> et <code>page</code>. Les révisions et types personnalisés ne font pas partie de cette sélection.</p>
 <h2 id="objets-et-champs">Objets et champs<a class="headerlink" href="#objets-et-champs" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1591,6 +1560,11 @@
 <td><code>post_title</code></td>
 <td><code>titre</code></td>
 <td>Texte du titre repris ; titre vide à contrôler</td>
+</tr>
+<tr>
+<td><code>post_excerpt</code></td>
+<td><code>descriptif</code></td>
+<td>HTML converti ; vide si l’extrait n’a pas été saisi</td>
 </tr>
 <tr>
 <td><code>post_content</code></td>
@@ -1624,7 +1598,7 @@
 </tr>
 </tbody>
 </table>
-<p>Le champ <code>post_excerpt</code> d’un article n’a pas de correspondance dédiée dans la composition de l’article de cette révision ; ne pas annoncer l’import d’un chapo WordPress. L’extrait d’un <strong>média</strong> peut en revanche alimenter son descriptif.</p>
+<p>L’extrait saisi dans WordPress (<code>post_excerpt</code>) devient le <strong>descriptif</strong> de l’article ou de la page, et non son chapo : comme l’extrait dans WordPress, <code>#INTRODUCTION</code> reprend le descriptif quand il est rempli, et le texte sinon. Si au moins un extrait est importé, le moteur active le descriptif des articles dans la configuration SPIP (<code>articles_descriptif</code>) pour qu’il apparaisse dans l’espace privé. Un extrait généré automatiquement par WordPress n’est pas stocké et n’est donc pas repris : <code>#INTRODUCTION</code> en produit l’équivalent. L’extrait d’un <strong>média</strong> alimente le descriptif du document.</p>
 <h2 id="statuts">Statuts<a class="headerlink" href="#statuts" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1670,7 +1644,7 @@
 <p>Pour la page enfant <code>51</code> de la page <code>42</code>, le moteur crée un lien a2a <code>sous_page</code> du parent vers l’enfant. Les enfants sont ordonnés par <code>menu_order</code>, titre puis identifiant ; leur position devient le rang du lien.</p>
 <p>Le squelette doit exploiter ces liens pour les sous-pages ou le fil d’Ariane. Le modèle WordPress <code>_wp_page_template</code> n’est pas repris. La <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/docs/superpowers/specs/2026-10-08-wp2spip-hierarchie-pages-design.md">spec de parenté</a> donne des exemples de boucles.</p>
 <h2 id="controler-apres-import">Contrôler après import<a class="headerlink" href="#controler-apres-import" title="Permanent link">&para;</a></h2>
-<p>Vérifier un article publié, un brouillon, un programmé, une page enfant et un article sans titre. Comparer dates, auteur et parenté ; tester le rendu des pages uniques et les URL hiérarchiques.</p>
+<p>Vérifier un article publié, un brouillon, un programmé, une page enfant, un article sans titre et un article avec extrait. Comparer dates, auteur et parenté ; tester le rendu des pages uniques et les URL hiérarchiques.</p>
 <p>Sources : <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/wp2spip/importer_articles.php">articles</a>, <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/wp2spip/importer_hierarchie_pages.php">hiérarchie</a>.</p>
 
 
@@ -1685,13 +1659,6 @@
 
 
                 
-  
-  <aside class="documented-revision" aria-label="Version du code documentée">
-    <strong>Révision documentée</strong>
-    <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/commit/dc1963eb54b317e7e9e7b445bfee81199a7804bb"><code>dc1963eb54b317e7e9e7b445bfee81199a7804bb</code></a>
-    <span>Branche main · Revue du 2026-10-09 · Version 3.0.0 (état test)</span>
-  </aside>
-
               </article>
             </div>
           

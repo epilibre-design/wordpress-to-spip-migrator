@@ -405,8 +405,6 @@
           
         
       
-        
-      
     
     
     
@@ -436,11 +434,6 @@
 
             </a>
             
-              
-              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
           </div>
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
@@ -450,29 +443,6 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../etat-projet/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    État du projet
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
               
             
           </ul>
@@ -1244,9 +1214,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#trois-preuves-differentes" class="md-nav__link">
+  <a href="#tests" class="md-nav__link">
     <span class="md-ellipsis">
-      Trois preuves différentes
+      Tests
     </span>
   </a>
   
@@ -1524,9 +1494,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#trois-preuves-differentes" class="md-nav__link">
+  <a href="#tests" class="md-nav__link">
     <span class="md-ellipsis">
-      Trois preuves différentes
+      Tests
     </span>
   </a>
   
@@ -1562,7 +1532,6 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  
                   
 
 
@@ -1571,7 +1540,7 @@
 
 
 <h1 id="couverture-et-compatibilite">Couverture et compatibilité<a class="headerlink" href="#couverture-et-compatibilite" title="Permanent link">&para;</a></h1>
-<p><strong>Objectif : WordPress 4 à 7.</strong> La spec d’ensemble fixe une cible plus précise, <strong>4.9 à 7.x</strong>, et rapporte des essais en 4.9, 6.9 et 7.1. Ne pas transformer ces indications en garantie pour chaque version, thème et extension.</p>
+<p><strong>Cible : WordPress 4.9 à 7.x</strong>, avec des essais en 4.9, 6.9 et 7.1. Ne pas transformer ces indications en garantie pour chaque version, thème et extension.</p>
 <h2 id="matrice-des-formes-de-donnees">Matrice des formes de données<a class="headerlink" href="#matrice-des-formes-de-donnees" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1587,13 +1556,13 @@
 <td>4.0–4.8</td>
 <td>HTML/shortcodes, termes hérités ; <code>termmeta</code> depuis 4.4</td>
 <td>Traitements génériques pour articles, catégories, médias…</td>
-<td>En dehors de la cible minimale 4.9 de la spec ; qualifier ces versions et les termes partagés</td>
+<td>En dehors de la cible minimale 4.9 ; qualifier ces versions et les termes partagés</td>
 </tr>
 <tr>
 <td>4.9</td>
 <td>Modèle classique et données d’extensions</td>
 <td>Traitements génériques et conversions classiques</td>
-<td>Essai rapporté par la spec, pas une suite automatisée couvrant tous les cas 4.x</td>
+<td>Essai manuel, pas une suite automatisée couvrant tous les cas 4.x</td>
 </tr>
 <tr>
 <td>5.x</td>
@@ -1610,7 +1579,7 @@
 <tr>
 <td>6.9</td>
 <td>Jeu Theme Unit Test, avec référence versionnée</td>
-<td>Script d’import complet comparatif ; validations rapportées dans les plans</td>
+<td>Script d’import complet comparatif</td>
 <td>Rejouer sur une installation identifiée ; ne pas extrapoler à tous les sites</td>
 </tr>
 <tr>
@@ -1621,19 +1590,14 @@
 </tr>
 </tbody>
 </table>
-<h2 id="trois-preuves-differentes">Trois preuves différentes<a class="headerlink" href="#trois-preuves-differentes" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>Code présent</strong> : confirme un mécanisme, pas son résultat sur toutes les sources.</li>
-<li><strong>Test présent</strong> : fournit des cas exécutables ; préciser leur jeu de données.</li>
-<li><strong>Test exécuté</strong> : permet un constat sur les versions, paramètres et résultats de cette exécution.</li>
-</ul>
+<h2 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">&para;</a></h2>
 <p>Les tests SQLite utilisent un schéma et des fixtures des tables consultées ; ils ne reproduisent pas toutes les installations historiques. Les imports complets 6.9/7.1 demandent les WordPress externes et leur configuration.</p>
 <h2 id="quelle-que-soit-la-version">Quelle que soit la version<a class="headerlink" href="#quelle-que-soit-la-version" title="Permanent link">&para;</a></h2>
-<p>Les étiquettes sont désormais importées par le cœur, et Yoast/ACF disposent d’extensions publiées avec un périmètre précis. Les types personnalisés, menus, révisions et autres données d’extensions restent soumis à <a href="../../etat-projet/">l’état du projet</a>. Une version prise en compte par l’architecture n’ajoute pas les traitements absents.</p>
+<p>Les étiquettes sont importées par le cœur, et Yoast/ACF disposent d’extensions publiées avec un périmètre précis. Les types personnalisés, menus, révisions et autres données d’extensions ne sont pas importés (voir la <a href="../../correspondances/">matrice</a>). Une version prise en compte par l’architecture n’ajoute pas les traitements absents.</p>
 <p>La recherche de variantes par version permet d’étendre le moteur. Une nouvelle adaptation doit expliquer les différences de stockage et fournir des cas de conversion et de relations vérifiables.</p>
 <h2 id="choisir-un-scenario-de-qualification">Choisir un scénario de qualification<a class="headerlink" href="#choisir-un-scenario-de-qualification" title="Permanent link">&para;</a></h2>
 <p>Sélectionner la version exacte et un jeu représentatif des fonctions réellement utilisées. Préparer une source figée, une destination vierge et un inventaire attendu. Exécuter les tests appropriés et la recette, puis consigner commit, version PHP/SPIP, plugins et anomalies restantes.</p>
-<p>Sources : <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/docs/superpowers/specs/2026-10-08-wp2spip-ensemble-design.md">cible de la spec</a>, <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/readme.md">tests et commandes</a>, <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/spip-cli/WordpressImporter.php">architecture de la commande</a>.</p>
+<p>Sources : <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/docs/superpowers/specs/2026-10-08-wp2spip-ensemble-design.md">spec d’ensemble</a>, <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/readme.md">tests et commandes</a>, <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/spip-cli/WordpressImporter.php">architecture de la commande</a>.</p>
 
 
 
@@ -1647,13 +1611,6 @@
 
 
                 
-  
-  <aside class="documented-revision" aria-label="Version du code documentée">
-    <strong>Révision documentée</strong>
-    <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/commit/dc1963eb54b317e7e9e7b445bfee81199a7804bb"><code>dc1963eb54b317e7e9e7b445bfee81199a7804bb</code></a>
-    <span>Branche main · Revue du 2026-10-09 · Version 3.0.0 (état test)</span>
-  </aside>
-
               </article>
             </div>
           

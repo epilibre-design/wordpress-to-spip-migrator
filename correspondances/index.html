@@ -405,8 +405,6 @@
           
         
       
-        
-      
     
     
     
@@ -436,11 +434,6 @@
 
             </a>
             
-              
-              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
           </div>
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
@@ -450,29 +443,6 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../etat-projet/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    État du projet
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
               
             
           </ul>
@@ -1466,7 +1436,6 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  
                   
 
 
@@ -1476,14 +1445,13 @@
 
 <h1 id="matrice-wordpress-spip">Matrice WordPress → SPIP<a class="headerlink" href="#matrice-wordpress-spip" title="Permanent link">&para;</a></h1>
 <p>Le moteur convertit des objets <strong>et leurs relations</strong>. Les structures SQL des deux CMS ne sont pas copiées à l’identique : une taxonomie devient une rubrique, une page devient un article particulier, une galerie devient un album.</p>
-<p>Les états ci-dessous concernent uniquement le commit documenté. Lire <a href="../etat-projet/">l’état du projet</a> pour les règles de validation et de mise à jour.</p>
 <table>
 <thead>
 <tr>
 <th>Fonction native WordPress</th>
 <th>Stockage source</th>
 <th>Équivalent SPIP</th>
-<th>État / limite</th>
+<th>Remarques</th>
 </tr>
 </thead>
 <tbody>
@@ -1491,85 +1459,85 @@
 <td>Options générales</td>
 <td><code>options</code></td>
 <td>Métas du site</td>
-<td>Implémenté pour une sélection de réglages</td>
+<td>Sélection de réglages</td>
 </tr>
 <tr>
 <td>Articles</td>
 <td><code>posts</code> (<code>post</code>)</td>
 <td>Articles</td>
-<td>Implémenté ; textes convertis, dates et liens repris</td>
+<td>Textes convertis, dates et liens repris</td>
 </tr>
 <tr>
 <td>Pages</td>
 <td><code>posts</code> (<code>page</code>)</td>
 <td>Articles du plugin Pages uniques</td>
-<td>Implémenté ; modèle de page non repris</td>
+<td>Modèle de page non repris</td>
 </tr>
 <tr>
 <td>Pages parentes/enfants</td>
 <td><code>post_parent</code>, <code>menu_order</code></td>
 <td>Liens a2a <code>sous_page</code> avec rang</td>
-<td>Implémenté ; rendu à construire</td>
+<td>Rendu à construire</td>
 </tr>
 <tr>
 <td>Catégories</td>
 <td><code>terms</code>, <code>term_taxonomy</code></td>
 <td>Rubriques</td>
-<td>Implémenté ; hiérarchie conservée</td>
+<td>Hiérarchie conservée</td>
 </tr>
 <tr>
 <td>Catégories multiples</td>
 <td><code>term_relationships</code></td>
 <td>Rubrique principale et secondaires Polyhiérarchie</td>
-<td>Implémenté</td>
+<td>—</td>
 </tr>
 <tr>
 <td>Étiquettes</td>
 <td>Taxonomie <code>post_tag</code></td>
 <td>Mots-clés du groupe « Étiquettes »</td>
-<td>Implémenté ; identifiants, descriptions et liens repris, même sans contenu</td>
+<td>Identifiants, descriptions et liens repris, même sans contenu</td>
 </tr>
 <tr>
 <td>Utilisateurs et rôles</td>
 <td><code>users</code>, <code>usermeta</code></td>
 <td>Auteurs et statuts SPIP</td>
-<td>Implémenté ; droits transformés, mots de passe non repris</td>
+<td>Droits transformés, mots de passe non repris</td>
 </tr>
 <tr>
 <td>Privé/protégé</td>
 <td><code>post_status</code>, <code>post_password</code></td>
 <td>Zones Accès restreint</td>
-<td>Implémenté ; règle d’accès différente</td>
+<td>Règle d’accès différente</td>
 </tr>
 <tr>
 <td>Médias</td>
 <td><code>attachment</code>, <code>postmeta</code>, uploads</td>
 <td>Documents et associations</td>
-<td>Implémenté ; fichiers manquants/refusés possibles</td>
+<td>Fichiers manquants/refusés possibles</td>
 </tr>
 <tr>
 <td>Galeries</td>
 <td>Bloc <code>gallery</code> ou shortcode</td>
 <td>Albums</td>
-<td>Implémenté</td>
+<td>—</td>
 </tr>
 <tr>
 <td>Blocs/HTML</td>
 <td><code>post_content</code></td>
 <td>Syntaxe SPIP, modèles et HTML conservé</td>
-<td>Implémenté partiellement selon le type</td>
+<td>Conversion partielle selon le type de bloc</td>
 </tr>
 <tr>
 <td>Commentaires</td>
 <td><code>comments</code></td>
 <td>Forums et fils de discussion</td>
-<td>Implémenté ; spam, corbeille, pingbacks/trackbacks exclus</td>
+<td>Spam, corbeille, pingbacks/trackbacks exclus</td>
 </tr>
 <tr>
 <td>Liens internes et slugs</td>
 <td>Texte, <code>post_name</code></td>
 <td>Raccourcis et entrées d’URL</td>
-<td>Implémenté avec limites ; redirections serveur à préparer</td>
+<td>Redirections serveur à préparer</td>
 </tr>
 <tr>
 <td>Révisions/autosaves</td>
@@ -1615,13 +1583,6 @@
 
 
                 
-  
-  <aside class="documented-revision" aria-label="Version du code documentée">
-    <strong>Révision documentée</strong>
-    <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/commit/dc1963eb54b317e7e9e7b445bfee81199a7804bb"><code>dc1963eb54b317e7e9e7b445bfee81199a7804bb</code></a>
-    <span>Branche main · Revue du 2026-10-09 · Version 3.0.0 (état test)</span>
-  </aside>
-
               </article>
             </div>
           
