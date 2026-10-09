@@ -1702,13 +1702,20 @@ Chacun suit le cycle de la spec (§ 6) : spec détaillée, relecture, puis plan 
 
 ### Task 19 : sous-projet 9 — extension `wp2spip_acf`
 
-- [ ] Spec : champs ACF → Champs Extras (via Champs Extras Interface, à vérifier) d'après les définitions `acf-field` ; correspondances vers des champs natifs.
-- [ ] Plan, réalisation dans un plugin séparé ; validation sur le site réel.
+- [x] Spec : `docs/superpowers/specs/2026-10-09-wp2spip-acf-design.md` (champs des groupes d'articles et de pages → colonnes `acf_<nom>` de `spip_articles`, saisies de Champs Extras Interface ; correspondances vers des colonnes existantes par le pipeline `wp2spip_acf_correspondances`).
+- [x] Plan : `docs/superpowers/plans/2026-10-09-wp2spip-acf.md` ; réalisation dans le dépôt local `wp2spip_acf` (non publié).
+- [x] Validation : depuis un clone neuf, 53 tests unitaires et 8 d'intégration au vert, deux fois ; deux sabotages détectés ; site réel : Champs Extras Interface installé par l'import, 30 champs créés en 3 groupes, 483 valeurs (autant que sur la base WordPress), relance sans changement, export de wp2spip identique, vérificateur à OK ; WordPress 6.9 et 7.1 : sans effet.
 
 ### Task 20 : sous-projet 10 — signalements amont
 
-- [ ] sale : `extraire_images()` parcourt une portion de texte de trop (warning PHP 8 `sale_fonctions.php`) ; ticket avec cas reproductible.
-- [ ] Polyhiérarchie configurable : pipeline `objet_compte_enfants` non déclaré, champ `date` codé en dur dans `calculer_rubriques` ; ticket.
+- [x] Spec : `docs/superpowers/specs/2026-10-09-wp2spip-signalements-design.md`.
+- [x] sale : brouillon `docs/signalements/sale-extraire-images.md` — avertissements PHP 8 d'`extraire_images()`, et, trouvé en reproduisant, **texte entier perdu** (motif à retour arrière exponentiel, deux contenus du WordPress 6.9 convertis en chaîne vide) ; correctifs vérifiés sur le corpus du 6.9 (seuls les deux textes perdus changent, 0 avertissement). Non publié.
+- [x] Polyhiérarchie configurable : brouillon `docs/signalements/polyhierarchie-configurable.md` — pipeline non déclaré, alias `O` (erreur SQL puis erreur fatale PHP 8), champ `date` supposé (SPIP le déclare par défaut même absent) ; correctif vérifié sur une copie locale (mots-clés et articles). Non publié.
+
+### Task 20 bis : sous-projet 11 — convertisseur HTML → SPIP sans sale
+
+- [x] Spec : `docs/superpowers/specs/2026-10-09-wp2spip-convertisseur-html-design.md` (demandé le 2026-10-09 ; PHP 8.4).
+- [ ] Plan, réalisation, validation (corpus comparés, différences classées, référence revue).
 
 ### Task 21 : publication
 
