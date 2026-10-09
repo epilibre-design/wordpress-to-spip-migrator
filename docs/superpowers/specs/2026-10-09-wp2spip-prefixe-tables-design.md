@@ -2,7 +2,7 @@
 
 Date : 2026-10-09
 Spec d'ensemble : `2026-10-08-wp2spip-ensemble-design.md`, § 6, sous-projet 6.
-Statut : design validé, à planifier.
+Statut : réalisé.
 
 ## 1. Constat
 

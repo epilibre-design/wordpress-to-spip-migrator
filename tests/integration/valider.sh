@@ -38,7 +38,7 @@ fi
 (cd "$spip" && "$spip_cli" --no-ansi php:eval "include '$racine/tests/integration/exporter_import.php';") >"$travail/export.tsv" 2>&1 \
 	|| { echo "ECHEC : export ($travail/export.tsv)"; exit 1; }
 # Adresse du WordPress, et date de son installation : celle de son premier article
-url_site=$(cd "$spip" && "$spip_cli" --no-ansi php:eval 'echo sql_getfetsel("option_value", "wp_options", "option_name = \"siteurl\"", "", "", "", "", "wordpress");')
+url_site=$(cd "$spip" && "$spip_cli" --no-ansi php:eval 'include_spip("inc/wp2spip"); echo sql_getfetsel("option_value", wp2spip_table("options"), "option_name = \"siteurl\"", "", "", "", "", "wordpress");')
 installation=$(awk -F'\t' '$1 == "article" && $2 == "1" { print $5 }' "$travail/export.tsv")
 [ -n "$url_site" ] && [ -n "$installation" ] || { echo "ECHEC : adresse ou date d'installation introuvable"; exit 1; }
 URL_SITE=$url_site INSTALLATION=$installation php -r '

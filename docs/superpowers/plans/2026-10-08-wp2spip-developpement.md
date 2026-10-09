@@ -1680,7 +1680,8 @@ Chacun suit le cycle de la spec (§ 6) : spec détaillée, relecture, puis plan 
 ### Task 16 : sous-projet 6 — préfixe des tables
 
 - [x] Spec : `docs/superpowers/specs/2026-10-09-wp2spip-prefixe-tables-design.md` (préfixe lu dans `wp-config.php`, `--prefixe` pour le remplacer, exigé s'il est introuvable ; tables contrôlées avant tout traitement ; SPIP amorcé avec un autre préfixe refusé).
-- [ ] Plan, réalisation ; validation : copie du WordPress 6.9 sous le préfixe `wpx_` (base `jetable`) importée à l'identique.
+- [x] Plan : `docs/superpowers/plans/2026-10-09-wp2spip-prefixe-tables.md`
+- [x] Réalisation ; validation : copie du WordPress 6.9 sous le préfixe `wpx_` (`tests/integration/creer_wordpress_prefixe.sh`) importée depuis un dossier vide, conforme à la référence ; `--info` sur cette copie avec un `wp-config.php` annonçant `wp_` : code 1 et les neuf tables absentes listées, code 0 avec `--prefixe wpx_` ; SPIP importé depuis un préfixe : autre préfixe refusé avant tout traitement, méta inchangée ; `composer tests-import` (6.9 et 7.1), SPIP de test du 7.1 et site réel identiques aux exports d'avant, vérificateur à OK ; 70 tests unitaires et 55 tests d'intégration (dont `PrefixeTablesTest`, 6 tests en échec sans l'option) ; préparation complète à 0 échec.
 
 ### Task 17 : sous-projet 7 — tests automatisés
 

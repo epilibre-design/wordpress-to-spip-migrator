@@ -26,6 +26,7 @@ Options:
   -b, --base[=BASE]                Identifiant de la base Wordpress déclarée dans SPIP [default: "wordpress"]
   -t, --traitements[=TRAITEMENTS]  Liste de traitements séparés par des virgules, si on veut n’en lancer que certains.
   -i, --info[=INFO]                Affiche la version du Wordpress et les traitements disponibles.
+      --prefixe=PREFIXE            Préfixe des tables Wordpress, s’il diffère de celui de wp-config.php ou n’y est pas lisible.
       --garder-adresse             Ne pas remplacer l’adresse du site SPIP par celle du Wordpress.
   -h, --help                       Display help for the given command. When no command is given display help for the list command
   -q, --quiet                      Do not output any message
@@ -50,6 +51,9 @@ $ SPIP_ADMIN_PASS='…' outils/preparer_spip.sh --spip /chemin/du/spip --wordpre
 Les accès à la base sont lus dans le `wp-config.php` du Wordpress, sans l'exécuter. La base de SPIP est en SQLite par défaut (`--base-spip mysql:<base>` pour une base MySQL existante). Sans `SPIP_ADMIN_PASS`, un mot de passe est généré et affiché à la fin. Toutes les options : `outils/preparer_spip.sh --help`.
 
 Il faut SPIP-Cli avec les correctifs de `plugins:svp:telecharger` (sélection du plugin, autorisation). `core:installer` ne recevant les mots de passe qu'en argument, ils sont brièvement visibles dans la liste des processus pendant l'installation, et il affiche celui de l'administrateur.
+
+## Préfixe des tables
+L'import lit le préfixe des tables Wordpress (`$table_prefix`) dans le `wp-config.php` du dossier fourni, sans l'exécuter. S'il y est absent, calculé ou affecté plusieurs fois, l'option `--prefixe` est exigée ; elle remplace aussi un préfixe lu. Avant tout traitement, l'import vérifie le format du préfixe et la présence des tables qu'il lit, puis le note dans le SPIP : un SPIP importé depuis un préfixe refuse d'importer depuis un autre (le remettre à zéro). `outils/preparer_spip.sh` transmet le préfixe lu à l'import.
 
 ## Blocs de l'éditeur et galeries
 Les blocs de l'éditeur Wordpress sont convertis : images en `<imgN>` avec leur alignement (la légende devient le descriptif du document), médias en `<docN>`, mise en page (colonnes, groupes, couvertures, boutons…) gardée avec ses seules classes `wp-block-…`, que le squelette peut styler, contenus embarqués en URL seule sur sa ligne (le plugin oEmbed en fait un lecteur). Chaque galerie (bloc ou raccourci `[gallery]`) devient un album du plugin Albums, inséré par `<albumN>`. Les blocs dynamiques (derniers articles, recherche…), qui n'enregistrent rien dans le contenu, sont retirés. Le bilan de `importer_articles` détaille ces conversions.

@@ -50,8 +50,10 @@ resultat "dossier non vide (code $code)" $?
 
 erreur_attendue "option inconnue" "option inconnue" --wordpress "$WP6" --inconnue x
 erreur_attendue "wp-config.php illisible" "wp-config.php illisible" --wordpress "$ESSAIS/sans-wordpress"
-faux_wordpress "$ESSAIS/wp-prefixe" "s/^\$table_prefix *= *'wp_'/\$table_prefix = 'autre_'/"
-erreur_attendue "préfixe autre que wp_" "seul wp_ est géré" --wordpress "$ESSAIS/wp-prefixe"
+faux_wordpress "$ESSAIS/wp-prefixe" "s/^\$table_prefix *= *'wp_'/\$table_prefix = 'wp-x_'/"
+erreur_attendue "préfixe invalide" "invalide : lettres, chiffres et _ seulement" --wordpress "$ESSAIS/wp-prefixe"
+faux_wordpress "$ESSAIS/wp-prefixe" "s/^\$table_prefix *= *'wp_';/if (getenv('X')) { \$table_prefix = 'a_'; } else { \$table_prefix = 'wp_'; }/"
+erreur_attendue "préfixe affecté deux fois" "table_prefix introuvable" --wordpress "$ESSAIS/wp-prefixe"
 faux_wordpress "$ESSAIS/wp-refuse" "s/define( *'DB_PASSWORD', *'[^']*' *)/define( 'DB_PASSWORD', 'mauvais-mot-de-passe' )/"
 erreur_attendue "accès MySQL refusés" "illisible avec les accès de wp-config.php" --wordpress "$ESSAIS/wp-refuse"
 erreur_attendue "base du WordPress sans --base-partagee" "ajouter --base-partagee" --wordpress "$WP6" --base-spip "mysql:$BASE_WP6"

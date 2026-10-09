@@ -148,7 +148,8 @@ wait $! || erreur "lecture de $wordpress/wp-config.php impossible"
 for ligne in "${lignes[@]}"; do
 	wp[${ligne%%=*}]=${ligne#*=}
 done
-[ "${wp[table_prefix]}" = wp_ ] || erreur "préfixe des tables WordPress « ${wp[table_prefix]} » : seul wp_ est géré pour l'instant"
+prefixe_wp=${wp[table_prefix]}
+[[ $prefixe_wp =~ ^[A-Za-z0-9_]+$ ]] || erreur "préfixe des tables WordPress « $prefixe_wp » invalide : lettres, chiffres et _ seulement"
 wp_hote=${wp[DB_HOST]}
 wp_port=
 if [[ $wp_hote == *:* ]]; then
@@ -159,9 +160,9 @@ fi
 wp_requete() {
 	mysql_requete "$wp_hote" "$wp_port" "${wp[DB_USER]}" "${wp[DB_PASSWORD]}" "${wp[DB_NAME]}" "$1"
 }
-wp_siteurl=$(wp_requete "select option_value from wp_options where option_name = 'siteurl'") \
+wp_siteurl=$(wp_requete "select option_value from ${prefixe_wp}options where option_name = 'siteurl'") \
 	|| erreur "base du WordPress ${wp[DB_NAME]} illisible avec les accès de wp-config.php"
-wp_admin_email=$(wp_requete "select option_value from wp_options where option_name = 'admin_email'") \
+wp_admin_email=$(wp_requete "select option_value from ${prefixe_wp}options where option_name = 'admin_email'") \
 	|| erreur "base du WordPress ${wp[DB_NAME]} illisible avec les accès de wp-config.php"
 admin_email=${admin_email:-$wp_admin_email}
 adresse=${adresse:-$wp_siteurl}
@@ -271,14 +272,14 @@ etape "Base externe du WordPress"
 		WP2SPIP_WP_PASS=${wp[DB_PASSWORD]} WP2SPIP_WP_BASE=${wp[DB_NAME]}
 	spip_cli php:eval 'include_spip("inc/install"); install_fichier_connexion(_DIR_CONNECT . "wordpress.php", install_connexion(getenv("WP2SPIP_WP_HOTE"), getenv("WP2SPIP_WP_PORT"), getenv("WP2SPIP_WP_LOGIN"), getenv("WP2SPIP_WP_PASS"), getenv("WP2SPIP_WP_BASE"), "mysql", "", "", ""));'
 ) || erreur "écriture de config/wordpress.php"
-siteurl_lue=$(spip_cli php:eval 'echo sql_getfetsel("option_value", "wp_options", "option_name = " . sql_quote("siteurl"), "", "", "", "", "wordpress");') \
+siteurl_lue=$(export WP2SPIP_PREFIXE=$prefixe_wp; spip_cli php:eval 'echo sql_getfetsel("option_value", getenv("WP2SPIP_PREFIXE") . "options", "option_name = " . sql_quote("siteurl"), "", "", "", "", "wordpress");') \
 	|| erreur "lecture de la base externe wordpress"
 [ "$siteurl_lue" = "$wp_siteurl" ] || erreur "la base externe wordpress ne répond pas comme attendu (siteurl lu : « $siteurl_lue »)"
 
 code=0
 if [ -n "$importer" ]; then
 	etape "Import du WordPress"
-	spip_cli wordpress:importer "$wordpress" || code=$?
+	spip_cli wordpress:importer "$wordpress" --prefixe "$prefixe_wp" || code=$?
 fi
 
 etape "Bilan"
@@ -294,6 +295,6 @@ fi
 if [ -n "$importer" ]; then
 	echo "Import : code $code"
 else
-	printf 'Import : cd %q && %q wordpress:importer %q\n' "$spip" "$spip_cli_exe" "$wordpress"
+	printf 'Import : cd %q && %q wordpress:importer %q --prefixe %q\n' "$spip" "$spip_cli_exe" "$wordpress" "$prefixe_wp"
 fi
 exit "$code"
