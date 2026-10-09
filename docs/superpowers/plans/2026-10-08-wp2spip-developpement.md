@@ -1696,8 +1696,9 @@ Chacun suit le cycle de la spec (§ 6) : spec détaillée, relecture, puis plan 
 
 ### Task 18 : sous-projet 8 — extension `wp2spip_yoast`
 
-- [ ] Spec : catégorie principale Yoast → rubrique principale (traitement inséré par `wp2spip_traitements` après `importer_articles`, avant `importer_polyhierarchie`) ; ensuite titre SEO et méta-description ; zones multiples si besoin (spec § 3.6).
-- [ ] Plan, réalisation dans un plugin séparé ; validation sur le site réel.
+- [x] Spec : `docs/superpowers/specs/2026-10-09-wp2spip-yoast-design.md` (catégorie principale → rubrique principale, après `importer_articles` ; titres, descriptions et indexation → plugin SEO, en dernier).
+- [x] Plan : `docs/superpowers/plans/2026-10-09-wp2spip-yoast.md` ; réalisation dans le dépôt local `wp2spip_yoast` (non publié).
+- [x] Validation : depuis un clone neuf, 16 tests unitaires et 7 d'intégration au vert, deux fois (sabotage du filtre des catégories supprimées détecté par 2 tests) ; site réel : SEO installé par l'import, 43 rubriques principales changées, 83 conformes, 33 métadonnées SEO (titres 4, descriptions 28, indexation 1), une catégorie supprimée ignorée, relance sans changement, export ne différant que par les 43 articles déplacés et leurs rubriques secondaires, vérificateur à OK ; WordPress 6.9 et 7.1 : export identique avec et sans l'extension.
 
 ### Task 19 : sous-projet 9 — extension `wp2spip_acf`
 

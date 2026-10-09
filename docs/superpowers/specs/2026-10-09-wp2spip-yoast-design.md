@@ -2,7 +2,7 @@
 
 Date : 2026-10-09
 Spec d'ensemble : `2026-10-08-wp2spip-ensemble-design.md`, § 6, sous-projet 8.
-Statut : design validé (« SEO, et dépôt séparé »), à planifier.
+Statut : réalisé (dépôt local `wp2spip_yoast`, non publié).
 
 ## 1. Constat
 
