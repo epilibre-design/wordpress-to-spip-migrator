@@ -25,7 +25,7 @@ Exemple : `[Lire->article42]` reste lié à l’objet SPIP, tandis qu’une anci
 
 Les métadonnées reprennent `siteurl` comme `adresse_site` par défaut. Utiliser `--garder-adresse` pour conserver l’URL SPIP de recette. Les autres métas sélectionnées sont `blogname` → nom du site, `admin_email` → email du webmestre et `blogdescription` → slogan converti.
 
-## Contrôler avant bascule
+## Vérifier les adresses avant la bascule
 
 Inventorier les anciennes URL importantes ; comparer les URL finales SPIP et préparer les redirections sur le serveur. Chercher les liens résiduels vers WordPress, notamment les images de fond, les médias hors médiathèque et les slugs ambigus. Tester ces adresses après la bascule.
 
