@@ -31,7 +31,7 @@ Le moteur crée ces zones avec Accès restreint et les réserve aux visiteurs id
 !!! warning "La règle d’accès change"
     « Visiteur identifié » ne signifie pas « éditeur WordPress » ni « personne connaissant le mot de passe de cette page ». Restreindre les zones aux personnes réellement autorisées avant d’ouvrir le site. La migration de l’état privé ne garantit pas l’équivalence des droits.
 
-## Contrôler
+## Tester les accès avant la mise en ligne
 
 Tester avec un visiteur anonyme, un compte identifié non autorisé et un compte autorisé. Vérifier les rôles, la récupération des comptes et les fichiers associés aux contenus protégés. Garder la destination hors ligne jusqu’à validation de cette politique.
 

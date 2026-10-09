@@ -47,7 +47,7 @@ Une collision d’identifiant, un mot issu d’une étiquette déplacé hors du 
 
 Formats d’article, taxonomies personnalisées et métadonnées de termes (`termmeta`) ne sont pas convertis de façon générale par wp2spip. Leur présence dans la base n’implique pas qu’elles soient utilisées par le moteur.
 
-## Contrôler
+## Vérifier catégories et étiquettes après migration
 
 Comparer les parents de rubriques et l’ensemble des catégories de plusieurs articles. Vérifier les catégories sans article principal, les étiquettes sans contenu, les liens sur les pages et les contenus privés. Les taxonomies personnalisées restent à adapter.
 

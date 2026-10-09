@@ -28,7 +28,7 @@ Les messages sont créés puis reliés. Une réponse peut donc retrouver un pare
 
 Si un parent est exclu (spam, par exemple), la réponse ne peut pas garder ce parent et peut former un nouveau fil. Le texte des messages déjà importés n’est pas réécrit lors d’une relance ; les relations de fil sont recalculées.
 
-## Contrôler
+## Contrôler les discussions après import
 
 Comparer nombre de commentaires admissibles, statut, article d’accueil et parenté. Vérifier une réponse imbriquée, un message en attente et une réponse à un parent exclu. Le compteur affiché par WordPress n’est pas forcément celui des commentaires admissibles à cette conversion.
 

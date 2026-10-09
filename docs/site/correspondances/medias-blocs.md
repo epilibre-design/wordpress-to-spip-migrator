@@ -31,7 +31,7 @@ Un bloc peut stocker son HTML entre commentaires ; un autre stocke seulement des
 
 Les blocs de couverture peuvent laisser des URL de fond pointant vers la source malgré l’import du document. Les bilans distinguent des médias absents de la médiathèque et des médias connus dont l’emplacement n’a pas de raccourci SPIP adapté.
 
-## Contrôler
+## Comment vérifier les médias importés
 
 Après association des pièces jointes à un article, `importer_articles` appelle `document_instituer()` pour recalculer leur statut, y compris pour les médias absents du texte. Un document joint à un article publié peut ainsi être publié sans modification manuelle de cet article. Les documents des contenus en préparation restent à contrôler selon les règles de SPIP et les traitements d’accès.
 
