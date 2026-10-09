@@ -5,6 +5,7 @@ repo_url: https://github.com/tech-nova/wordpress-to-spip-migrator
 repo_name: tech-nova/wordpress-to-spip-migrator
 docs_dir: docs/site
 site_dir: site
+site_url: https://tech-nova.github.io/wordpress-to-spip-migrator/
 theme:
   name: material
   language: fr
