@@ -11,6 +11,7 @@
  *   si le plugin est actif, publiés dans leur zone.
  * - hiérarchie des pages : un lien a2a sous_page de chaque page parente vers chacune de ses
  *   pages enfants, dans l'ordre Wordpress.
+ * - étiquettes : un mot-clé du groupe « Étiquettes » par étiquette, liés aux mêmes contenus.
  *
  * Usage, depuis le site SPIP (base Wordpress déclarée sous le nom "wordpress") :
  *   spip php:eval 'include "<wp2spip>/tests/integration/verifier_identifiants.php";'
@@ -155,6 +156,37 @@ elseif ($attendus) {
 	$echecs[] = 'hiérarchie des pages : ' . array_sum(array_map('count', $attendus)) . ' pages enfants, mais a2a n’est pas actif';
 }
 echo array_sum(array_map('count', $attendus)) . " pages enfants vérifiées\n";
+
+// Étiquettes : chacune a son mot-clé, de même identifiant, dans le groupe « Étiquettes » ; aucun autre mot n'a
+// d'id_wordpress ; les liens mot–article sont exactement les relations post_tag des contenus importés
+$etiquettes = array_map('intval', array_column(sql_allfetsel('term_id', wp2spip_table('term_taxonomy'), 'taxonomy = "post_tag"', '', '', '', '', $base), 'term_id'));
+$id_groupe = intval($GLOBALS['meta']['wp2spip_groupe_etiquettes'] ?? 0);
+$mots = array_map('intval', array_column(sql_allfetsel('id_mot', 'spip_mots', array('id_wordpress > 0', 'id_mot = id_wordpress', 'id_groupe = ' . $id_groupe)), 'id_mot'));
+sort($etiquettes);
+sort($mots);
+if ($etiquettes !== $mots or sql_countsel('spip_mots', 'id_wordpress > 0') != count($mots)) {
+	$echecs[] = 'mots-clés : ' . count($mots) . ' étiquettes importées dans le groupe ' . $id_groupe . ' pour ' . count($etiquettes) . ' étiquettes Wordpress, ou des mots hors du groupe';
+}
+$relations = array_map(
+	fn($relation) => $relation['term_id'] . '-' . $relation['object_id'],
+	sql_allfetsel(
+		'tax.term_id, rel.object_id',
+		wp2spip_table('term_relationships') . ' as rel join ' . wp2spip_table('term_taxonomy') . ' as tax on tax.term_taxonomy_id = rel.term_taxonomy_id join ' . wp2spip_table('posts') . ' as post on post.ID = rel.object_id',
+		array('tax.taxonomy = "post_tag"', sql_in('post.post_type', array('post', 'page'))),
+		'', '', '', '', $base
+	)
+);
+$liens = array_map(fn($lien) => $lien['id_mot'] . '-' . $lien['id_objet'], sql_allfetsel('id_mot, id_objet', 'spip_mots_liens', 'objet = "article"'));
+sort($relations);
+sort($liens);
+if ($relations !== $liens) {
+	$echecs[] = 'mots-clés : ' . count($liens) . ' liens mot–article pour ' . count($relations) . ' relations post_tag ('
+		. join(', ', array_slice(array_merge(array_diff($relations, $liens), array_diff($liens, $relations)), 0, 10)) . ')';
+}
+if ($etiquettes and ($GLOBALS['meta']['articles_mots'] ?? '') !== 'oui') {
+	$echecs[] = 'mots-clés : articles_mots n’est pas activé';
+}
+echo count($etiquettes) . ' étiquettes et ' . count($relations) . " liens vérifiés\n";
 
 $url_wordpress = sql_getfetsel('option_value', wp2spip_table('options'), 'option_name="siteurl"', '', '', '', '', $base);
 foreach (sql_allfetsel('id_article, texte', 'spip_articles', 'id_wordpress > 0') as $article) {

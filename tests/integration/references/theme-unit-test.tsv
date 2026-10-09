@@ -322,6 +322,308 @@ forum	6	article#wp155	prop	2014-12-10 01:56:24	parent#wp4	thread#wp4	2007-09-04 
 forum	7	article#wp703	prop	2014-11-29 21:03:05	parent#spip0	thread#wp7	2014-11-29 21:03:05	I want to learn how to make chinese eggrolls
 forum	8	article#wp1148	publie	2012-09-03 10:18:04	parent#spip0	thread#wp8	2012-09-03 10:18:04	{{Headings}}\n\n{{{ Header one }}}\n\n{{{ Header two }}}\n\n{{{ Header three }}}\n\n{{Header four}}\n{{Header five}}\n{{Header six}}\n\n{{{ Blockquotes }}}\n\nSingle line blockquote:\n<quote>\nStay hungry. Stay foolish.\n</quote>\nMulti line blockquote with a cite reference:\n<quote>\nThe {{HTML <code><blockquote></code> Element}} (or {HTML Block Quotation Element}) indicates that the enclosed text is an extended quotation. Usually, this is rendered visually by indentation (see [Notes->https://developer.mozilla.org/en-US/docs/HTML/Element/blockquote#Notes] for how to change it). A URL for the source of the quotation may be given using the {{cite}} attribute, while a text representation of the source can be given using the [<code><cite></code>->https://developer.mozilla.org/en-US/docs/Web/HTML/Element/cite] element.\n</quote>\n<cite>multiple contributors</cite> - MDN HTML element reference - blockquote\n\n{{{ Tables }}}\n\n|  {{Employee}} | \n {{Salary}} | \n {{}} |\n|  [John Saddington->http://example.org/] | \n $1 | \n Because that's all Steve Job' needed for a salary. |\n|  [Tom McFarlin->http://example.org/] | \n $100K | \n For all the blogging he does. |\n|  [Jared Erickson->http://example.org/] | \n $100M | \n Pictures are worth a thousand words, right? So Tom x 1,000. |\n|  [Chris Ames->http://example.org/] | \n $100B | \n With hair like that?! Enough said... |\n\n{{{ Definition Lists }}}\n\n<dl><dt>Definition List Title</dt><dd>Definition list division.</dd><dt>Startup</dt><dd>A startup company or startup is a company or temporary organization designed to search for a repeatable and scalable business model.</dd><dt>#dowork</dt><dd>Coined by Rob Dyrdek and his personal body guard Christopher "Big Black" Boykins, "Do Work" works as a self motivator, to motivating your friends.</dd><dt>Do It Live</dt><dd>I'll let Bill O'Reilly will [explain->https://www.youtube.com/watch?v=O_HyZ5aW76c] this one.</dd></dl>\n\n{{{ Unordered Lists (Nested) }}}\n\n-* List item one\n-** List item one\n-*** List item one\n-*** List item two\n-*** List item three\n-*** List item four\n-** List item two\n-** List item three\n-** List item four\n-* List item two\n-* List item three\n-* List item four\n {{{ Ordered List (Nested) }}}\n-# List item one -start at 8\n-## List item one\n-### List item one -reversed attribute\n-### List item two\n-### List item three\n-### List item four\n-## List item two\n-## List item three\n-## List item four\n-# List item two\n-# List item three\n-# List item four\n\n{{{ HTML Tags }}}\n\nThese supported tags come from the WordPress.com code [FAQ->https://en.support.wordpress.com/code/].\n\n{{Address Tag}}\n\n<address>1 Infinite Loop\nCupertino, CA 95014\nUnited States</address>{{Anchor Tag (aka. Link)}}\n\nThis is an example of a [link->//wordpressfoundation.org/].\n\n{{Abbreviation Tag}}\n\nThe abbreviation <abbr title="Seriously">srsly</abbr> stands for "seriously".\n\n{{Acronym Tag ({deprecated in HTML5})}}\n\nThe acronym <acronym title="For The Win">ftw</acronym> stands for "for the win".\n\n{{Big Tag}} ({deprecated in HTML5})\n\nThese tests are a <big>big</big> deal, but this tag is no longer supported in HTML5.\n\n{{Cite Tag}}\n\n"Code is poetry." --<cite>Automattic</cite>\n\n{{Code Tag}}\n\nThis tag styles blocks of code.\n<code>.post-title {\n margin: 0 0 5px;\n font-weight: bold;\n font-size: 38px;\n line-height: 1.2;\n and here's a line of some really, really, really, really long text, just to see how it is handled and to find out how it overflows;\n}</code>\nYou will learn later on in these tests that <code>word-wrap: break-word;</code> will be your best friend.\n\n{{Delete Tag}}\n\nThis tag will let you <del cite="deleted it">strike out text</del>, but this tag is {recommended} supported in HTML5 (use the <code><s></code> instead).\n\n{{Emphasize Tag}}\n\nThe emphasize tag should {italicize} {text}.\n\n{{Horizontal Rule Tag}}\n\n----\n\nThis sentence is following a <code><hr /></code> tag.\n\n{{Insert Tag}}\n\nThis tag should denote <ins cite="inserted it">inserted</ins> text.\n\n{{Keyboard Tag}}\n\nThis scarcely known tag emulates <kbd>keyboard text</kbd>, which is usually styled like the <code><code></code> tag.\n\n{{Preformatted Tag}}\n\nThis tag is for preserving whitespace as typed, such as in poetry or ASCII art.\n\n{{{ The Road Not Taken }}}\n\n<poesie>\n\n<cite>Robert Frost</cite>\n\n Two roads diverged in a yellow wood,\n And sorry I could not travel both          (\_/)\n And be one traveler, long I stood         (='.'=)\n And looked down one as far as I could     (")_(")\n To where it bent in the undergrowth;\n\n Then took the other, as just as fair,\n And having perhaps the better claim,          |\_/|\n Because it was grassy and wanted wear;       / @ @ \\n Though as for that the passing there        ( > º < )\n Had worn them really about the same,         `>>x<<´\n  /  O  \\n And both that morning equally lay\n In leaves no step had trodden black.\n Oh, I kept the first for another day!\n Yet knowing how way leads on to way,\n I doubted if I should ever come back.\n\n I shall be telling this with a sigh\n Somewhere ages and ages hence:\n Two roads diverged in a wood, and I—\n I took the one less traveled by,\n And that has made all the difference.\n\n and here's a line of some really, really, really, really long text, just to see how it is handled and to find out how it overflows;\n\n</poesie>\n\n{{Quote Tag}} for short, inline quotes\n\n<q>Developers, developers, developers...</q> --Steve Ballmer\n\n{{Subscript Tag}}\n\nGetting our science styling on with H<sub>2</sub>O, which should push the "2" down.\n\n{{Superscript Tag}}\n\nStill sticking with science and Albert Einstein's E = MC<sup>2</sup>, which should lift the 2 up.
 forum	9	article#wp1148	publie	2013-03-11 23:45:54	parent#spip0	thread#wp9	2013-03-11 23:45:54	This user it trying to be anonymous.\n\n They used a fake email, so there should be no [Gravatar->https://gravatar.com//] associated with it.\n They did not speify a website, so there should be no link to it in the comment.
+mot	100	formatting	
+mot	101	FTW	
+mot	102	Fun	Tags posts about fun.
+mot	103	gallery	
+mot	104	goes here	
+mot	105	habergeon	
+mot	106	hapless	
+mot	107	hartshorn	
+mot	108	hostility impregnability	
+mot	109	html	
+mot	110	image	
+mot	111	impropriation	
+mot	112	is	
+mot	113	jetpack	
+mot	114	knave	
+mot	115	layout	
+mot	116	link	
+mot	117	lists	
+mot	118	lorem	
+mot	119	Love	Tags posts about love.
+mot	120	markup	
+mot	121	media	
+mot	122	misinformed	
+mot	123	moil	
+mot	124	more	
+mot	125	mornful	
+mot	126	Mothership	Tags posts about motherships.
+mot	127	Must Read	Tags posts about articles you must read.
+mot	128	Nailed It	Tags posts about that nailed it.
+mot	129	outlaw	
+mot	130	pagination	
+mot	131	pamphjlet	
+mot	132	password	
+mot	133	Pictures	
+mot	134	pingbacks	
+mot	135	pneumatics	
+mot	136	portly portreeve	
+mot	137	post	
+mot	138	Post Formats	
+mot	139	precipitancy	
+mot	140	privation	
+mot	141	programme	
+mot	142	psychological	
+mot	143	puncher	
+mot	144	quote	
+mot	145	ramose	
+mot	146	read more	
+mot	147	readability	
+mot	148	renegade	
+mot	149	retrocede	
+mot	150	shortcode	
+mot	151	stagnation unhorsed	
+mot	152	standard	
+mot	153	status	
+mot	154	sticky	
+mot	155	Success	Tags posts about success.
+mot	156	Swagger	Tags posts about swagger.
+mot	157	Tag A	
+mot	158	Tag B	
+mot	159	Tag C	
+mot	160	tag1	
+mot	161	tag2	
+mot	162	tag3	
+mot	163	Tags	Tags posts about tags. #inception
+mot	164	template	
+mot	165	text	
+mot	166	the man	
+mot	167	thunderheaded	
+mot	168	tiled	
+mot	169	title	
+mot	170	trackbacks	
+mot	171	twitter	
+mot	172	unculpable	
+mot	173	Unseen	Tags posts about things that cannot be unseen.
+mot	174	video	
+mot	175	videopress	
+mot	176	withered brandnew	
+mot	177	WordPress	Tags posts about WordPress.
+mot	178	wordpress.tv	
+mot	179	xanthopsia	
+mot	186	Sample	
+mot	187	test tag	
+mot	197	content περιεχόμενο	
+mot	198	Columns	
+mot	70	8BIT	Tags posts about 8BIT.
+mot	71	alignment	
+mot	72	Articles	Tags posts about Articles.
+mot	73	aside	
+mot	74	audio	
+mot	75	captions	
+mot	76	categories	
+mot	77	chat	
+mot	78	chattels	
+mot	79	cienaga	
+mot	80	claycold	
+mot	81	Codex	
+mot	82	comments	
+mot	83	content περιεχόμενο	
+mot	84	crushing	
+mot	85	css	
+mot	86	depo	
+mot	87	dinarchy	
+mot	88	doolie	
+mot	89	dowork	Tags posts about #dowork.
+mot	90	edge case	
+mot	91	embeds	
+mot	92	energumen	
+mot	93	ephialtes	
+mot	94	eudiometer	
+mot	95	excerpt	
+mot	96	Fail	Tags posts about fail.
+mot	97	featured image	
+mot	98	figuriste	
+mot	99	filler	
+mot_article	wp100	article#wp1178
+mot_article	wp100	article#wp1779
+mot_article	wp101	article#wp1151
+mot_article	wp102	article#wp1151
+mot_article	wp103	article#wp1031
+mot_article	wp103	article#wp1151
+mot_article	wp103	article#wp1778
+mot_article	wp103	article#wp1787
+mot_article	wp103	article#wp555
+mot_article	wp109	article#wp1151
+mot_article	wp109	article#wp1173
+mot_article	wp109	article#wp1174
+mot_article	wp109	article#wp1175
+mot_article	wp109	article#wp1178
+mot_article	wp110	article#wp1011
+mot_article	wp110	article#wp1016
+mot_article	wp110	article#wp1151
+mot_article	wp110	article#wp1158
+mot_article	wp110	article#wp1163
+mot_article	wp110	article#wp1177
+mot_article	wp110	article#wp1778
+mot_article	wp110	article#wp1784
+mot_article	wp110	article#wp1787
+mot_article	wp110	article#wp1788
+mot_article	wp110	article#wp568
+mot_article	wp113	article#wp1031
+mot_article	wp113	article#wp1151
+mot_article	wp115	article#wp1151
+mot_article	wp115	article#wp1169
+mot_article	wp115	article#wp1170
+mot_article	wp115	article#wp1175
+mot_article	wp116	article#wp1151
+mot_article	wp116	article#wp565
+mot_article	wp117	article#wp1000
+mot_article	wp119	article#wp1151
+mot_article	wp120	article#wp1000
+mot_article	wp120	article#wp1151
+mot_article	wp120	article#wp1174
+mot_article	wp120	article#wp1176
+mot_article	wp120	article#wp1177
+mot_article	wp120	article#wp1178
+mot_article	wp121	article#wp1179
+mot_article	wp126	article#wp1151
+mot_article	wp127	article#wp1151
+mot_article	wp128	article#wp1151
+mot_article	wp130	article#wp1171
+mot_article	wp132	article#wp1168
+mot_article	wp133	article#wp1151
+mot_article	wp134	article#wp1149
+mot_article	wp137	article#wp1174
+mot_article	wp138	article#wp1031
+mot_article	wp138	article#wp1151
+mot_article	wp138	article#wp1158
+mot_article	wp138	article#wp1161
+mot_article	wp138	article#wp1163
+mot_article	wp138	article#wp358
+mot_article	wp138	article#wp555
+mot_article	wp138	article#wp559
+mot_article	wp138	article#wp562
+mot_article	wp138	article#wp565
+mot_article	wp138	article#wp568
+mot_article	wp138	article#wp575
+mot_article	wp138	article#wp579
+mot_article	wp138	article#wp582
+mot_article	wp138	article#wp587
+mot_article	wp144	article#wp1151
+mot_article	wp144	article#wp575
+mot_article	wp146	article#wp996
+mot_article	wp147	article#wp358
+mot_article	wp150	article#wp1031
+mot_article	wp150	article#wp1151
+mot_article	wp150	article#wp1163
+mot_article	wp150	article#wp555
+mot_article	wp150	article#wp587
+mot_article	wp152	article#wp1151
+mot_article	wp152	article#wp358
+mot_article	wp153	article#wp579
+mot_article	wp154	article#wp1241
+mot_article	wp155	article#wp1151
+mot_article	wp156	article#wp1151
+mot_article	wp163	article#wp1151
+mot_article	wp163	article#wp34
+mot_article	wp164	article#wp1011
+mot_article	wp164	article#wp1016
+mot_article	wp164	article#wp1148
+mot_article	wp164	article#wp1149
+mot_article	wp164	article#wp1150
+mot_article	wp164	article#wp1151
+mot_article	wp164	article#wp1168
+mot_article	wp164	article#wp1171
+mot_article	wp164	article#wp1241
+mot_article	wp164	article#wp1446
+mot_article	wp164	article#wp993
+mot_article	wp164	article#wp996
+mot_article	wp168	article#wp1031
+mot_article	wp169	article#wp1151
+mot_article	wp169	article#wp1169
+mot_article	wp169	article#wp1173
+mot_article	wp169	article#wp1174
+mot_article	wp169	article#wp1175
+mot_article	wp170	article#wp1149
+mot_article	wp171	article#wp1151
+mot_article	wp171	article#wp1179
+mot_article	wp173	article#wp1151
+mot_article	wp174	article#wp1151
+mot_article	wp174	article#wp1778
+mot_article	wp174	article#wp582
+mot_article	wp175	article#wp1151
+mot_article	wp177	article#wp1151
+mot_article	wp178	article#wp1151
+mot_article	wp178	article#wp582
+mot_article	wp186	article#wp34
+mot_article	wp187	article#wp34
+mot_article	wp197	article#wp1778
+mot_article	wp197	article#wp1779
+mot_article	wp197	article#wp1780
+mot_article	wp197	article#wp1781
+mot_article	wp197	article#wp1782
+mot_article	wp197	article#wp1783
+mot_article	wp197	article#wp1785
+mot_article	wp197	article#wp1786
+mot_article	wp197	article#wp1787
+mot_article	wp197	article#wp1788
+mot_article	wp198	article#wp1783
+mot_article	wp198	article#wp1787
+mot_article	wp70	article#wp1151
+mot_article	wp71	article#wp1151
+mot_article	wp71	article#wp1176
+mot_article	wp71	article#wp1177
+mot_article	wp72	article#wp1151
+mot_article	wp73	article#wp559
+mot_article	wp74	article#wp587
+mot_article	wp75	article#wp1151
+mot_article	wp75	article#wp1177
+mot_article	wp76	article#wp1151
+mot_article	wp76	article#wp1152
+mot_article	wp77	article#wp1151
+mot_article	wp77	article#wp562
+mot_article	wp81	article#wp1011
+mot_article	wp81	article#wp1016
+mot_article	wp81	article#wp1151
+mot_article	wp81	article#wp1724
+mot_article	wp82	article#wp1148
+mot_article	wp82	article#wp1149
+mot_article	wp82	article#wp1150
+mot_article	wp82	article#wp1151
+mot_article	wp83	article#wp1000
+mot_article	wp83	article#wp1151
+mot_article	wp83	article#wp1153
+mot_article	wp83	article#wp1164
+mot_article	wp83	article#wp1170
+mot_article	wp83	article#wp1171
+mot_article	wp83	article#wp1175
+mot_article	wp83	article#wp1176
+mot_article	wp83	article#wp1177
+mot_article	wp83	article#wp1178
+mot_article	wp83	article#wp1179
+mot_article	wp83	article#wp1446
+mot_article	wp83	article#wp993
+mot_article	wp83	article#wp996
+mot_article	wp85	article#wp1000
+mot_article	wp85	article#wp1151
+mot_article	wp85	article#wp1173
+mot_article	wp85	article#wp1175
+mot_article	wp85	article#wp1176
+mot_article	wp85	article#wp1177
+mot_article	wp85	article#wp1178
+mot_article	wp89	article#wp1151
+mot_article	wp90	article#wp1000
+mot_article	wp90	article#wp1011
+mot_article	wp90	article#wp1016
+mot_article	wp90	article#wp1151
+mot_article	wp90	article#wp1152
+mot_article	wp90	article#wp1169
+mot_article	wp90	article#wp1170
+mot_article	wp90	article#wp1175
+mot_article	wp91	article#wp1151
+mot_article	wp91	article#wp1179
+mot_article	wp91	article#wp1778
+mot_article	wp91	article#wp1781
+mot_article	wp91	article#wp582
+mot_article	wp95	article#wp1151
+mot_article	wp95	article#wp1446
+mot_article	wp95	article#wp993
+mot_article	wp96	article#wp1151
+mot_article	wp97	article#wp1011
+mot_article	wp97	article#wp1016
+mot_article	wp97	article#wp1151
 rubrique	1	Non classé		parent#spip0	publie
 rubrique	10	buying		parent#spip0	publie
 rubrique	11	Cat A		parent#spip0	publie

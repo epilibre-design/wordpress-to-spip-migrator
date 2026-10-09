@@ -1675,7 +1675,8 @@ Chacun suit le cycle de la spec (§ 6) : spec détaillée, relecture, puis plan 
 ### Task 15 : sous-projet 5 — étiquettes (`importer_mots`)
 
 - [x] Spec : `docs/superpowers/specs/2026-10-09-wp2spip-etiquettes-design.md` (`post_tag` → mots-clés du groupe « Étiquettes », `id_mot` = `term_id` ; `importer_mots` entre `importer_hierarchie_pages` et `importer_acces`, après la création des articles ; échec si un contenu lié manque).
-- [ ] Plan, réalisation ; validation : 114 étiquettes du contenu de test, liens conformes à `wp_term_relationships`.
+- [x] Plan : `docs/superpowers/plans/2026-10-09-wp2spip-etiquettes.md`
+- [x] Réalisation ; validation : `MotsTest` (7 tests, 3 en échec sur un sabotage du filtre des contenus) ; WordPress 6.9 : 114 étiquettes et 188 liens, seuls ajouts à la référence (`mot`, `mot_article`), 7.1 conforme ; relance sans changement (114 déjà présentes, 0 lien) ; échecs à code 1 (mot hors du groupe, contenu étiqueté supprimé) ; site réel : 1 étiquette liée au contenu privé, export identique à celui d'avant hormis ces 2 lignes, vérificateur à OK ; tests unitaires, d'intégration et préparation complète au vert.
 
 ### Correctif : statut des documents joints aux articles
 

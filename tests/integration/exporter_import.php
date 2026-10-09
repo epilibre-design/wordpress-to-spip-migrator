@@ -60,6 +60,14 @@ foreach (sql_allfetsel('*', 'spip_urls', sql_in('type', array('article', 'docume
 	$ids = ($u['type'] == 'article') ? $articles : $documents;
 	$lignes[] = array('url', $u['type'], $wp($ids, $u['id_objet']), $u['url']);
 }
+// Étiquettes : mots-clés et leurs liens aux articles
+$mots = $correspondances('spip_mots', 'id_mot');
+foreach (sql_allfetsel('*', 'spip_mots', 'id_wordpress > 0') as $m) {
+	$lignes[] = array('mot', $m['id_wordpress'], $m['titre'], $normaliser($m['descriptif']));
+}
+foreach (sql_allfetsel('*', 'spip_mots_liens', 'objet = "article"') as $l) {
+	$lignes[] = array('mot_article', $wp($mots, $l['id_mot']), 'article#' . $wp($articles, $l['id_objet']));
+}
 if (test_plugin_actif('accesrestreint')) {
 	foreach (sql_allfetsel('z.titre, l.id_objet', 'spip_zones_liens as l join spip_zones as z on z.id_zone = l.id_zone', 'l.objet = "article"') as $l) {
 		$lignes[] = array('zone', $l['titre'], 'article#' . $wp($articles, $l['id_objet']));

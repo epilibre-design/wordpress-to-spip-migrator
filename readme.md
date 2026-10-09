@@ -81,6 +81,9 @@ Les contenus privés ou protégés par mot de passe dans Wordpress ne sont jamai
 
 Ils sont publiés dans une zone du plugin [Accès restreint](https://contrib.spip.net/Acces-Restreint-3-0), que l'import installe (voir « Plugins requis »), réservée aux visiteurs identifiés (une zone pour les contenus privés, une pour les contenus protégés). Les mots de passe Wordpress ne sont pas repris.
 
+## Étiquettes
+Les étiquettes Wordpress deviennent des mots-clés du groupe « Étiquettes » (créé par l'import), avec l'identifiant de l'étiquette, y compris celles qui n'étiquettent aucun contenu. Ils sont liés aux articles et pages étiquetés, quel que soit leur statut, et les mots-clés sont activés sur les articles. Si un contenu étiqueté manque dans SPIP, ou si un mot venant d'une étiquette est hors du groupe, le traitement `importer_mots` échoue et la commande retourne le code de sortie 1.
+
 ## Hiérarchie des pages
 Les pages Wordpress deviennent des pages uniques (plugin Pages), sans rubrique. Leur hiérarchie est gardée par des liens du plugin [a2a](https://contrib.spip.net/Le-plugin-a2a-pour-lier-des-articles), que l'import installe s'il y a des pages enfants : un lien de type `sous_page` de chaque page parente vers chacune de ses pages enfants, dont le rang suit l'ordre Wordpress (ordre de la page, puis titre). wp2spip ne fournit pas de squelette : à chaque site d'exploiter ces liens, par exemple ainsi :
 
