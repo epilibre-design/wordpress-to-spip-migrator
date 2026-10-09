@@ -8,7 +8,11 @@ Avec SPIP-Cli installé et corrigé, et ses dépendances disponibles :
 
 ```bash
 bash outils/preparer_spip.sh --help
-bash outils/preparer_spip.sh   --spip /chemin/vers/spip-test   --wordpress /chemin/vers/wordpress-fige   --spip-cli /chemin/vers/spip   --wp2spip lien
+bash outils/preparer_spip.sh \
+  --spip /chemin/vers/spip-test \
+  --wordpress /chemin/vers/wordpress-fige \
+  --spip-cli /chemin/vers/spip \
+  --wp2spip lien
 ```
 
 Cette commande prépare la destination **sans lancer l’import**. `--wp2spip lien` lie le checkout pour le développement ; `copie` est le défaut. L’option `--importer` peut enchaîner l’import, mais ne dispense pas de l’audit ni des contrôles.
@@ -40,6 +44,8 @@ spip plugins:lister --short --raw --no-dist
 spip wordpress:importer /chemin/vers/wordpress-fige --info
 ```
 
-Confirmer Sale, Pages uniques, Polyhiérarchie et wp2spip actifs. Les autres plugins requis par le contenu seront détectés avant les traitements. La source est lisible et le préfixe correspond aux tables attendues.
+Confirmer Pages uniques, Polyhiérarchie et wp2spip actifs, avec PHP 8.4 et DOM. Sale n’est plus installé ni requis. Les autres plugins requis par le contenu seront détectés avant les traitements. La source est lisible et le préfixe correspond aux tables attendues.
 
-Source : [script de préparation](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/outils/preparer_spip.sh). **Suite : [lancer l’import](importer.md).**
+Pour reprendre les données Yoast ou ACF, installer et activer les [extensions du migrateur](../comprendre/extensions.md) dans ce SPIP avant l’import ; elles ne sont pas ajoutées par ce script. Préparer alors sans `--importer`, puis vérifier les traitements avec `--info`.
+
+Source : [script de préparation](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/outils/preparer_spip.sh). **Suite : [lancer l’import](importer.md).**

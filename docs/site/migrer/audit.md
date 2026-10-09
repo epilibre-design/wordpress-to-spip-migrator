@@ -24,7 +24,7 @@ Geler les écritures pendant l’import, ou travailler sur une copie cohérente 
 
 ## Décider des adaptations
 
-Consulter la [matrice des correspondances](../correspondances/index.md). Pour chaque fonction absente ou partielle, choisir une extension, une reprise manuelle ou une conservation indépendante de la source. Les étiquettes sont **prévues par une spec**, mais ne sont pas importées dans la révision documentée.
+Consulter la [matrice des correspondances](../correspondances/index.md). Les étiquettes sont importées en mots-clés, y compris celles sans contenu ; vérifier leurs liens dans l’inventaire. Si le site utilise Yoast SEO ou ACF, prévoir les [extensions correspondantes](../comprendre/extensions.md) et examiner leur périmètre. Pour les fonctions absentes ou partielles, choisir une adaptation, une reprise manuelle ou une conservation indépendante de la source.
 
 ## Préparer les critères d’acceptation
 

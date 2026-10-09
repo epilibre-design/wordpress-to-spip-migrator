@@ -12,7 +12,7 @@ Les états ci-dessous concernent uniquement le commit documenté. Lire [l’éta
 | Pages parentes/enfants | `post_parent`, `menu_order` | Liens a2a `sous_page` avec rang | Implémenté ; rendu à construire |
 | Catégories | `terms`, `term_taxonomy` | Rubriques | Implémenté ; hiérarchie conservée |
 | Catégories multiples | `term_relationships` | Rubrique principale et secondaires Polyhiérarchie | Implémenté |
-| Étiquettes | Taxonomie `post_tag` | Mots-clés envisagés | Non implémenté dans la révision documentée ; prévu par la spec |
+| Étiquettes | Taxonomie `post_tag` | Mots-clés du groupe « Étiquettes » | Implémenté ; identifiants, descriptions et liens repris, même sans contenu |
 | Utilisateurs et rôles | `users`, `usermeta` | Auteurs et statuts SPIP | Implémenté ; droits transformés, mots de passe non repris |
 | Privé/protégé | `post_status`, `post_password` | Zones Accès restreint | Implémenté ; règle d’accès différente |
 | Médias | `attachment`, `postmeta`, uploads | Documents et associations | Implémenté ; fichiers manquants/refusés possibles |
@@ -33,4 +33,4 @@ Un article WordPress `42` appartient à « Actualités » (`12`) et « Culture �
 
 Préserver identifiants, hiérarchies, associations et dates quand un équivalent existe ; rendre visibles les changements de sens ; identifier les données non reprises. Cela ne promet pas de conserver toutes les tables, toutes les métadonnées ou toutes les capacités des extensions.
 
-ACF et Yoast sont des **extensions WordPress**, pas des fonctions natives. Leurs correspondances prévues sont décrites dans [la feuille de route](../comprendre/extensions.md).
+ACF et Yoast sont des **extensions WordPress**, pas des fonctions natives. Les plugins séparés [wp2spip_acf et wp2spip_yoast](../comprendre/extensions.md) ajoutent leurs conversions lorsqu’ils sont installés et actifs ; ils ne font pas partie du checkout du moteur.

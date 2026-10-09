@@ -26,9 +26,9 @@ La commande prépare d’abord les plugins supplémentaires requis ; elle peut s
 
 ## Traitements disponibles
 
-Métas → auteurs → rubriques → documents → articles → hiérarchie des pages → accès → polyhiérarchie → commentaires. Voir [le flux détaillé](../comprendre/traitements.md).
+Métas → auteurs → rubriques → documents → articles → hiérarchie des pages → **étiquettes (`importer_mots`)** → accès → polyhiérarchie → commentaires. Voir [le flux détaillé](../comprendre/traitements.md).
 
-`importer_mots` n’est **pas disponible** dans la révision documentée. Le demander avec `--traitements` produit une erreur, même si une spec décrit son fonctionnement futur.
+Les [extensions Yoast et ACF](../comprendre/extensions.md), si elles sont actives, ajoutent leurs traitements à la même commande. Yoast ajuste la catégorie principale après les articles et ajoute les métadonnées SEO en fin de liste ; ACF ajoute `importer_acf` en fin de liste. Utiliser `--info` pour connaître la liste effective de votre installation.
 
 ## Comprendre la sortie
 
@@ -40,4 +40,4 @@ Les bilans indiquent notamment médias refusés, blocs dynamiques retirés, bloc
 
 Une relance évite généralement de recréer les contenus tracés, mais ne met pas à jour leur texte. Certains traitements recalculent configuration ou relations. Ce mécanisme n’est pas une reprise garantie après interruption : pour refaire un import après échec, interruption ou évolution du moteur, repartir d’une destination remise à zéro avec des sauvegardes vérifiées.
 
-Source : [commande](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/spip-cli/WordpressImporter.php).
+Source : [commande](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/spip-cli/WordpressImporter.php).

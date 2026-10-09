@@ -18,7 +18,7 @@ Une copie ancienne ou mise à niveau peut encore présenter des situations héri
 
 La table `termmeta` et les API de métadonnées de termes permettent d’associer des valeurs supplémentaires aux catégories et autres taxonomies. Le modèle de base conserve ses tables de termes et de relations ; cette nouvelle couche peut porter des données importantes pour le site.
 
-La révision documentée importe les catégories et leurs descriptions, mais n’effectue pas un transfert général de `termmeta`. Les valeurs propres au thème ou aux extensions demandent une stratégie dédiée.
+La révision documentée importe les catégories, les étiquettes, leurs descriptions et leurs relations aux contenus, mais n’effectue pas un transfert général de `termmeta`. Les valeurs propres au thème ou aux extensions demandent une stratégie dédiée.
 
 ## Médias et shortcodes
 
@@ -28,4 +28,4 @@ Images, légendes et galeries utilisent HTML et des shortcodes tels que `[captio
 
 La spec d’ensemble vise **4.9 à 7.x** et rapporte un essai en 4.9. Elle ne démontre pas toute la plage 4.0–4.8. Qualifier ces versions, les termes partagés, les shortcodes et les relations fait partie du travail nécessaire pour l’objectif WordPress 4 complet.
 
-Sources : [séparation des termes, 4.2](https://github.com/WordPress/WordPress/blob/87bf150016e042bc3e21f2f1cb9de44042b8cdb1/wp-includes/taxonomy.php), [schéma 4.4](https://github.com/WordPress/WordPress/blob/f6a29831c76d2dbe82e9ae673539f910654c58a4/wp-admin/includes/schema.php), [API des termes 4.4](https://github.com/WordPress/WordPress/blob/f6a29831c76d2dbe82e9ae673539f910654c58a4/wp-includes/taxonomy.php), [types en 4.9](https://github.com/WordPress/WordPress/blob/29ffbff370968ae48a1b7a34e35c8b8e75cf0f91/wp-includes/post.php), [spec d’ensemble](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/docs/superpowers/specs/2026-10-08-wp2spip-ensemble-design.md).
+Sources : [séparation des termes, 4.2](https://github.com/WordPress/WordPress/blob/87bf150016e042bc3e21f2f1cb9de44042b8cdb1/wp-includes/taxonomy.php), [schéma 4.4](https://github.com/WordPress/WordPress/blob/f6a29831c76d2dbe82e9ae673539f910654c58a4/wp-admin/includes/schema.php), [API des termes 4.4](https://github.com/WordPress/WordPress/blob/f6a29831c76d2dbe82e9ae673539f910654c58a4/wp-includes/taxonomy.php), [types en 4.9](https://github.com/WordPress/WordPress/blob/29ffbff370968ae48a1b7a34e35c8b8e75cf0f91/wp-includes/post.php), [spec d’ensemble](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/docs/superpowers/specs/2026-10-08-wp2spip-ensemble-design.md).

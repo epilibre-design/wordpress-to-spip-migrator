@@ -1,6 +1,6 @@
 # Développer et tester
 
-Les dépendances de développement sont définies dans Composer. Le verrou documenté contient PHPUnit 13.4.1, qui impose **PHP ≥ 8.4.1** ; le minimum PHP du plugin seul est différent.
+Les dépendances de développement sont définies dans Composer. Le plugin demande PHP **≥ 8.4** pour `Dom\HTMLDocument` ; le verrou documenté contient PHPUnit 13.4.1, qui impose **PHP ≥ 8.4.1** pour les tests.
 
 ## Depuis la racine du checkout
 
@@ -15,12 +15,16 @@ Utiliser `install`, pas `update`, pour respecter `composer.lock`. Les dépendanc
 
 | Commande | Ce qu’elle vérifie |
 |---|---|
-| `tests-unit` | Fonctions de conversion et utilitaires, sans installation SPIP |
+| `tests-unit` | Conversion HTML5, blocs et utilitaires, sans installation SPIP |
 | `install-spip-test` | Prépare SPIP 4.4 SQLite, ses plugins et le patch SPIP-Cli ; vérifie les plugins et tables requis |
-| `tests-integration` | Relations, blocs, liens, hiérarchie, préfixes et squelettes, dans ce SPIP avec des fixtures WordPress SQLite |
+| `tests-integration` | Relations, étiquettes, statuts des documents, blocs, liens, hiérarchie, préfixes, rendu HTML et squelettes, dans ce SPIP avec des fixtures WordPress SQLite |
 | `tests-import` | Imports complets de jeux WordPress externes configurés, comparés à une référence versionnée |
 
 Une fixture SQLite des colonnes lues par le moteur n’est pas une installation complète de chaque version WordPress. Elle ne prouve pas à elle seule la couverture historique.
+
+`HtmlTest` vérifie la conversion HTML et l’échappement des raccourcis présents comme texte ; `HtmlSpipTest` vérifie leur rendu avec `propre()` de SPIP. `MotsTest` contrôle les étiquettes, leurs liens et les erreurs de cohérence ; `DocumentsArticleTest` vérifie aussi le recalcul du statut des documents après association.
+
+Les suites des extensions Yoast et ACF sont dans leurs [dépôts respectifs](../comprendre/extensions.md). La suite de wp2spip seule ne valide pas ces extensions.
 
 ## Imports complets
 
@@ -41,4 +45,4 @@ L’export normalise certaines valeurs, dont l’adresse du site et la date d’
 
 Rapporter la commande, la révision, les versions exactes et les cas exécutés. Distinguer réussites, échecs, cas ignorés et suites non exécutées. Un code de sortie nul sans cas exécuté ne valide pas le moteur.
 
-Sources : [configuration PHPUnit](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/phpunit.xml), [scripts Composer](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/composer.json), [fixtures](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/tests/integration/data/wordpress/schema.sql), [script d’import complet](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/tests/integration/valider.sh).
+Sources : [configuration PHPUnit](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/phpunit.xml), [scripts Composer](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/composer.json), [fixtures](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/tests/integration/data/wordpress/schema.sql), [script d’import complet](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/tests/integration/valider.sh).

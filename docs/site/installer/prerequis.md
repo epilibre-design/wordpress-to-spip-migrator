@@ -4,7 +4,7 @@
 
 | Usage | Prérequis |
 |---|---|
-| Utiliser le plugin | SPIP 4.2 à 4.4 d’après le manifeste ; PHP ≥ 8.1 d’après Composer, avec les exigences de la version SPIP retenue |
+| Utiliser le plugin | SPIP 4.2 à 4.4 d’après le manifeste ; **PHP ≥ 8.4**, avec l’extension DOM et `Dom\HTMLDocument` pour la conversion HTML5 |
 | Exécuter les tests verrouillés | PHP **≥ 8.4.1**, Composer, extensions demandées par PHPUnit et SQLite pour l’intégration |
 | Préparer un SPIP automatiquement | Bash, PHP CLI, SPIP-Cli corrigé, client MySQL pour lire le WordPress, accès aux bases et téléchargements |
 | Construire ce site documentaire | Python 3.11 ou ultérieur et `requirements-docs.txt` ; aucun SPIP ni WordPress requis |
@@ -21,7 +21,6 @@ Le préfixe est lu dans `wp-config.php` sans l’exécuter ; `--prefixe` permet 
 
 | Plugin | Rôle | Dépendance |
 |---|---|---|
-| Sale ≥ 1.0 | HTML → syntaxe SPIP | Obligatoire |
 | Pages uniques ≥ 2.0 | Pages hors rubriques | Obligatoire |
 | Polyhiérarchie ≥ 4.0 | Rubriques secondaires | Obligatoire |
 | Albums ≥ 4.0 | Galeries | Selon le contenu |
@@ -30,7 +29,9 @@ Le préfixe est lu dans `wp-config.php` sans l’exécuter ; `--prefixe` permet 
 | Forum | Commentaires | Selon le contenu |
 | oEmbed | Lecteurs des URL embarquées | Utilisé pour le rendu, à prévoir si nécessaire |
 
-La commande télécharge et active les plugins qu’elle détecte comme requis par le contenu. Le rendu final et l’ensemble des dépendances de votre site restent à contrôler.
+Sale n’est plus une dépendance : le HTML est converti par `inc/wp2spip_html.php`, inclus dans wp2spip.
+
+La commande télécharge et active les plugins qu’elle détecte comme requis par le contenu, ainsi que leurs dépendances. Les extensions [wp2spip_yoast et wp2spip_acf](../comprendre/extensions.md) ajoutent respectivement SEO et Champs Extras Interface selon les données présentes. Ces extensions du migrateur s’installent séparément et doivent être actives avant l’import. Le rendu final et l’ensemble des dépendances de votre site restent à contrôler.
 
 ## Téléchargements et droits
 
@@ -38,4 +39,4 @@ Composer utilise Packagist et les dépôts SPIP ; SPIP-Cli utilise les serveurs 
 
 SPIP doit pouvoir écrire dans ses dossiers de configuration, caches, fichiers et plugins. Garder les accès réels aux bases et les mots de passe dans une configuration locale protégée, hors des sources publiques.
 
-Sources : [paquet](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/paquet.xml), [Composer](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/composer.json), [verrou](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/composer.lock), [tables lues](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/inc/wp2spip.php).
+Sources : [paquet](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/paquet.xml), [Composer](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/composer.json), [verrou](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/composer.lock), [tables lues](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/inc/wp2spip.php).

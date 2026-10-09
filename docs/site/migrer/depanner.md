@@ -11,7 +11,9 @@ Lire le premier échec avant de relancer. Les traitements dépendent les uns des
 | Préfixe différent d’un import commencé | Repartir d’une destination vierge ; le moteur refuse de mélanger les sources |
 | Téléchargement/activation d’un plugin impossible | Lire les commandes affichées, vérifier accès réseau, correctif SVP et droits des dossiers |
 | Identifiant déjà pris | Destination non vierge ou conflit ; sauvegarder puis refaire une destination de test propre |
-| Traitement inconnu | Comparer à `--info` ; une spec n’ajoute pas son traitement à ce checkout |
+| Traitement inconnu | Comparer à `--info` ; pour `importer_yoast_categories`, `importer_yoast_seo` ou `importer_acf`, vérifier l’installation et l’activation de l’extension correspondante |
+| Étiquettes non liées ou hors du groupe | Examiner le bilan de `importer_mots` : contenu absent, groupe supprimé ou mot importé déplacé ; repartir d’une destination propre après correction |
+| Erreur `Dom\HTMLDocument` introuvable | Vérifier PHP ≥ 8.4 et l’extension DOM sur le PHP CLI réellement utilisé ; installer Sale ne remplace pas ce prérequis |
 | Média manquant/refusé | Contrôler fichier source, URL, autorisations et type de fichier ; utiliser `-v` |
 | Lien conservé vers WordPress | Examiner média hors médiathèque, URL de fond ou slug ambigu ; préparer une correction ciblée |
 | Conversion d’un bloc incomplète | Identifier le bloc et son stockage ; un bloc dynamique vide ne fournit pas de HTML à importer |
@@ -26,4 +28,4 @@ Ne pas utiliser un script de remise à zéro sur une installation réelle sans v
 
 Une extension PHP absente, une connexion refusée ou un plugin non actif est un prérequis à corriger. Une relation erronée malgré les prérequis corrects peut être un défaut du moteur : consigner version exacte, commit, scénario minimal et sortie, sans modifier les références de tests pour cacher le problème.
 
-[Tests](../installer/developpement.md) · [État du projet](../etat-projet.md) · [Commande et erreurs](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/spip-cli/WordpressImporter.php).
+[Tests](../installer/developpement.md) · [État du projet](../etat-projet.md) · [Commande et erreurs](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/spip-cli/WordpressImporter.php).

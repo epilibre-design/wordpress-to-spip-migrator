@@ -35,4 +35,4 @@ Le moteur crée ces zones avec Accès restreint et les réserve aux visiteurs id
 
 Tester avec un visiteur anonyme, un compte identifié non autorisé et un compte autorisé. Vérifier les rôles, la récupération des comptes et les fichiers associés aux contenus protégés. Garder la destination hors ligne jusqu’à validation de cette politique.
 
-Sources : [auteurs](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/wp2spip/importer_auteurs.php), [accès](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/wp2spip/importer_acces.php).
+Sources : [auteurs](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/wp2spip/importer_auteurs.php), [accès](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/wp2spip/importer_acces.php).

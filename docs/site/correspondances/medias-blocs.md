@@ -33,6 +33,8 @@ Les blocs de couverture peuvent laisser des URL de fond pointant vers la source 
 
 ## Contrôler
 
-Vérifier fichiers, légendes, galeries, alignements, liens, lectures audio/vidéo et fonds de blocs. Examiner les blocs inconnus et dynamiques. La mise en page dépend des squelettes et du CSS SPIP. Le [statut des documents après liaison](../comprendre/extensions.md#correctif-du-statut-des-documents) fait l’objet d’un correctif prévu.
+Après association des pièces jointes à un article, `importer_articles` appelle `document_instituer()` pour recalculer leur statut, y compris pour les médias absents du texte. Un document joint à un article publié peut ainsi être publié sans modification manuelle de cet article. Les documents des contenus en préparation restent à contrôler selon les règles de SPIP et les traitements d’accès.
 
-Sources : [documents](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/wp2spip/importer_documents.php), [blocs](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/inc/wp2spip_blocs.php), [index et associations](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/wp2spip/importer_articles.php).
+Vérifier fichiers, légendes, galeries, alignements, liens, lectures audio/vidéo et fonds de blocs. Examiner les blocs inconnus et dynamiques. Contrôler le statut des documents et leur accès public, ainsi que les pièces jointes absentes du texte. La mise en page dépend des squelettes et du CSS SPIP.
+
+Sources : [documents](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/wp2spip/importer_documents.php), [blocs](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/inc/wp2spip_blocs.php), [index et associations](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/wp2spip/importer_articles.php).

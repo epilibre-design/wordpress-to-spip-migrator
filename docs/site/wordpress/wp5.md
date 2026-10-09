@@ -12,7 +12,7 @@ L’éditeur de blocs enregistre des commentaires `<!-- wp:nom {attributs} -->`,
 <!-- /wp:paragraph -->
 ```
 
-Le migrateur analyse cette représentation avant Sale et propose des conversions spécialisées. Cela conserve les relations aux médias et une partie des structures de mise en page, pas le fonctionnement complet de l’éditeur WordPress.
+Le migrateur analyse cette représentation avant son convertisseur HTML5 et propose des conversions spécialisées. Cela conserve les relations aux médias et une partie des structures de mise en page, pas le fonctionnement complet de l’éditeur WordPress.
 
 ## Blocs réutilisables
 
@@ -36,4 +36,4 @@ Le migrateur documenté sélectionne les articles, pages et médias, pas ces obj
 
 Tester HTML classique, blocs imbriqués, galerie, bloc réutilisable, contenu embarqué et bloc dynamique. Vérifier les commentaires et identifier les données de thème ignorées. Un site WP5 utilisant exclusivement l’éditeur classique peut être très différent d’un site WP5.9 à thème blocs.
 
-Sources : [blocs 5.0](https://github.com/WordPress/WordPress/blob/491c67be12ca8a9fe37ae38307ba7e298c976ec3/wp-includes/blocks.php), [types 5.0](https://github.com/WordPress/WordPress/blob/491c67be12ca8a9fe37ae38307ba7e298c976ec3/wp-includes/post.php), [schéma 5.5](https://github.com/WordPress/WordPress/blob/537fd931bc02e6e934a2d774422b897871aa87ad/wp-admin/includes/schema.php), [types 5.9](https://github.com/WordPress/WordPress/blob/73157386d069425c5e6ea7c4fc0122e8a9b58a7b/wp-includes/post.php), [conversion du migrateur](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/inc/wp2spip_blocs.php).
+Sources : [blocs 5.0](https://github.com/WordPress/WordPress/blob/491c67be12ca8a9fe37ae38307ba7e298c976ec3/wp-includes/blocks.php), [types 5.0](https://github.com/WordPress/WordPress/blob/491c67be12ca8a9fe37ae38307ba7e298c976ec3/wp-includes/post.php), [schéma 5.5](https://github.com/WordPress/WordPress/blob/537fd931bc02e6e934a2d774422b897871aa87ad/wp-admin/includes/schema.php), [types 5.9](https://github.com/WordPress/WordPress/blob/73157386d069425c5e6ea7c4fc0122e8a9b58a7b/wp-includes/post.php), [conversion du migrateur](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/inc/wp2spip_blocs.php).
