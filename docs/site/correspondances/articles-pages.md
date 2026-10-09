@@ -8,6 +8,7 @@
 |---|---|---|
 | `ID` | `id_article` et `id_wordpress` | Identifiant conservé |
 | `post_title` | `titre` | Texte du titre repris ; titre vide à contrôler |
+| `post_excerpt` | `descriptif` | HTML converti ; vide si l’extrait n’a pas été saisi |
 | `post_content` | `texte` | Blocs, HTML et références convertis |
 | `post_date` | `date`, `date_redac` | Dates conservées |
 | `post_modified` | `maj`, `date_modif` | Rétablies après les associations |
@@ -15,7 +16,7 @@
 | `post_name` | Entrée `spip_urls` | Slug repris ; routage final à vérifier |
 | `comment_status` | `accepter_forum` | `open` → forum autorisé, sinon fermé |
 
-Le champ `post_excerpt` d’un article n’a pas de correspondance dédiée dans la composition de l’article de cette révision ; ne pas annoncer l’import d’un chapo WordPress. L’extrait d’un **média** peut en revanche alimenter son descriptif.
+L’extrait saisi dans WordPress (`post_excerpt`) devient le **descriptif** de l’article ou de la page, et non son chapo : comme l’extrait dans WordPress, `#INTRODUCTION` reprend le descriptif quand il est rempli, et le texte sinon. Si au moins un extrait est importé, le moteur active le descriptif des articles dans la configuration SPIP (`articles_descriptif`) pour qu’il apparaisse dans l’espace privé. Un extrait généré automatiquement par WordPress n’est pas stocké et n’est donc pas repris : `#INTRODUCTION` en produit l’équivalent. L’extrait d’un **média** alimente le descriptif du document.
 
 ## Statuts
 
@@ -41,6 +42,6 @@ Le squelette doit exploiter ces liens pour les sous-pages ou le fil d’Ariane. 
 
 ## Contrôler après import
 
-Vérifier un article publié, un brouillon, un programmé, une page enfant et un article sans titre. Comparer dates, auteur et parenté ; tester le rendu des pages uniques et les URL hiérarchiques.
+Vérifier un article publié, un brouillon, un programmé, une page enfant, un article sans titre et un article avec extrait. Comparer dates, auteur et parenté ; tester le rendu des pages uniques et les URL hiérarchiques.
 
 Sources : [articles](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/wp2spip/importer_articles.php), [hiérarchie](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/wp2spip/importer_hierarchie_pages.php).

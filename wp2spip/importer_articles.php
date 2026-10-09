@@ -45,6 +45,7 @@ function wp2spip_importer_articles_dist($command) {
 		$nb_import = 0;
 		$nb_liens_absents = 0;
 		$nb_liens_non_convertis = 0;
+		$nb_extraits = 0;
 		$bilan_blocs = array('convertis' => array(), 'dynamiques' => array(), 'inconnus' => array(), 'medias_introuvables' => 0, 'images_retirees' => 0, 'albums' => 0);
 		$command->output->writeln("$nb_posts articles à importer.");
 		
@@ -273,6 +274,8 @@ function wp2spip_importer_articles_dist($command) {
 				'id_parent' => $id_rubrique_principale,
 				'page' => $page,
 				'titre' => $wp_post['post_title'],
+				// L'extrait saisi dans Wordpress : repris par #INTRODUCTION quand il est rempli, comme dans Wordpress
+				'descriptif' => wp2spip_html_spip($wp_post['post_excerpt']),
 				'texte' => $texte,
 				'date' => $wp_post['post_date'],
 				'maj' => $wp_post['post_modified'],
@@ -309,6 +312,9 @@ function wp2spip_importer_articles_dist($command) {
 				return wp2spip_erreur_modification($command, 'article', $id_article, $erreur);
 			}
 			$nb_import++;
+			if ($article['descriptif'] !== '') {
+				$nb_extraits++;
+			}
 			
 			// Associer les docs, et les albums des galeries
 			wp2spip_importer_articles_documents($command, $id_wordpress, $id_article);
@@ -348,6 +354,12 @@ function wp2spip_importer_articles_dist($command) {
 			$command->output->writeln("$nb_liens_non_convertis liens vers des médias importés, mais placés là où SPIP n’a pas de raccourci (image de fond…), laissés tels quels (détail avec -v).");
 		}
 		wp2spip_afficher_bilan_blocs($command, $bilan_blocs);
+		if ($nb_extraits) {
+			// Descriptifs visibles sur les articles
+			include_spip('inc/meta');
+			ecrire_meta('articles_descriptif', 'oui');
+			$command->output->writeln("$nb_extraits extraits importés en descriptifs d’articles.");
+		}
 	}
 }
 

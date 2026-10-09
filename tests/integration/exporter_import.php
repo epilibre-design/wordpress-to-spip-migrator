@@ -36,7 +36,7 @@ foreach (sql_allfetsel('*', 'spip_rubriques', 'id_wordpress > 0') as $r) {
 	$lignes[] = array('rubrique', $r['id_wordpress'], $r['titre'], $normaliser($r['texte']), 'parent#' . $wp($rubriques, $r['id_parent']), $r['statut']);
 }
 foreach (sql_allfetsel('*', 'spip_articles', 'id_wordpress > 0') as $a) {
-	$lignes[] = array('article', $a['id_wordpress'], $a['titre'], $a['statut'], $a['date'], $a['date_modif'], $a['page'], 'rubrique#' . $wp($rubriques, $a['id_rubrique']), $a['accepter_forum'], $normaliser($a['texte']));
+	$lignes[] = array('article', $a['id_wordpress'], $a['titre'], $a['statut'], $a['date'], $a['date_modif'], $a['page'], 'rubrique#' . $wp($rubriques, $a['id_rubrique']), $a['accepter_forum'], $normaliser($a['descriptif']), $normaliser($a['texte']));
 }
 foreach (sql_allfetsel('*', 'spip_documents', 'id_wordpress > 0') as $d) {
 	$lignes[] = array('document', $d['id_wordpress'], $d['titre'], $normaliser($d['descriptif']), $d['date'], $d['fichier'], $d['mode'], $d['statut']);
