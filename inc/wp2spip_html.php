@@ -2,7 +2,7 @@
 /**
  * Conversion du HTML de Wordpress en raccourcis SPIP
  *
- * Le HTML est analysé en arbre HTML5 (Dom\HTMLDocument, PHP 8.4), puis parcouru nœud par nœud : aucune expression
+ * Le HTML est analysé en arbre HTML5 (inc/wp2spip_html_arbre.php), puis parcouru nœud par nœud : aucune expression
  * régulière n'est appliquée au HTML. La sortie a la forme qu'attendent les traitements de wp2spip qui suivent
  * (images, lecteurs, liens internes, raccourcis Wordpress) : balises de médias gardées en HTML, liens en [texte->url].
  */
@@ -10,6 +10,9 @@
 if (!defined('_ECRIRE_INC_VERSION')) {
 	return;
 }
+
+// Arbre HTML5 : seul inc/wp2spip_html_arbre.php connaît les classes du parseur
+include_once __DIR__ . '/wp2spip_html_arbre.php';
 
 /**
  * Éléments de bloc gardés en HTML : leur contenu est converti en paragraphes
@@ -48,15 +51,25 @@ function wp2spip_html_spip($html, $options = array()) {
 	if (trim($html) === '') {
 		return '';
 	}
-	$document = Dom\HTMLDocument::createFromString('<!DOCTYPE html><html><body>' . $html . '</body></html>', LIBXML_NOERROR);
+	return wp2spip_html_convertir_body(wp2spip_html_arbre_body($html), $options);
+}
+
+/**
+ * Body d'un HTML déjà analysé en raccourcis SPIP
+ *
+ * @param Dom\Element|DOMElement $body
+ * @param array $options voir wp2spip_html_spip()
+ * @return string
+ */
+function wp2spip_html_convertir_body($body, $options) {
 	$contexte = array('autop' => $options['autop'] ?? true, 'pre' => false, 'gras' => false, 'italique' => false, 'listes' => '');
-	return wp2spip_html_blocs($document->body, $contexte);
+	return wp2spip_html_blocs($body, $contexte);
 }
 
 /**
  * Contenu d'un élément converti en paragraphes séparés par une ligne vide
  *
- * @param Dom\Node $parent
+ * @param Dom\Node|DOMNode $parent
  * @param array $contexte
  * @return string
  */
@@ -69,7 +82,7 @@ function wp2spip_html_blocs($parent, $contexte) {
 /**
  * Contenu d'un élément converti sur une ligne logique : ses paragraphes joints par des sauts de ligne
  *
- * @param Dom\Node $parent
+ * @param Dom\Node|DOMNode $parent
  * @param array $contexte
  * @return string
  */
@@ -80,7 +93,7 @@ function wp2spip_html_en_ligne($parent, $contexte) {
 }
 
 /**
- * @param Dom\Node $parent
+ * @param Dom\Node|DOMNode $parent
  * @param array $sortie
  * @param array $contexte
  */
@@ -91,16 +104,16 @@ function wp2spip_html_enfants($parent, &$sortie, $contexte) {
 }
 
 /**
- * @param Dom\Node $noeud
+ * @param Dom\Node|DOMNode $noeud
  * @param array $sortie
  * @param array $contexte
  */
 function wp2spip_html_noeud($noeud, &$sortie, $contexte) {
-	if ($noeud instanceof Dom\Text) {
+	if (wp2spip_html_est_texte($noeud)) {
 		wp2spip_html_texte($noeud->data, $sortie, $contexte);
 		return;
 	}
-	if (!$noeud instanceof Dom\Element) {
+	if (!wp2spip_html_est_element($noeud)) {
 		// Commentaires, instructions : retirés
 		return;
 	}
@@ -151,6 +164,10 @@ function wp2spip_html_noeud($noeud, &$sortie, $contexte) {
 				wp2spip_html_ecrire($sortie, wp2spip_html_tableau_html($noeud, $contexte));
 				return;
 			}
+			// Contenu égaré dans la structure du tableau : avant le tableau, où le place l'analyse HTML5
+			foreach (wp2spip_html_hors_tableau($noeud) as $egare) {
+				wp2spip_html_noeud($egare, $sortie, $contexte);
+			}
 			wp2spip_html_bloc($sortie, wp2spip_html_tableau($noeud, $contexte));
 			return;
 		case 'blockquote':
@@ -181,7 +198,7 @@ function wp2spip_html_noeud($noeud, &$sortie, $contexte) {
 		return;
 	}
 	if (in_array($nom, WP2SPIP_HTML_TELS_QUELS)) {
-		wp2spip_html_ecrire($sortie, $noeud->ownerDocument->saveHtml($noeud));
+		wp2spip_html_ecrire($sortie, wp2spip_html_serialiser($noeud));
 		return;
 	}
 	if (in_array($nom, WP2SPIP_HTML_BLOCS)) {
@@ -249,7 +266,7 @@ function wp2spip_html_texte($texte, &$sortie, $contexte) {
 /**
  * Gras ou italique : marques autour du contenu, blancs de bord sortis ; pas de marque dans une marque de même nature
  *
- * @param Dom\Element $element
+ * @param Dom\Element|DOMElement $element
  * @param array $contexte
  * @param string $style gras, italique
  * @param string $ouvrant
@@ -267,7 +284,7 @@ function wp2spip_html_entourer($element, $contexte, $style, $ouvrant, $fermant) 
 /**
  * Blancs de bord du texte d'origine d'un élément, gardés hors de sa conversion
  *
- * @param Dom\Element $element
+ * @param Dom\Element|DOMElement $element
  * @param string $conversion
  * @return string
  */
@@ -291,7 +308,7 @@ function wp2spip_html_marquer($texte, $ouvrant, $fermant) {
 /**
  * Lien : [texte->url], ancre nommée : [nom<-]
  *
- * @param Dom\Element $lien
+ * @param Dom\Element|DOMElement $lien
  * @param array $contexte
  * @return string
  */
@@ -312,7 +329,7 @@ function wp2spip_html_lien($lien, $contexte) {
  * Contenu hors des éléments (liste non fermée : l'analyseur HTML5 y range la suite du texte) : gardé, en
  * paragraphes après la liste au premier niveau, à la suite de l'élément précédent dans une sous-liste
  *
- * @param Dom\Element $liste ul ou ol
+ * @param Dom\Element|DOMElement $liste ul ou ol
  * @param array $contexte
  * @return string
  */
@@ -325,10 +342,10 @@ function wp2spip_html_liste($liste, $contexte) {
 	$lignes = array();
 	$hors = wp2spip_html_sortie();
 	foreach ($liste->childNodes as $enfant) {
-		if ($enfant instanceof Dom\Text ? trim($enfant->data) === '' : !$enfant instanceof Dom\Element) {
+		if (wp2spip_html_est_texte($enfant) ? trim($enfant->data) === '' : !wp2spip_html_est_element($enfant)) {
 			continue;
 		}
-		$nom = ($enfant instanceof Dom\Element) ? strtolower($enfant->localName) : '';
+		$nom = wp2spip_html_est_element($enfant) ? strtolower($enfant->localName) : '';
 		$en_cours_hors = (trim($hors['courant']) !== '' or $hors['paragraphes']);
 		if ($nom === 'li' or (in_array($nom, array('ul', 'ol')) and !$en_cours_hors)) {
 			if ($en_cours_hors) {
@@ -363,7 +380,7 @@ function wp2spip_html_liste($liste, $contexte) {
 /**
  * Élément de liste : son texte sur une ligne (paragraphes joints par des sauts de ligne), ses sous-listes à la suite
  *
- * @param Dom\Element $element li
+ * @param Dom\Element|DOMElement $element li
  * @param string $marque
  * @param array $contexte
  * @return string
@@ -372,7 +389,7 @@ function wp2spip_html_element_liste($element, $marque, $contexte) {
 	$texte = wp2spip_html_sortie();
 	$sous_listes = array();
 	foreach ($element->childNodes as $noeud) {
-		if ($noeud instanceof Dom\Element and in_array(strtolower($noeud->localName), array('ul', 'ol'))) {
+		if (wp2spip_html_est_element($noeud) and in_array(strtolower($noeud->localName), array('ul', 'ol'))) {
 			$sous_listes[] = wp2spip_html_liste($noeud, $contexte);
 		}
 		else {
@@ -386,16 +403,16 @@ function wp2spip_html_element_liste($element, $marque, $contexte) {
  * Tableau SPIP ; gardé en HTML s'il ne s'écrit pas en raccourcis (tableau imbriqué, cellule sur plusieurs lignes,
  * fusion de lignes)
  *
- * @param Dom\Element $tableau
+ * @param Dom\Element|DOMElement $tableau
  * @param array $contexte
  * @return string
  */
 function wp2spip_html_tableau($tableau, $contexte) {
 	$lignes = array();
 	$legende = '';
-	$simple = !$tableau->querySelector('table, [rowspan]:not([rowspan="1"])');
+	$simple = !wp2spip_html_tableau_complexe($tableau);
 	foreach ($tableau->childNodes as $partie) {
-		if (!$partie instanceof Dom\Element) {
+		if (!wp2spip_html_est_element($partie)) {
 			continue;
 		}
 		$nom = strtolower($partie->localName);
@@ -442,7 +459,7 @@ function wp2spip_html_tableau($tableau, $contexte) {
 /**
  * Tableau gardé en HTML : structure d'origine, une rangée par ligne, contenu des cellules converti
  *
- * @param Dom\Element $element table, ou une de ses parties
+ * @param Dom\Element|DOMElement $element table, ou une de ses parties
  * @param array $contexte
  * @return string
  */
@@ -454,14 +471,81 @@ function wp2spip_html_tableau_html($element, $contexte) {
 	if (in_array($nom, WP2SPIP_HTML_VIDES)) {
 		return wp2spip_html_ouvrante($element);
 	}
-	$parties = array_map(fn($partie) => wp2spip_html_tableau_html($partie, $contexte), wp2spip_html_elements($element));
+	$parties = array_map(fn($partie) => wp2spip_html_tableau_html($partie, $contexte), wp2spip_html_parties_tableau($element));
 	return wp2spip_html_ouvrante($element) . ($nom === 'tr' ? join('', $parties) : "\n" . join("\n", $parties) . "\n") . "</$nom>";
+}
+
+/**
+ * Enfants attendus des éléments de structure d'un tableau
+ */
+const WP2SPIP_HTML_PARTIES_TABLEAU = array(
+	'table' => array('caption', 'colgroup', 'col', 'thead', 'tbody', 'tfoot', 'tr'),
+	'thead' => array('tr'),
+	'tbody' => array('tr'),
+	'tfoot' => array('tr'),
+	'tr' => array('td', 'th'),
+	'colgroup' => array('col'),
+);
+
+/**
+ * Tableau qui ne s'écrit pas en raccourcis : tableau imbriqué, ou cellule fusionnée sur plusieurs lignes
+ *
+ * @param Dom\Element|DOMElement $element
+ * @return bool
+ */
+function wp2spip_html_tableau_complexe($element) {
+	foreach (wp2spip_html_elements($element) as $enfant) {
+		if (
+			strtolower($enfant->localName) === 'table'
+			or ($enfant->hasAttribute('rowspan') and $enfant->getAttribute('rowspan') !== '1')
+			or wp2spip_html_tableau_complexe($enfant)
+		) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Éléments enfants d'une partie de tableau, sans le contenu égaré (rendu avant le tableau)
+ *
+ * @param Dom\Element|DOMElement $element
+ * @return array
+ */
+function wp2spip_html_parties_tableau($element) {
+	$attendus = WP2SPIP_HTML_PARTIES_TABLEAU[strtolower($element->localName)] ?? null;
+	$elements = wp2spip_html_elements($element);
+	return ($attendus === null) ? $elements : array_values(array_filter($elements, fn($enfant) => in_array(strtolower($enfant->localName), $attendus)));
+}
+
+/**
+ * Contenu égaré dans la structure d'un tableau (texte ou élément hors d'une cellule) : l'analyse HTML5 de PHP 8.4
+ * le place avant le tableau, Masterminds le laisse dedans
+ *
+ * @param Dom\Element|DOMElement $element
+ * @return array nœuds, dans l'ordre du document
+ */
+function wp2spip_html_hors_tableau($element) {
+	$attendus = WP2SPIP_HTML_PARTIES_TABLEAU[strtolower($element->localName)] ?? null;
+	if ($attendus === null) {
+		return array();
+	}
+	$egares = array();
+	foreach ($element->childNodes as $enfant) {
+		if (wp2spip_html_est_element($enfant) and in_array(strtolower($enfant->localName), $attendus)) {
+			array_push($egares, ...wp2spip_html_hors_tableau($enfant));
+		}
+		elseif (wp2spip_html_est_element($enfant) or (wp2spip_html_est_texte($enfant) and trim($enfant->data) !== '')) {
+			$egares[] = $enfant;
+		}
+	}
+	return $egares;
 }
 
 /**
  * Texte préformaté : <cadre> pour du code, sinon <poesie> (lignes gardées)
  *
- * @param Dom\Element $pre
+ * @param Dom\Element|DOMElement $pre
  * @param array $contexte
  * @return string
  */
@@ -480,23 +564,23 @@ function wp2spip_html_pre($pre, $contexte) {
 /**
  * Éléments enfants
  *
- * @param Dom\Node $parent
- * @return Dom\Element[]
+ * @param Dom\Node|DOMNode $parent
+ * @return Dom\Element[]|DOMElement[]
  */
 function wp2spip_html_elements($parent) {
-	return array_values(array_filter(iterator_to_array($parent->childNodes), fn($noeud) => $noeud instanceof Dom\Element));
+	return array_values(array_filter(iterator_to_array($parent->childNodes), fn($noeud) => wp2spip_html_est_element($noeud)));
 }
 
 /**
  * Balise ouvrante d'un élément, avec ses attributs
  *
- * @param Dom\Element $element
+ * @param Dom\Element|DOMElement $element
  * @return string
  */
 function wp2spip_html_ouvrante($element) {
 	$balise = '<' . strtolower($element->localName);
 	foreach ($element->attributes as $attribut) {
-		$balise .= ' ' . $attribut->name . '="' . htmlspecialchars($attribut->value, ENT_COMPAT | ENT_HTML5, 'UTF-8') . '"';
+		$balise .= ' ' . $attribut->nodeName . '="' . htmlspecialchars($attribut->value, ENT_COMPAT | ENT_HTML5, 'UTF-8') . '"';
 	}
 	return $balise . '>';
 }

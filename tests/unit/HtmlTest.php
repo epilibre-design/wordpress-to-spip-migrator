@@ -80,18 +80,36 @@ final class HtmlTest extends TestCase
 			'éditeur classique, blancs' => array("a   b\t c", 'a b c'),
 			'éditeur classique, balises de bloc' => array("<ul>\n<li>a</li>\n</ul>\nTexte", "-* a\n\nTexte"),
 			// HTML mal formé, textes qui faisaient échouer sale
-			'balises croisées' => array('<p>a <b>b <i>c</b> d</i></p>', 'a {{b {c} }} {d}'),
-			'balises non fermées' => array('<p>a <b>b<p>c', "a {{b}}\n\n{{c}}"),
+			'balises croisées' => array('<p>a <b>b <i>c</b> d</i></p>', 'a {{b {c} }} {d}', 'a {{b {c} }} d'),
+			'balises non fermées' => array('<p>a <b>b<p>c', "a {{b}}\n\n{{c}}", "a {{b}}\n\nc"),
 			'fermantes orphelines' => array('a</b></p>b', "a\n\nb"),
+			'texte égaré dans un tableau' => array('<table><tr><td>a</td></tr>égaré</table>', "égaré\n\n| a |"),
+			'texte égaré entre deux rangées' => array('<table><tr><td>a</td></tr>x<tr><td>b</td></tr></table>', "x\n\n| a |\n| b |"),
+			'section et rangée implicites' => array('<table><td>a</td></table>', '| a |'),
+			'cellules non fermées' => array('<table><tr><td>a<td>b<tr><td>c</table>', "| a | b |\n| c |"),
+			'éléments de liste non fermés' => array('<ul><li>a<li>b</ul>', "-* a\n-* b"),
+			'paragraphe fermé par un bloc' => array('<p>a<div>b</div>c', "a\n\n<div>b</div>\n\nc"),
+			'br fermant' => array('a</br>b', "a\n_ b"),
+			'svg et attribut à préfixe' => array('<p><svg viewBox="0 0 1 1"><use xlink:href="#i"></use></svg></p>', '<svg viewBox="0 0 1 1"><use xlink:href="#i"></use></svg>'),
+			'iframe et attribut booléen' => array('<iframe src="https://e.test/?a=1&amp;b=2" allowfullscreen></iframe>', '<iframe src="https://e.test/?a=1&amp;b=2" allowfullscreen=""></iframe>'),
+			'attribut à espace insécable et chevrons' => array('<img alt="a&nbsp;&lt;b&gt;">', '<img alt="a&nbsp;<b>">'),
+			'commentaire dans un média' => array('<audio><!-- c --></audio>', '<audio><!-- c --></audio>'),
+			'attribut à préfixe gardé dans un bloc' => array('<div xml:lang="fr"><p>a</p></div>', '<div xml:lang="fr">a</div>'),
 			'vingt espaces' => array('a' . str_repeat(' ', 30) . 'b', 'a b'),
 			'texte vide' => array(" \n ", ''),
 		);
 	}
 
 	#[DataProvider('conversions')]
-	public function testConversion(string $html, string $attendu): void
+	public function testConversion(string $html, string $attendu, ?string $attendu_masterminds = null): void
 	{
-		$this->assertSame($attendu, wp2spip_html_spip($html));
+		$this->assertSame(class_exists('Dom\HTMLDocument') ? $attendu : ($attendu_masterminds ?? $attendu), wp2spip_html_spip($html));
+	}
+
+	#[DataProvider('conversions')]
+	public function testConversionMasterminds(string $html, string $attendu, ?string $attendu_masterminds = null): void
+	{
+		$this->assertSame($attendu_masterminds ?? $attendu, trim($html) === '' ? '' : wp2spip_html_convertir_body(wp2spip_html_arbre_body_masterminds($html), array()));
 	}
 
 	public function testContenuABlocs(): void
