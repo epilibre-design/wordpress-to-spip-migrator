@@ -13,7 +13,7 @@ Lire le premier échec avant de relancer. Les traitements dépendent les uns des
 | Identifiant déjà pris | Destination non vierge ou conflit ; sauvegarder puis refaire une destination de test propre |
 | Traitement inconnu | Comparer à `--info` ; pour `importer_yoast_categories`, `importer_yoast_seo` ou `importer_acf`, vérifier l’installation et l’activation de l’extension correspondante |
 | Étiquettes non liées ou hors du groupe | Examiner le bilan de `importer_mots` : contenu absent, groupe supprimé ou mot importé déplacé ; repartir d’une destination propre après correction |
-| Erreur `Dom\HTMLDocument` introuvable | Vérifier PHP ≥ 8.4 et l’extension DOM sur le PHP CLI réellement utilisé ; installer Sale ne remplace pas ce prérequis |
+| Analyseur HTML5 indisponible | Vérifier l’extension DOM du PHP CLI réellement utilisé (PHP ≥ 8.1) et, avant PHP 8.4, la présence de `lib/masterminds-html5/` dans le plugin ; `-v` affiche l’analyseur utilisé |
 | Média manquant/refusé | Contrôler fichier source, URL, autorisations et type de fichier ; utiliser `-v` |
 | Lien conservé vers WordPress | Examiner média hors médiathèque, URL de fond ou slug ambigu ; préparer une correction ciblée |
 | Conversion d’un bloc incomplète | Identifier le bloc et son stockage ; un bloc dynamique vide ne fournit pas de HTML à importer |

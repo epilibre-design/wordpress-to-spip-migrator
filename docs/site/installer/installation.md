@@ -13,7 +13,7 @@ cd wordpress-to-spip-migrator
 
 1. Préparer une destination SPIP vierge, hors ligne.
 2. Installer SPIP-Cli et vérifier que son correctif `plugins:svp:telecharger` est présent.
-3. Vérifier PHP 8.4 et son extension DOM, puis installer et activer Pages uniques et Polyhiérarchie.
+3. Vérifier PHP 8.1 ou plus récent et son extension DOM, puis installer et activer Pages uniques et Polyhiérarchie.
 4. Placer ce plugin sous `plugins/wp2spip` — en copie, ou par lien vers le checkout pour le développer — puis l’activer.
 5. Déclarer la base WordPress comme base externe dans l’administration de SPIP. Le nom reconnu par défaut est `wordpress`.
 

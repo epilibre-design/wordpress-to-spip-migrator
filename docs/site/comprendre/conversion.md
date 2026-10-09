@@ -22,7 +22,7 @@ Avec le document `72` importé, la cible est un modèle de type `<img72|left>` e
 1. Analyser les commentaires `<!-- wp:… -->` et les attributs JSON en arbre de blocs.
 2. Convertir les blocs reconnus et les galeries, en conservant leur ordre.
 3. Protéger temporairement les fragments déjà convertis avec des marqueurs `wp2spipblocN`.
-4. Convertir le HTML restant avec `wp2spip_html_spip()`, à partir de l’arbre HTML5 construit par `Dom\HTMLDocument` de PHP 8.4.
+4. Convertir le HTML restant avec `wp2spip_html_spip()`, à partir de l’arbre HTML5 construit par `Dom\HTMLDocument` à partir de PHP 8.4, et avant par Masterminds HTML5-PHP. Sur du HTML mal formé, Masterminds peut ne pas rouvrir un gras ou un italique interrompu : le texte est gardé, sa mise en forme est à vérifier.
 5. Restaurer les fragments protégés et réécrire les références reconnues aux contenus et médias.
 
 Les marqueurs empêchent le convertisseur HTML de traiter une deuxième fois un raccourci déjà produit. Les structures sélectionnées gardent des classes `wp-block-…` pour être stylées dans SPIP. Sale n’intervient plus dans cette chaîne.

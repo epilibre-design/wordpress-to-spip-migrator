@@ -1,6 +1,6 @@
 # Développer et tester
 
-Les dépendances de développement sont définies dans Composer. Le plugin demande PHP **≥ 8.4** pour `Dom\HTMLDocument` ; le verrou documenté contient PHPUnit 13.4.1, qui impose **PHP ≥ 8.4.1** pour les tests.
+Les dépendances de développement sont définies dans Composer. Le plugin demande PHP **≥ 8.1** ; le verrou est résolu pour PHP 8.1 et contient PHPUnit 10.5. `composer tests-matrice` rejoue les suites et l’import complet avec chaque PHP de 8.1 à 8.4 installé.
 
 ## Depuis la racine du checkout
 
