@@ -6,6 +6,9 @@ if (!defined('_ECRIRE_INC_VERSION')) {
 	return;
 }
 
+// Noms des tables WordPress (wp2spip_table())
+include_spip('inc/wp2spip');
+
 /**
  * Rattache les articles importés à toutes leurs catégories Wordpress
  *
@@ -34,7 +37,7 @@ function wp2spip_importer_polyhierarchie_dist($command) {
 	$categories = array();
 	if ($relations = sql_allfetsel(
 		'rel.object_id as id_post, tax.term_id as id_term',
-		'wp_term_relationships as rel join wp_term_taxonomy as tax on tax.term_taxonomy_id=rel.term_taxonomy_id',
+		wp2spip_table('term_relationships') . ' as rel join ' . wp2spip_table('term_taxonomy') . ' as tax on tax.term_taxonomy_id=rel.term_taxonomy_id',
 		array(
 			'tax.taxonomy = "category"',
 			sql_in('rel.object_id', array_column($articles, 'id_wordpress')),

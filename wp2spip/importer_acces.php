@@ -4,6 +4,9 @@ if (!defined('_ECRIRE_INC_VERSION')) {
 	return;
 }
 
+// Noms des tables WordPress (wp2spip_table())
+include_spip('inc/wp2spip');
+
 /**
  * Publie les contenus privés et protégés par mot de passe dans des zones d'Accès restreint
  *
@@ -18,7 +21,7 @@ function wp2spip_importer_acces_dist($command) {
 	// Les contenus Wordpress concernés
 	$wp_posts = sql_allfetsel(
 		'ID, post_status, post_password, post_date, post_modified',
-		'wp_posts',
+		wp2spip_table('posts'),
 		wp2spip_where_contenus_restreints(),
 		'',
 		'ID',

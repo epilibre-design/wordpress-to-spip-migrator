@@ -14,6 +14,7 @@ if (!defined('_ECRIRE_INC_VERSION')) {
 }
 
 include_spip('inc/filtres');
+include_spip('inc/wp2spip');
 
 /**
  * Contexte de conversion d'un contenu Wordpress
@@ -446,7 +447,7 @@ function wp2spip_convertir_raccourci_gallery($raccourci, $attributs, &$contexte)
 	else {
 		$ids = array_column(sql_allfetsel(
 			'ID',
-			'wp_posts',
+			wp2spip_table('posts'),
 			array('post_type = "attachment"', 'post_parent = ' . $contexte['id_wordpress'], 'post_mime_type like "image/%"'),
 			'',
 			'menu_order, ID',

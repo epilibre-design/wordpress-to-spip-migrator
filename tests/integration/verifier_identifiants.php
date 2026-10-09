@@ -16,6 +16,7 @@
  * Affiche OK, ou ECHEC et la liste des écarts avec le code de sortie 1.
  */
 include_spip('base/objets');
+include_spip('inc/wp2spip');
 include_spip('wp2spip/importer_articles');
 $base = 'wordpress';
 $echecs = array();
@@ -31,18 +32,18 @@ foreach (array('article', 'rubrique', 'document') as $objet) {
 	}
 }
 
-$nb_wp = sql_countsel('wp_posts', sql_in('post_type', array('post', 'page')), '', '', $base);
+$nb_wp = sql_countsel(wp2spip_table('posts'), sql_in('post_type', array('post', 'page')), '', '', $base);
 $nb_spip = sql_countsel('spip_articles', 'id_wordpress > 0');
 if ($nb_wp != $nb_spip) {
 	$echecs[] = "articles : $nb_spip importés pour $nb_wp contenus Wordpress";
 }
-$nb_wp = sql_countsel('wp_term_taxonomy', sql_in('taxonomy', array('category', 'link_category')), '', '', $base);
+$nb_wp = sql_countsel(wp2spip_table('term_taxonomy'), sql_in('taxonomy', array('category', 'link_category')), '', '', $base);
 $nb_spip = sql_countsel('spip_rubriques', 'id_wordpress > 0');
 if ($nb_wp != $nb_spip) {
 	$echecs[] = "rubriques : $nb_spip importées pour $nb_wp catégories Wordpress";
 }
 // Médias : ceux que importer_documents sélectionne (pièces jointes au statut inherit), comparés par identifiant
-$ids_wp = array_map('intval', array_column(sql_allfetsel('ID', 'wp_posts', array('post_type = "attachment"', 'post_status = "inherit"'), '', '', '', '', $base), 'ID'));
+$ids_wp = array_map('intval', array_column(sql_allfetsel('ID', wp2spip_table('posts'), array('post_type = "attachment"', 'post_status = "inherit"'), '', '', '', '', $base), 'ID'));
 $ids_spip = array_map('intval', array_column(sql_allfetsel('id_wordpress', 'spip_documents', 'id_wordpress > 0'), 'id_wordpress'));
 if ($manquants = array_diff($ids_wp, $ids_spip)) {
 	$echecs[] = 'documents : ' . count($manquants) . ' médias Wordpress non importés (' . join(', ', array_slice($manquants, 0, 10)) . (count($manquants) > 10 ? '…' : '') . ')';
@@ -88,7 +89,7 @@ include_spip('inc/plugin');
 $acces = test_plugin_actif('accesrestreint');
 $restreints = sql_allfetsel(
 	'ID, post_status',
-	'wp_posts',
+	wp2spip_table('posts'),
 	array(sql_in('post_type', array('post', 'page')), '(post_status = "private" or post_password != "")'),
 	'', '', '', '', $base
 );
@@ -114,7 +115,7 @@ echo count($restreints) . " contenus privés ou protégés vérifiés" . ($acces
 // avec les rangs 1 à N ; les pages liées existent dans SPIP
 include_spip('inc/wp2spip_plugins');
 $attendus = array();
-foreach (sql_allfetsel('ID, post_parent', 'wp_posts', wp2spip_where_pages_enfants(), '', 'post_parent, menu_order, post_title, ID', '', '', $base) as $wp_page) {
+foreach (sql_allfetsel('ID, post_parent', wp2spip_table('posts'), wp2spip_where_pages_enfants(), '', 'post_parent, menu_order, post_title, ID', '', '', $base) as $wp_page) {
 	$attendus[intval($wp_page['post_parent'])][] = intval($wp_page['ID']);
 }
 if (test_plugin_actif('a2a')) {
@@ -145,7 +146,7 @@ elseif ($attendus) {
 }
 echo array_sum(array_map('count', $attendus)) . " pages enfants vérifiées\n";
 
-$url_wordpress = sql_getfetsel('option_value', 'wp_options', 'option_name="siteurl"', '', '', '', '', $base);
+$url_wordpress = sql_getfetsel('option_value', wp2spip_table('options'), 'option_name="siteurl"', '', '', '', '', $base);
 foreach (sql_allfetsel('id_article, texte', 'spip_articles', 'id_wordpress > 0') as $article) {
 	preg_match_all('#->article(\d+)\]#', $article['texte'], $trouves);
 	foreach (array_unique($trouves[1]) as $id) {

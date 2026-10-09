@@ -6,6 +6,9 @@ if (!defined('_ECRIRE_INC_VERSION')) {
 	return;
 }
 
+// Noms des tables WordPress (wp2spip_table())
+include_spip('inc/wp2spip');
+
 function wp2spip_importer_documents_dist($command) {
 	// Les contenus déjà importés ne sont pas retouchés
 	$ids_wordpress = array_column(sql_allfetsel('id_wordpress', 'spip_documents', 'id_wordpress>0'), 'id_wordpress') ?: array(0);
@@ -13,7 +16,7 @@ function wp2spip_importer_documents_dist($command) {
 	// On va chercher tous les auteurs Wordpress qui ont l'air pertinent
 	if ($wp_attachments = sql_allfetsel(
 		'*',
-		'wp_posts',
+		wp2spip_table('posts'),
 		array(
 			'post_type = "attachment"',
 			'post_status = "inherit"',

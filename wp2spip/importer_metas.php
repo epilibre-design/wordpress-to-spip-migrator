@@ -6,11 +6,14 @@ if (!defined('_ECRIRE_INC_VERSION')) {
 	return;
 }
 
+// Noms des tables WordPress (wp2spip_table())
+include_spip('inc/wp2spip');
+
 function wp2spip_importer_metas_dist($command) {
 	// On va chercher les quelques infos importantes
 	if ($options = sql_allfetsel(
 		'*',
-		'wp_options',
+		wp2spip_table('options'),
 		array(
 			sql_in('option_name', array('siteurl', 'blogname', 'admin_email', 'blogdescription'))
 		),

@@ -6,6 +6,9 @@ if (!defined('_ECRIRE_INC_VERSION')) {
 	return;
 }
 
+// Noms des tables WordPress (wp2spip_table())
+include_spip('inc/wp2spip');
+
 function wp2spip_importer_auteurs_dist($command) {
 	// Les contenus déjà importés ne sont pas retouchés
 	$ids_wordpress = array_column(sql_allfetsel('id_wordpress', 'spip_auteurs', 'id_wordpress>0'), 'id_wordpress') ?: array(0);
@@ -13,7 +16,7 @@ function wp2spip_importer_auteurs_dist($command) {
 	// On va chercher tous les auteurs Wordpress qui ont l'air pertinent
 	if ($wp_users = sql_allfetsel(
 		'*',
-		'wp_users',
+		wp2spip_table('users'),
 		array(
 			'(user_email != "" or user_nicename not like "\_%")', // à cause d'un plugin ou un hack qui peut créer des millions de lignes de faux users
 			sql_in('ID', $ids_wordpress, 'NOT'),
@@ -43,7 +46,7 @@ function wp2spip_importer_auteurs_dist($command) {
 			
 			// On fait un tableau avec toutes ses métas par clé
 			$metas = array();
-			if ($usermetas = sql_allfetsel('*', 'wp_usermeta', 'user_id = '.$id_wordpress_user, '', '', '', '', $command->base)) {
+			if ($usermetas = sql_allfetsel('*', wp2spip_table('usermeta'), 'user_id = '.$id_wordpress_user, '', '', '', '', $command->base)) {
 				foreach ($usermetas as $meta) {
 					$metas[$meta['meta_key']] = $meta['meta_value'];
 				}
@@ -72,8 +75,8 @@ function wp2spip_importer_auteurs_dist($command) {
 			// Pour les statuts
 			$wp_statut = '';
 			if (
-				isset($metas['wp_capabilities'])
-				and $capabilities = unserialize($metas['wp_capabilities'], array('allowed_classes' => false))
+				isset($metas[wp2spip_prefixe_tables() . 'capabilities'])
+				and $capabilities = unserialize($metas[wp2spip_prefixe_tables() . 'capabilities'], array('allowed_classes' => false))
 				and is_array($capabilities)
 			) {
 				$wp_statut = array_key_first($capabilities);

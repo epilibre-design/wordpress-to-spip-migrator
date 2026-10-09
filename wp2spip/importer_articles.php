@@ -6,6 +6,9 @@ if (!defined('_ECRIRE_INC_VERSION')) {
 	return;
 }
 
+// Noms des tables WordPress (wp2spip_table())
+include_spip('inc/wp2spip');
+
 function wp2spip_importer_articles_dist($command) {
 	// Les contenus déjà importés ne sont pas retouchés
 	$ids_wordpress = array_column(sql_allfetsel('id_wordpress', 'spip_articles', 'id_wordpress>0'), 'id_wordpress') ?: array(0);
@@ -13,7 +16,7 @@ function wp2spip_importer_articles_dist($command) {
 	// On va chercher tous les articles Wordpress qui ont l'air pertinent
 	if ($wp_posts = sql_allfetsel(
 		'*',
-		'wp_posts',
+		wp2spip_table('posts'),
 		array(
 			sql_in('post_type', array('post', 'page')),
 			sql_in('ID', $ids_wordpress, 'NOT'),
@@ -51,7 +54,7 @@ function wp2spip_importer_articles_dist($command) {
 		$progressBar->start();
 		
 		// Récupérer l'URL de l'époque du site Wordpress (dans le SPIP on a pu le changé depuis un premier import) pour retrouver les liens et docs internes
-		$url_wordpress = sql_getfetsel('option_value', 'wp_options', 'option_name="siteurl"', '', '', '', '', $command->base);
+		$url_wordpress = sql_getfetsel('option_value', wp2spip_table('options'), 'option_name="siteurl"', '', '', '', '', $command->base);
 		
 		foreach ($wp_posts as $wp_post) {
 			$id_wordpress = intval($wp_post['ID']);
@@ -67,7 +70,7 @@ function wp2spip_importer_articles_dist($command) {
 			// On va chercher toutes les catégories, et on prend la première comme rubrique principale
 			elseif ($ids_categories = sql_allfetsel(
 				'term_id',
-				'wp_term_taxonomy as tax left join wp_term_relationships as rel on tax.term_taxonomy_id=rel.term_taxonomy_id',
+				wp2spip_table('term_taxonomy') . ' as tax left join ' . wp2spip_table('term_relationships') . ' as rel on tax.term_taxonomy_id=rel.term_taxonomy_id',
 				array(
 					'rel.object_id = '.$id_wordpress,
 					'tax.taxonomy = "category"',
@@ -117,7 +120,7 @@ function wp2spip_importer_articles_dist($command) {
 					}
 					
 					//~ if (
-						//~ $id_wordpress_doc = sql_getfetsel('ID', 'wp_posts', 'guid = '.sql_quote($url), '', '', '', '', $command->base)
+						//~ $id_wordpress_doc = sql_getfetsel('ID', wp2spip_table('posts'), 'guid = '.sql_quote($url), '', '', '', '', $command->base)
 						//~ and $id_document = sql_getfetsel('id_document', 'spip_documents', 'id_wordpress = '.intval($id_wordpress_doc))
 					//~ ) {
 						//~ // Si jamais en plus le contenu du lien est en fait une image,
@@ -415,7 +418,7 @@ function wp2spip_index_contenus($base = 'wordpress') {
 
 	$contenus = sql_allfetsel(
 		'ID, post_type, post_name, post_parent',
-		'wp_posts',
+		wp2spip_table('posts'),
 		sql_in('post_type', array('post', 'page', 'attachment')),
 		'',
 		'ID',
@@ -581,7 +584,7 @@ function wp2spip_index_medias($base = 'wordpress') {
 	$index[$base] = array();
 
 	// Le guid, souvent l'URL d'origine du fichier
-	foreach (sql_allfetsel('ID, guid', 'wp_posts', 'post_type = "attachment"', '', 'ID', '', '', $base) as $media) {
+	foreach (sql_allfetsel('ID, guid', wp2spip_table('posts'), 'post_type = "attachment"', '', 'ID', '', '', $base) as $media) {
 		if ($chemin = wp2spip_chemin_upload($media['guid'])) {
 			$index[$base][$chemin] = intval($media['ID']);
 		}
@@ -589,7 +592,7 @@ function wp2spip_index_medias($base = 'wordpress') {
 
 	$metas = sql_allfetsel(
 		'post_id, meta_key, meta_value',
-		'wp_postmeta',
+		wp2spip_table('postmeta'),
 		sql_in('meta_key', array('_wp_attached_file', '_wp_attachment_metadata', '_wp_attachment_backup_sizes')),
 		'',
 		'meta_id',
@@ -654,7 +657,7 @@ function wp2spip_importer_articles_documents($command, $id_wordpress, $id_articl
 	// On va chercher tous les attachments liés à ce post
 	if ($ids_attachments = sql_allfetsel(
 		'ID',
-		'wp_posts',
+		wp2spip_table('posts'),
 		array(
 			'post_type="attachment"',
 			'post_status="inherit"',

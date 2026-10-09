@@ -6,6 +6,9 @@ if (!defined('_ECRIRE_INC_VERSION')) {
 	return;
 }
 
+// Noms des tables WordPress (wp2spip_table())
+include_spip('inc/wp2spip');
+
 function wp2spip_importer_rubriques_dist($command) {
 	// Les contenus déjà importés ne sont pas retouchés
 	$ids_wordpress = array_column(sql_allfetsel('id_wordpress', 'spip_rubriques', 'id_wordpress>0'), 'id_wordpress') ?: array(0);
@@ -13,7 +16,7 @@ function wp2spip_importer_rubriques_dist($command) {
 	// On va chercher toutes les catégories
 	if ($wp_categories = sql_allfetsel(
 		'tax.description as description, tax.parent as id_parent, term.name as titre, term.slug as slug, term.term_id as id_term',
-		'wp_term_taxonomy as tax left join wp_terms as term on tax.term_id=term.term_id',
+		wp2spip_table('term_taxonomy') . ' as tax left join ' . wp2spip_table('terms') . ' as term on tax.term_id=term.term_id',
 		array(
 			sql_in('taxonomy', array('category', 'link_category')),
 			sql_in('term.term_id', $ids_wordpress, 'NOT'),

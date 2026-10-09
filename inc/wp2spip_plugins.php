@@ -11,6 +11,9 @@ if (!defined('_ECRIRE_INC_VERSION')) {
 	return;
 }
 
+// Noms des tables WordPress (wp2spip_table())
+include_spip('inc/wp2spip');
+
 // Dépôt de plugins déclaré par l'import quand le SPIP n'en a aucun
 if (!defined('_WP2SPIP_DEPOT_SVP')) {
 	define('_WP2SPIP_DEPOT_SVP', 'https://plugins.spip.net/depots/principal.xml');
@@ -61,7 +64,7 @@ function wp2spip_where_pages_enfants() {
 	return array(
 		'post_type = "page"',
 		'post_parent > 0',
-		'post_parent IN (SELECT ID FROM wp_posts WHERE post_type = "page")',
+		'post_parent IN (SELECT ID FROM ' . wp2spip_table('posts') . ' WHERE post_type = "page")',
 	);
 }
 
@@ -77,16 +80,16 @@ function wp2spip_where_pages_enfants() {
  */
 function wp2spip_plugins_requis($base) {
 	$requis = array();
-	if ($nb = sql_countsel('wp_posts', wp2spip_where_galeries(), '', '', $base)) {
+	if ($nb = sql_countsel(wp2spip_table('posts'), wp2spip_where_galeries(), '', '', $base)) {
 		$requis['albums'] = array('nom' => 'Albums', 'table' => 'spip_albums', 'dist' => false, 'raison' => "$nb contenus avec une galerie");
 	}
-	if ($nb = sql_countsel('wp_posts', wp2spip_where_contenus_restreints(), '', '', $base)) {
+	if ($nb = sql_countsel(wp2spip_table('posts'), wp2spip_where_contenus_restreints(), '', '', $base)) {
 		$requis['accesrestreint'] = array('nom' => 'Accès restreint', 'table' => 'spip_zones', 'dist' => false, 'raison' => "$nb contenus privés ou protégés");
 	}
-	if ($nb = sql_countsel('wp_comments', wp2spip_where_commentaires(), '', '', $base)) {
+	if ($nb = sql_countsel(wp2spip_table('comments'), wp2spip_where_commentaires(), '', '', $base)) {
 		$requis['forum'] = array('nom' => 'Forum', 'table' => 'spip_forum', 'dist' => true, 'raison' => "$nb commentaires");
 	}
-	if ($nb = sql_countsel('wp_posts', wp2spip_where_pages_enfants(), '', '', $base)) {
+	if ($nb = sql_countsel(wp2spip_table('posts'), wp2spip_where_pages_enfants(), '', '', $base)) {
 		$requis['a2a'] = array('nom' => 'A2A', 'table' => 'spip_articles_lies', 'dist' => false, 'raison' => "$nb pages enfants");
 	}
 	return pipeline('wp2spip_plugins_requis', array('args' => array('base' => $base), 'data' => $requis));

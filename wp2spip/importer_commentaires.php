@@ -6,6 +6,9 @@ if (!defined('_ECRIRE_INC_VERSION')) {
 	return;
 }
 
+// Noms des tables WordPress (wp2spip_table())
+include_spip('inc/wp2spip');
+
 /**
  * Importe les commentaires Wordpress en messages de forum, en gardant les fils de discussion
  *
@@ -24,7 +27,7 @@ function wp2spip_importer_commentaires_dist($command) {
 
 	$wp_comments = sql_allfetsel(
 		'*',
-		'wp_comments',
+		wp2spip_table('comments'),
 		wp2spip_where_commentaires(),
 		'',
 		'comment_ID',

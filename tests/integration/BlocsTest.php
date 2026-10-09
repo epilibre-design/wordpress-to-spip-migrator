@@ -52,7 +52,7 @@ final class BlocsTest extends WordpressTestCase
 			'post_date' => '2020-01-02 03:04:05',
 			'post_content' => $test['contenu'],
 		);
-		$url_wordpress = sql_getfetsel('option_value', 'wp_options', 'option_name = "siteurl"', '', '', '', '', self::BASE);
+		$url_wordpress = sql_getfetsel('option_value', wp2spip_table('options'), 'option_name = "siteurl"', '', '', '', '', self::BASE);
 		$contexte = wp2spip_contexte_blocs(self::commande(), $wp_post, $url_wordpress);
 		$obtenu = trim(wp2spip_restaurer_blocs(sale(wp2spip_convertir_blocs($test['contenu'], $contexte)), $contexte));
 		$this->albums = $contexte['albums'];

@@ -4,6 +4,9 @@ if (!defined('_ECRIRE_INC_VERSION')) {
 	return;
 }
 
+// Noms des tables WordPress (wp2spip_table())
+include_spip('inc/wp2spip');
+
 /**
  * Relie chaque page enfant à sa page parente par un lien a2a de type sous_page
  *
@@ -18,7 +21,7 @@ function wp2spip_importer_hierarchie_pages_dist($command) {
 	// Pages enfants, dans l'ordre Wordpress des pages d'un même parent
 	$wp_pages = sql_allfetsel(
 		'ID, post_parent',
-		'wp_posts',
+		wp2spip_table('posts'),
 		wp2spip_where_pages_enfants(),
 		'',
 		'post_parent, menu_order, post_title, ID',
