@@ -331,5 +331,5 @@ Chaque sous-projet aura sa propre spec, puis son plan de réalisation.
 ## 7. Questions ouvertes
 
 1. **Hiérarchie des pages** (sous-projet 4) : décidé — les pages restent des pages uniques, liées par des liens a2a de type `sous_page` (page parente → page enfant, dans l'ordre WordPress) ; a2a est installé par l'import quand il y a des pages enfants ; wp2spip ne fournit pas de squelette (spec `2026-10-08-wp2spip-hierarchie-pages-design.md`).
-2. **Ordre de priorité** de la feuille de route.
-3. **Branche principale** : décidé — `compat-spip-4.4` devient la branche principale du dépôt (branche par défaut), sans fusion dans `master` ; le dépôt d'origine, abandonné, ne reçoit pas de demande de fusion. Reste ouverte : la publication d'une version 3.0.0.
+2. **Ordre de priorité** de la feuille de route : close — tous les sous-projets de la feuille de route sont réalisés (§ 6), les signalements du 10 restant à publier.
+3. **Branche principale** : décidé — `compat-spip-4.4` devient la branche principale du dépôt (branche par défaut), sans fusion dans `master` ; le dépôt d'origine, abandonné, ne reçoit pas de demande de fusion. Version 3.0.0 publiée le 2026-10-09 : étiquette `v3.0.0` sur `compat-spip-4.4`.
