@@ -1,3 +1,4 @@
 /tests/integration/environnement.sh
 /vendor/
 /.phpunit.cache/
+/site/

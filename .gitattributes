@@ -40,3 +40,6 @@ prive/themes/spip/images/wp2spip.png -text
 /scripts export-ignore
 /phpunit.xml export-ignore
 /composer.lock export-ignore
+
+# Preserve the verified third-party bundle byte for byte.
+docs/site/assets/javascripts/mermaid.min.js -text -whitespace linguist-vendored=true

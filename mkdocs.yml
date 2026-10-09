@@ -1,0 +1,131 @@
+site_name: WordPress → SPIP
+site_description: Migrer les données, préserver les relations et comprendre les transformations.
+site_author: tech-nova
+repo_url: https://github.com/tech-nova/wordpress-to-spip-migrator
+repo_name: tech-nova/wordpress-to-spip-migrator
+docs_dir: docs/site
+site_dir: site
+theme:
+  name: material
+  language: fr
+  custom_dir: docs/site/overrides
+  font: false
+  icon:
+    logo: material/database-arrow-right-outline
+    repo: fontawesome/brands/github
+  palette:
+    - scheme: default
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Passer au thème sombre
+    - scheme: slate
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: Passer au thème clair
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+plugins:
+  - search:
+      lang: fr
+  - i18n:
+      docs_structure: suffix
+      fallback_to_default: true
+      languages:
+        - locale: fr
+          name: Français
+          default: true
+          build: true
+        - locale: en
+          name: English
+          build: false
+          nav_translations:
+            Accueil: Home
+            Installer: Install
+            Migrer: Migrate
+            Correspondances: Mappings
+            WordPress 4–7: WordPress 4–7
+            Comprendre: Understand
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+validation:
+  nav:
+    omitted_files: warn
+    not_found: warn
+  links:
+    not_found: warn
+    unrecognized_links: warn
+    anchors: warn
+    absolute_links: warn
+exclude_docs: |
+  /overrides/
+extra_javascript:
+  - assets/javascripts/mermaid.min.js
+extra_css:
+  - stylesheets/extra.css
+extra:
+  documented_commit: 9f08d61f86515d80975cb6fbb228cac0142437f2
+  documented_branch: compat-spip-4.4
+  reviewed_on: 2026-10-09
+  generator: false
+nav:
+  - Accueil:
+      - Vue d’ensemble: index.md
+      - État du projet: etat-projet.md
+  - Installer:
+      - Prérequis: installer/prerequis.md
+      - Installer le migrateur: installer/installation.md
+      - Développer et tester: installer/developpement.md
+  - Migrer:
+      - Auditer et sauvegarder: migrer/audit.md
+      - Préparer SPIP: migrer/preparer.md
+      - Lancer l’import: migrer/importer.md
+      - Valider et basculer: migrer/valider.md
+      - Dépanner: migrer/depanner.md
+  - Correspondances:
+      - Matrice générale: correspondances/index.md
+      - Articles et pages: correspondances/articles-pages.md
+      - Catégories et étiquettes: correspondances/taxonomies.md
+      - Auteurs et accès: correspondances/auteurs-acces.md
+      - Médias et blocs: correspondances/medias-blocs.md
+      - Commentaires: correspondances/commentaires.md
+      - Liens et adresses: correspondances/liens.md
+  - WordPress 4–7:
+      - Le modèle de données: wordpress/modele.md
+      - WordPress 4: wordpress/wp4.md
+      - WordPress 5: wordpress/wp5.md
+      - WordPress 6: wordpress/wp6.md
+      - WordPress 7: wordpress/wp7.md
+      - Couverture et compatibilité: wordpress/compatibilite.md
+  - Comprendre:
+      - La chaîne de migration: comprendre/traitements.md
+      - Identifiants et traçabilité: comprendre/identifiants.md
+      - Conversion des contenus: comprendre/conversion.md
+      - Extensions et feuille de route: comprendre/extensions.md
+      - Sources et méthode: comprendre/sources.md
+      - Maintenir et publier ce site: comprendre/maintenir.md
