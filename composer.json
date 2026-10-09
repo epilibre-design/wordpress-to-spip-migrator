@@ -35,7 +35,8 @@
         "install-spip-test": "bash scripts/install-spip-test.sh",
         "tests-unit": "phpunit --testsuite unit",
         "tests-integration": "phpunit --testsuite integration --bootstrap tests/bootstrap_integration.php",
-        "tests-import": "bash -c 'source tests/integration/environnement.sh && tests/integration/valider.sh \"$WP6\" && tests/integration/valider.sh \"$WP7\"'"
+        "tests-import": "bash -c 'source tests/integration/environnement.sh && tests/integration/valider.sh \"$WP6\" && tests/integration/valider.sh \"$WP7\"'",
+        "tests-matrice": "bash tests/matrice_php.sh --import"
     },
     "config": {
         "sort-packages": true,

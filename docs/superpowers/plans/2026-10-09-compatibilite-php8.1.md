@@ -52,6 +52,7 @@ Un prototype de la frontière a été exécuté sur les cas de `HtmlTest` avec c
 | `tests/spip_cli_autonome.sh` (créé) | SPIP-Cli sans l'autoload du dépôt, pour que l'import charge `lib/` |
 | `tests/matrice_php.sh` (créé) | Suites sous chaque PHP, import complet en option (SPIP-Cli autonome) |
 | `tests/integration/valider.sh` (modifié) | `VERSION_SPIP` transmis à `outils/preparer_spip.sh` ; SPIP-Cli choisi par `VALIDER_SPIP_CLI` |
+| `outils/preparer_spip.sh` (modifié) | Version de SPIP X.Y.Z demandée par son tag, version obtenue contrôlée |
 | `tests/preparation/tester_preparer_spip.sh` (modifié) | La copie de wp2spip garde `lib/masterminds-html5/` |
 | `composer.json`, `composer.lock`, `paquet.xml`, `readme.md`, `docs/site/…` | Prérequis PHP 8.1 |
 
@@ -1141,7 +1142,7 @@ Un écart d'export sous 8.1 à 8.3 seulement : lire `ecarts.diff`, réduire le c
 
 - [ ] **Step 4 : tests du préparateur sous 8.1**
 
-Run : `bin=$(mktemp -d); ln -s "$(command -v php8.1)" "$bin/php"; PATH="$bin:$PATH" tests/preparation/tester_preparer_spip.sh; rm -rf "$bin"`
+Run : `bin=$(mktemp -d); ln -s "$(command -v php8.1)" "$bin/php"; PATH="$bin:$PATH" tests/preparation/tester_preparer_spip.sh --complet; rm -rf "$bin"`
 Expected : 0 échec, dont `MySQL distincte : wp2spip copié avec lib/, sans tests/, …`.
 
 - [ ] **Step 5 : comparer le corpus réel entre 8.1 et 8.4**
@@ -1162,34 +1163,57 @@ done
 diff "$corpus/export-8.4.tsv" "$corpus/export-8.1.tsv" >"$corpus/ecarts.diff"; echo "lignes d'écart : $(grep -c '^[<>]' "$corpus/ecarts.diff")"
 ```
 
+Si le `wp-config.php` de `$WP_REEL` porte d'autres accès que ceux de la base locale (préparateur en erreur « base du WordPress … illisible »), importer une vue du site : `cp -as "$WP_REEL" "$corpus/wp"`, puis remplacer le lien `wp-config.php` par une copie dont `DB_NAME`, `DB_USER` et `DB_PASSWORD` désignent la base locale, et utiliser `$corpus/wp` à la place de `$WP_REEL`. Le site d'origine n'est pas modifié.
+
 Expected : `import 8.1 : 0`, `import 8.4 : 0`. Classer chaque écart : (a) mise en forme non reconstruite sur balises mal formées, accepté ; (b) autre écart, à réduire en cas de `HtmlTest` et à corriger comme au Step 3. Vérifier qu'aucun mot ne manque : pour chaque ligne différente, comparer `tr -cs '[:alnum:]' '\n'` des deux versions. Consigner le classement (nombre d'écarts par catégorie, sans nom de site ni contenu) dans la section « Résultats » de ce plan. Supprimer `$corpus` ensuite.
 
 - [ ] **Step 6 : combinaisons SPIP annoncées**
 
-Le manifeste annonce SPIP `[4.2.0;4.4.*]`. Pour SPIP 4.2 et 4.3, lire la plage PHP du cœur, puis valider chaque combinaison de cette plage avec 8.1 à 8.4 :
+Le manifeste annonce SPIP `[4.2.0;4.4.*]`. SPIP-Cli 2.0.1 ignore l'option `-R` de `core:telecharger` et prend la branche stable (4.4) : `outils/preparer_spip.sh --version-spip 4.2` préparait un SPIP 4.4 (constaté pendant l'exécution). Le préparateur demande donc une version X.Y.Z par son tag (`-b vX.Y.Z`) et contrôle la version obtenue (`spip_version_branche`), avec une erreur si elle diffère.
+
+Dans `outils/preparer_spip.sh`, `telecharger_spip()` devient :
 
 ```bash
-source tests/integration/environnement.sh
-for spip in 4.2 4.3; do
-	d=$(mktemp -d); vendor/bin/spip --no-ansi core:telecharger spip -R "$spip" -d "$d/spip" >/dev/null 2>&1
-	echo "SPIP $spip : $(grep -hoE "define\('_PHP_(MIN|MAX)', '[^']+'\)" "$d/spip/ecrire/inc_version.php" | tr '\n' ' ')"
-	rm -rf "$d"
-done
+# Téléchargement depuis le dossier parent, pour que SPIP-Cli ne charge pas un SPIP voisin
+# SPIP-Cli 2.0.1 ignore la release (-R) et prend la branche stable : une version X.Y.Z est demandée par son tag
+telecharger_spip() {
+	local source=(-R "$version_spip")
+	[[ $version_spip =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && source=(-b "v$version_spip")
+	(cd "$(dirname "$spip")" && "$spip_cli_exe" --no-ansi core:telecharger spip "${source[@]}" -d "$spip")
+}
 ```
 
-Pour chaque version PHP comprise dans la plage d'un SPIP : `VERSION_SPIP=<4.2|4.3> tests/matrice_php.sh --import <version PHP>`.
+après `[ -f "$spip/ecrire/inc_version.php" ] || erreur …`, ajouter :
+
+```bash
+version_obtenue=$(grep -oE "spip_version_branche = '[^']+'" "$spip/ecrire/inc_version.php" | cut -d"'" -f2)
+[[ $version_obtenue == "$version_spip" || $version_obtenue == "$version_spip".* ]] \
+	|| erreur "SPIP $version_obtenue téléchargé au lieu de $version_spip : donner la version complète (X.Y.Z)"
+```
+
+et l'aide de `--version-spip` devient `version de SPIP (défaut : 4.4, branche stable) ; X.Y.Z pour une autre branche`.
+
+Dernières releases et plage PHP de leur cœur (`_PHP_MIN`/`_PHP_MAX` de `ecrire/inc_version.php`) : SPIP 4.2.16 et 4.3.5 acceptent PHP 7.4 à 8.3 ; SPIP 4.4 (4.4.28) accepte 7.4 à 8.5. Combinaisons à valider :
+
+```bash
+VERSION_SPIP=4.2.16 tests/matrice_php.sh --import 8.1 8.2 8.3
+VERSION_SPIP=4.3.5 tests/matrice_php.sh --import 8.1 8.2 8.3
+```
+
 Décision : une combinaison qui échoue sans correction possible dans wp2spip fait réduire `compatibilite` du `paquet.xml` (Task 7) aux versions de SPIP validées. Consigner le résultat dans « Résultats ».
 
 - [ ] **Step 7 : commit**
 
 ```bash
-git add tests/matrice_php.sh tests/integration/valider.sh composer.json docs/superpowers/plans/2026-10-09-compatibilite-php8.1.md
+git add tests/matrice_php.sh tests/integration/valider.sh outils/preparer_spip.sh composer.json docs/superpowers/plans/2026-10-09-compatibilite-php8.1.md
 git commit -m "Tests : matrice PHP 8.1 à 8.4 et version de SPIP de la validation
 
 tests/matrice_php.sh lance les suites et l'import complet avec chaque PHP
 (composer tests-matrice), par un SPIP-Cli autonome pour que le plugin
 charge sa copie de Masterminds ; VERSION_SPIP et VALIDER_SPIP_CLI
-choisissent le SPIP et le SPIP-Cli de valider.sh. Résultats de la matrice, du corpus réel et des combinaisons
+choisissent le SPIP et le SPIP-Cli de valider.sh. Le préparateur
+demande une version X.Y.Z de SPIP par son tag et contrôle la version
+obtenue : SPIP-Cli 2.0.1 ignore -R et prenait toujours la branche 4.4. Résultats de la matrice, du corpus réel et des combinaisons
 SPIP consignés dans le plan."
 ```
 
@@ -1341,4 +1365,10 @@ Pousser `main` sur git.spip.net (SSH) avec l'autorisation du Step 5. Ensuite, v�
 
 ## Résultats
 
-_À compléter pendant la Task 6 : matrice, classement des écarts du corpus réel (nombres par catégorie, sans nom de site ni contenu), combinaisons PHP/SPIP validées._
+Relevés du 2026-10-09 (PHP 8.1.34, 8.2.34, 8.3.35, 8.4.25 ; Masterminds 2.11.0 ; PHPUnit 10.5.66).
+
+- **Matrice, SPIP 4.4** (`tests/matrice_php.sh --import`, SPIP-Cli autonome) : 8.1, 8.2, 8.3 et 8.4 OK. À chaque version : 259 tests unitaires, 82 tests d'intégration, imports WordPress 6.9 et 7.1 conformes à la référence.
+- **Préparateur sous 8.1** (`tester_preparer_spip.sh --complet`) : 25 vérifications, 0 échec, dont la copie de wp2spip avec `lib/`.
+- **Analyseur chargé** (Task 5) : sous 8.1, « copie du plugin, version 2.11.0 » ; sous 8.4, `Dom\HTMLDocument` ; sans `lib/`, arrêt avant traitement (code 1).
+- **Corpus réel, 8.1 contre 8.4** : imports en code 0 ; exports de 5595 lignes chacun (342 articles, 1612 documents, 44 rubriques…), **0 ligne d'écart**. Aucun écart à classer : ni mise en forme non reconstruite, ni autre.
+- **SPIP 4.2 et 4.3** : les dernières releases (4.2.16, 4.3.5) acceptent PHP 7.4 à 8.3 ; SPIP 4.4 accepte 7.4 à 8.5. Combinaisons validées par la matrice avec import : SPIP 4.2.16 sous 8.1, 8.2, 8.3 ; SPIP 4.3.5 sous 8.1, 8.2, 8.3. La plage `[4.2.0;4.4.*]` du manifeste est conservée.
