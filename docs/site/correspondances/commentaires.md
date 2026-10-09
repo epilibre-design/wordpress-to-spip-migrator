@@ -8,7 +8,7 @@
 |---|---|
 | `comment_post_ID` | Article d’accueil retrouvé par son identifiant source |
 | `comment_ID` | `id_wordpress`, distinct de `id_forum` |
-| `comment_content` | Texte passé par Sale |
+| `comment_content` | Texte converti par le convertisseur HTML5 de wp2spip, avec les retours à la ligne de l’éditeur classique |
 | Auteur, email, URL, IP | Champs correspondants du message |
 | `user_id` | Auteur SPIP retrouvé, sinon pas d’auteur connecté associé |
 | `comment_date` | Date du message |
@@ -32,4 +32,4 @@ Si un parent est exclu (spam, par exemple), la réponse ne peut pas garder ce pa
 
 Comparer nombre de commentaires admissibles, statut, article d’accueil et parenté. Vérifier une réponse imbriquée, un message en attente et une réponse à un parent exclu. Le compteur affiché par WordPress n’est pas forcément celui des commentaires admissibles à cette conversion.
 
-Sources : [traitement](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/wp2spip/importer_commentaires.php), [sélection des commentaires](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/inc/wp2spip_plugins.php).
+Sources : [traitement](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/wp2spip/importer_commentaires.php), [sélection des commentaires](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/inc/wp2spip_plugins.php).

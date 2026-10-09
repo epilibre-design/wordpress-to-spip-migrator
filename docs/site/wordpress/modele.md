@@ -45,4 +45,4 @@ SPIP utilise des tables et des associations dédiées aux articles, rubriques, a
 
 [Correspondances](../correspondances/index.md) · [WP4](wp4.md) · [WP5](wp5.md) · [WP6](wp6.md) · [WP7](wp7.md).
 
-Sources : [schéma officiel 4.4](https://github.com/WordPress/WordPress/blob/f6a29831c76d2dbe82e9ae673539f910654c58a4/wp-admin/includes/schema.php), [schéma officiel 7.1](https://github.com/WordPress/WordPress/blob/b998fef9238af183f9523b3df71618e6e57498b6/wp-admin/includes/schema.php), [tables consultées par le moteur](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/inc/wp2spip.php).
+Sources : [schéma officiel 4.4](https://github.com/WordPress/WordPress/blob/f6a29831c76d2dbe82e9ae673539f910654c58a4/wp-admin/includes/schema.php), [schéma officiel 7.1](https://github.com/WordPress/WordPress/blob/b998fef9238af183f9523b3df71618e6e57498b6/wp-admin/includes/schema.php), [tables consultées par le moteur](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/inc/wp2spip.php).

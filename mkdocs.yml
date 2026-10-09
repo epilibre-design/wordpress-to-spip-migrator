@@ -1,8 +1,8 @@
 site_name: WordPress → SPIP
 site_description: Migrer les données, préserver les relations et comprendre les transformations.
 site_author: tech-nova
-repo_url: https://github.com/tech-nova/wordpress-to-spip-migrator
-repo_name: tech-nova/wordpress-to-spip-migrator
+repo_url: https://github.com/epilibre-design/wordpress-to-spip-migrator
+repo_name: epilibre-design/wordpress-to-spip-migrator
 docs_dir: docs/site
 site_dir: site
 theme:
@@ -89,8 +89,8 @@ extra_javascript:
 extra_css:
   - stylesheets/extra.css
 extra:
-  documented_commit: 9f08d61f86515d80975cb6fbb228cac0142437f2
-  documented_branch: compat-spip-4.4
+  documented_commit: dc1963eb54b317e7e9e7b445bfee81199a7804bb
+  documented_branch: main
   reviewed_on: 2026-10-09
   generator: false
 nav:
@@ -126,6 +126,6 @@ nav:
       - La chaîne de migration: comprendre/traitements.md
       - Identifiants et traçabilité: comprendre/identifiants.md
       - Conversion des contenus: comprendre/conversion.md
-      - Extensions et feuille de route: comprendre/extensions.md
+      - Extensions et signalements: comprendre/extensions.md
       - Sources et méthode: comprendre/sources.md
       - Maintenir et publier ce site: comprendre/maintenir.md

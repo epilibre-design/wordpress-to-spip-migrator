@@ -4,7 +4,7 @@
 
 **WordPress → SPIP** convertit les données éditoriales pour retrouver des articles, des pages, des auteurs et des médias reliés entre eux. La migration vise à préserver la structure du site, puis à lui donner un nouveau rendu dans SPIP.
 
-Outil en développement · SPIP 4.2–4.4 · Objectif : WordPress 4–7
+Version 3.0.0 (état test) · PHP 8.4 · SPIP 4.2–4.4 · Cible : WordPress 4.9–7.x
 
 </div>
 
@@ -30,7 +30,7 @@ Outil en développement · SPIP 4.2–4.4 · Objectif : WordPress 4–7
 
 - **Contribuer à l’outil**
 
-    Comprendre l’ordre des traitements et les points d’extension, puis lire les évolutions prévues.
+    Comprendre l’ordre des traitements, les points d’extension et les plugins complémentaires publiés.
 
     [Lire les mécanismes](comprendre/traitements.md)
 
@@ -42,8 +42,8 @@ Un article appartenant à deux catégories devient un article SPIP lié à une r
 
 Ces correspondances ont des conséquences éditoriales : un rôle WordPress et un statut SPIP ne donnent pas nécessairement les mêmes droits ; un bloc enregistré et un bloc calculé ne se convertissent pas de la même manière.
 
-!!! warning "L’outil se construit encore"
-    Cette documentation décrit le miroir au commit affiché en bas de chaque page. Les fonctions **implémentées**, **prévues par une spec** et **hors périmètre** sont distinguées. La prise en charge de toute la plage WordPress 4–7 reste un objectif : consulter la [couverture](wordpress/compatibilite.md) avant de préparer un site réel.
+!!! info "Une version à qualifier sur votre site"
+    Cette documentation décrit le code au commit affiché en bas de chaque page. Le moteur importe désormais les étiquettes et convertit le HTML avec son propre analyseur, sans Sale ; des extensions séparées ajoutent Yoast SEO et ACF. Le paquet reste en état **test** : consulter la [couverture](wordpress/compatibilite.md) et valider un import représentatif avant la bascule.
 
 ## Ce qui reste à reconstruire
 

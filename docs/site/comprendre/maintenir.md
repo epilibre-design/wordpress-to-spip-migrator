@@ -4,7 +4,7 @@ Les sources publiques sont dans `docs/site/`. Le fichier unique `mkdocs.yml` fix
 
 ## Installer et construire
 
-Depuis la racine du miroir, avec Python 3.11 ou ultérieur :
+Depuis la racine du dépôt, avec Python 3.11 ou ultérieur :
 
 ```bash
 python -m venv ../.venvs/wp2spip-docs
@@ -15,6 +15,18 @@ python -m mkdocs serve
 ```
 
 Les versions directes et transitives sont verrouillées. Le site se construit indépendamment de PHP et des bases de migration. `serve` sert à la lecture locale ; `build` produit les fichiers statiques à publier sur l’hébergeur choisi. Aucun déploiement distant n’est implicite.
+
+## Publier sur GitHub Pages
+
+Pour une publication par branche, utiliser le dépôt GitHub qui héberge ce site et un compte autorisé à y pousser. Après revue des sources et construction stricte, la commande suivante construit et pousse le site sur la branche `gh-pages` du remote `origin` :
+
+```bash
+python -m mkdocs gh-deploy --strict --remote-name origin --remote-branch gh-pages
+```
+
+Cette commande est une **publication distante**, contrairement à `build` ; l’exécuter seulement quand les changements sont prêts à être publiés. Dans les paramètres **Pages** du dépôt GitHub, sélectionner la publication depuis la branche `gh-pages`, dossier racine. Si Pages utilise déjà un workflow GitHub Actions, conserver cette méthode et y reprendre la construction stricte plutôt que configurer deux modes de publication.
+
+`repo_url` et `repo_name` désignent le dépôt du code documenté. `site_url` reste à définir selon l’adresse publique effectivement retenue : URL de projet GitHub Pages ou domaine personnalisé. Vérifier après publication les chemins sous le préfixe du projet, les liens, la recherche et les diagrammes. Les changements documentaires et un build local ne prouvent pas que la publication a eu lieu.
 
 ## Diagrammes locaux
 
@@ -61,12 +73,14 @@ Le repli `fallback_to_default: true` fournit une page française quand sa traduc
 
 ## Réviser les états après synchronisation
 
-1. Relever le nouveau SHA du **code du miroir** ; examiner son diff avec la révision documentée précédente.
+1. Relever le nouveau SHA du **code du dépôt** et sa branche de référence ; examiner son diff avec la révision documentée précédente.
 2. Vérifier chaque fonction de [l’état du projet](../etat-projet.md) contre le code, l’orchestration et les tests.
 3. Réviser les pages concernées et leurs références, sans confondre spec et implémentation.
-4. Mettre à jour `extra.documented_commit`, la date de revue, les permaliens et le tableau ensemble.
+4. Mettre à jour `extra.documented_commit`, `extra.documented_branch`, la date de revue, les permaliens et le tableau ensemble ; vérifier aussi `repo_url` et `repo_name` si le dépôt change.
 5. Construire et contrôler le site avant de publier.
 
 Le commit documenté est celui du code analysé, pas nécessairement le commit ajoutant ou publiant la documentation. Si la revue n’est pas terminée, garder la révision précédente affichée. La même politique s’appliquera aux traductions anglaises ; signaler toute traduction devenue obsolète.
+
+Pour les extensions publiées dans d’autres dépôts, examiner aussi leurs README, traitements, prérequis et tests. Ne pas présenter une ancienne mention de dépôt local ou de fonction future dans un plan comme leur état actuel ; vérifier les indications de publication et l’état du code correspondant.
 
 Références : [configuration MkDocs](https://www.mkdocs.org/user-guide/configuration/), [validation](https://www.mkdocs.org/user-guide/configuration/#validation), [mkdocs-static-i18n](https://ultrabug.github.io/mkdocs-static-i18n/).

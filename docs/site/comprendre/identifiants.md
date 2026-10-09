@@ -8,6 +8,7 @@ Les identifiants relient les objets dans les deux CMS. Préserver un numéro fac
 |---|---|---|
 | Article/page `posts.ID` | Même `id_article` | `id_wordpress` |
 | Catégorie `terms.term_id` | Même `id_rubrique` | `id_wordpress` |
+| Étiquette `terms.term_id` | Même `id_mot`, dans le groupe « Étiquettes » | `id_wordpress` |
 | Média `posts.ID` | Même `id_document` | `id_wordpress` |
 | Utilisateur `users.ID` | Numérotation SPIP | `id_wordpress` |
 | Commentaire `comments.comment_ID` | Numérotation SPIP du forum | `id_wordpress` |
@@ -23,7 +24,7 @@ Pour l’article WordPress `42`, le raccourci `article42` vise le bon article SP
 
 ## Pourquoi une destination vierge ?
 
-Avant de créer une série d’articles, rubriques ou documents, le moteur vérifie les identifiants nécessaires. Une collision arrête le traitement avant la création des objets de cette série, mais les séries précédentes peuvent déjà exister.
+Avant de créer une série d’articles, rubriques, documents ou mots-clés, le moteur vérifie les identifiants nécessaires. Une collision arrête le traitement avant la création des objets de cette série, mais les séries précédentes peuvent déjà exister. Pour les étiquettes, le groupe de mots peut aussi avoir été créé avant ce contrôle.
 
 Un autre article SPIP numéro `42` ne doit pas être confondu avec le contenu WordPress `42`. La vérification empêche cette ambiguïté ; elle ne transforme pas un SPIP existant en espace de fusion.
 
@@ -33,4 +34,4 @@ Retrouver `id_wordpress` évite des doublons à la relance. Cela ne signifie pas
 
 La désinstallation supprime les champs de traçabilité ajoutés par le plugin. Conserver les rapports et exports utiles avant de retirer l’outil ; ne pas traiter sa désinstallation comme une annulation de migration.
 
-Sources : [déclaration des champs](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/wp2spip_pipelines.php), [installation/désinstallation](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/wp2spip_administrations.php), [vérification des identifiants](https://github.com/tech-nova/wordpress-to-spip-migrator/blob/9f08d61f86515d80975cb6fbb228cac0142437f2/inc/wp2spip.php).
+Sources : [déclaration des champs](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/wp2spip_pipelines.php), [installation/désinstallation](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/wp2spip_administrations.php), [vérification des identifiants](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/inc/wp2spip.php).
