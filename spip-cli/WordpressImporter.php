@@ -79,6 +79,13 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 			return Command::FAILURE;
 		}
 		
+		// Analyseur HTML5 de la conversion : Dom\HTMLDocument (PHP 8.4), sinon Masterminds (lib/masterminds-html5/)
+		include_spip('inc/wp2spip_html_arbre');
+		if ($erreur = wp2spip_html_arbre_verifier()) {
+			$output->writeln("<error>$erreur</error>");
+			return Command::FAILURE;
+		}
+		
 		// Dossier sur le disque où se trouve les fichiers du Wordpress
 		$this->dir_wordpress = rtrim($input->getArgument('dir_wordpress'), '/') . '/';
 		
@@ -129,6 +136,9 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 			'* <comment>Traitements disponibles</comment> : ' . join(', ', $traitements_disponibles),
 			'',
 		));
+		if ($output->isVerbose()) {
+			$output->writeln(array('* <comment>Analyseur HTML</comment> : ' . wp2spip_html_arbre_parseur(), ''));
+		}
 		
 		// Si on cherche juste à lire les infos, on s'arrête là
 		if ($input->hasParameterOption(array('--info', '-i'))) {
