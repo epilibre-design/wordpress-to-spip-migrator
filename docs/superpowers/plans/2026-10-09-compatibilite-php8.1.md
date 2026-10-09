@@ -1320,7 +1320,7 @@ Expected : `technova69/wp2spip (dev-compat-spip-4.4)` installé en lien symboliq
 - [ ] **Step 4 : suites sous chaque PHP**
 
 ```bash
-rm -rf .phpunit.cache && COMPOSER=composer.essai.json composer install-spip-test
+rm -rf .phpunit.cache && composer install-spip-test   # sans COMPOSER : SPIP-Cli lance son propre composer install pour le cœur
 echecs=()
 for v in 8.1 8.2 8.3 8.4; do
 	bin=$(mktemp -d); ln -s "$(command -v php$v)" "$bin/php"
@@ -1372,3 +1372,4 @@ Relevés du 2026-10-09 (PHP 8.1.34, 8.2.34, 8.3.35, 8.4.25 ; Masterminds 2.11.0 
 - **Analyseur chargé** (Task 5) : sous 8.1, « copie du plugin, version 2.11.0 » ; sous 8.4, `Dom\HTMLDocument` ; sans `lib/`, arrêt avant traitement (code 1).
 - **Corpus réel, 8.1 contre 8.4** : imports en code 0 ; exports de 5595 lignes chacun (342 articles, 1612 documents, 44 rubriques…), **0 ligne d'écart**. Aucun écart à classer : ni mise en forme non reconstruite, ni autre.
 - **SPIP 4.2 et 4.3** : les dernières releases (4.2.16, 4.3.5) acceptent PHP 7.4 à 8.3 ; SPIP 4.4 accepte 7.4 à 8.5. Combinaisons validées par la matrice avec import : SPIP 4.2.16 sous 8.1, 8.2, 8.3 ; SPIP 4.3.5 sous 8.1, 8.2, 8.3. La plage `[4.2.0;4.4.*]` du manifeste est conservée.
+- **Extensions contre le wp2spip local** (dépôt Composer `path`, Task 8) : verrous résolus sous 8.1 (PHPUnit 10.5.66, Masterminds 2.11.0) ; `wp2spip_acf` 53 tests unitaires et 8 d'intégration, `wp2spip_yoast` 16 et 7, OK sous 8.1, 8.2, 8.3 et 8.4.
