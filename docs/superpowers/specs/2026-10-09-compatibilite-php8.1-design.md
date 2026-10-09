@@ -10,19 +10,23 @@ Complète la [spec du convertisseur HTML → SPIP](2026-10-09-wp2spip-convertiss
 
 Abaisser le minimum réel de wp2spip et de ses extensions à PHP 8.1 si l'audit complet confirme cette compatibilité, pour la production **et** leur chaîne de tests. Vérifier PHP 8.2 et 8.3 et préserver le fonctionnement sous PHP 8.4. Si une dépendance ou un plugin requis bloque réellement PHP 8.1, documenter le blocage et retenir PHP 8.2 comme minimum validé. Le remplacement du parseur HTML5 est une partie de ce travail, pas son seul critère de réussite.
 
+PHP 8.1 n'a plus de correctifs de sécurité depuis le 31 décembre 2025, mais des hébergeurs le proposent encore : la cible basse reste 8.1 tant qu'elle est techniquement possible. Ce choix implique PHPUnit 10.5, seule série compatible avec 8.1, qui ne reçoit plus de correctifs ; il est accepté pour la chaîne de tests.
+
 Sous PHP 8.1 à 8.3, [Masterminds HTML5-PHP](https://github.com/Masterminds/html5-php) fournit l'arbre HTML5 utilisé par `wp2spip_html_spip()`. Sous PHP 8.4 et au-delà, conserver `Dom\HTMLDocument`. Le choix du parseur se fait automatiquement, sans option utilisateur.
 
 Le contrat public de `wp2spip_html_spip($html, $options)` reste inchangé : même entrée, mêmes règles de conversion et même forme de sortie pour les étapes suivantes (images, légendes, lecteurs, liens internes et extensions). La prise en charge de PHP 7.4 et 8.0 ne fait pas partie de ce changement.
 
 ## 2. Constat dans le dépôt
 
-- `inc/wp2spip_html.php` crée directement un `Dom\HTMLDocument`, teste `Dom\Text` et `Dom\Element`, sérialise des médias avec `saveHtml($noeud)` et utilise une fois `querySelector()` pour reconnaître les tableaux complexes. Ces API n'existent pas sous PHP 8.1–8.3.
+- `inc/wp2spip_html.php` crée directement un `Dom\HTMLDocument`, part de sa propriété `body`, teste `Dom\Text` et `Dom\Element` (sept `instanceof`), sérialise des médias avec `saveHtml($noeud)` et utilise une fois `querySelector()` pour reconnaître les tableaux complexes. Ces API n'existent pas sous PHP 8.1–8.3 : un `DOMDocument` n'a notamment pas de propriété `body`.
+- `wp2spip_html_ouvrante()` recopie les attributs par `$attribut->name`. Pour un attribut à préfixe (`xlink:href` en SVG), `Dom\Attr` et `DOMAttr` peuvent ne pas renvoyer le même nom.
 - Le code de production appelle aussi `str_contains()`, `str_starts_with()` et `str_ends_with()`. Ces fonctions sont disponibles dès PHP 8.0 : elles n'empêchent pas la cible 8.1–8.3.
 - `composer.json` et `paquet.xml` demandent PHP ≥ 8.4. Les deux extensions `wp2spip_acf` et `wp2spip_yoast` portent le même minimum. Les tests emploient PHPUnit 13, dont la version verrouillée requiert PHP ≥ 8.4.1.
 - Le `vendor/` de développement est ignoré par Git et exclu de la copie de `outils/preparer_spip.sh`. Une simple dépendance Composer dans `require` ne rendrait donc pas Masterminds disponible dans un plugin SPIP installé depuis ses sources ou copié par cet outil.
-- Dans les verrous actuels de wp2spip et wp2spip_acf, `spip/tests` demande PHP ≥ 8.1 et `spip/spip-cli` accepte PHP 8 ; ces contraintes déclarées ne bloquent donc pas PHP 8.1. `wp2spip_yoast` n'a pas de `composer.lock` dans le dépôt examiné : sa résolution reste à contrôler.
+- Dans les verrous actuels de wp2spip et wp2spip_acf, `spip/tests` demande PHP ≥ 8.1 et `spip/spip-cli` accepte PHP 8 ; ces contraintes déclarées ne bloquent donc pas la cible basse. `wp2spip_yoast` n'a pas de `composer.lock` dans le dépôt examiné : sa résolution reste à contrôler.
 - Les 18 classes de test des trois dépôts utilisent uniquement des assertions, hooks et attributs présents dans la documentation de PHPUnit 10.5. Les 24 emplois de `#[DataProvider]` désignent chacun une méthode `public static`. Les assertions examinées sont `assertArrayNotHasKey`, `assertCount`, `assertEqualsCanonicalizing`, `assertFalse`, `assertMatchesRegularExpression`, `assertNotContains`, `assertNotEmpty`, `assertNotFalse`, `assertNull`, `assertSame`, `assertStringContainsString`, `assertStringNotContainsString` et `assertTrue`. Aucun usage repéré ne demande PHPUnit 11, 12 ou 13.
 - Tous les fichiers PHP du code et des tests des trois dépôts passent `php8.1 -l` dans l'environnement examiné. Ce contrôle syntaxique ne prouve ni la résolution Composer ni l'exécution. Après installation de `php8.1-sqlite3`, le PHP 8.1 local charge `pdo_sqlite` et `sqlite3` ; une création et une lecture en base SQLite mémoire ont réussi. L'environnement peut désormais servir aux tests d'intégration, une fois les contraintes Composer et le parseur adaptés.
+- Aucun des trois dépôts n'a d'intégration continue. La machine de développement dispose de `php8.1` et `php8.4` seulement.
 - `php8.1 composer check-platform-reqs --no-dev` échoue aujourd'hui sur le minimum `>=8.4` du plugin. Avec les dépendances de développement, la vérification échoue aussi sur `phpunit/php-code-coverage` du verrou actuel (`>=8.4`). Les extensions DOM, libxml, mbstring et xmlwriter passent la vérification.
 
 ## 3. Audit préalable à la baisse du minimum PHP
@@ -44,14 +48,17 @@ Une contrainte Composer compatible en théorie ne valide pas un exécutable : l'
 | Sujet | Décision |
 | --- | --- |
 | Parseur | `Dom\HTMLDocument` si PHP ≥ 8.4 et classe présente ; Masterminds HTML5-PHP si PHP 8.1, 8.2 ou 8.3. Absence de l'extension DOM ou de Masterminds : erreur explicite avant conversion. |
+| Options de Masterminds | `disable_html_ns` activé : les éléments sont créés hors de l'espace de noms XHTML, comme les noms recherchés par le parcours. |
 | Version de Masterminds | Dépendance `masterminds/html5` en version 2.x compatible avec PHP 8.1 à 8.3, verrouillée pour la distribution et les tests. Vérifier sa contrainte PHP et `ext-dom` à la résolution Composer. |
-| Frontière interne | Isoler création du document, reconnaissance des nœuds, sérialisation HTML et détection des tableaux complexes derrière de petites fonctions internes. Le parcours et les règles HTML → SPIP restent dans `inc/wp2spip_html.php`. Aucun objet `Dom\*` ou `DOM*` ne sort de cette frontière. |
+| Frontière interne | De petites fonctions d'accès isolent ce qui diffère entre les deux parseurs : création du document et obtention du `body`, `est_texte()` et `est_element()` à la place des `instanceof Dom\Text` / `Dom\Element`, nom qualifié d'un attribut, sérialisation HTML. Les règles HTML → SPIP manipulent les nœuds uniquement par ces fonctions et par les propriétés communes aux deux familles de classes (`localName`, `childNodes`, `textContent`, `data`, `getAttribute()`, `attributes`). Aucun nom de classe `Dom\*` ou `DOM*` n'apparaît hors des fonctions d'accès. |
 | Nœuds Masterminds | Son parseur renvoie les classes DOM historiques (`DOMDocument`, `DOMElement`, `DOMText`). Ne pas passer ce document à `DOMDocument::loadHTML()` : cette méthode utilise les règles HTML4. |
 | Sérialisation | Sérialiser les sous-arbres conservés en HTML avec le sérialiseur HTML5 de Masterminds sur la branche 8.1–8.3 ; garder `Dom\HTMLDocument::saveHtml()` sur la branche native. Vérifier les balises vides, attributs booléens, entités et SVG/MathML. |
-| Sélection des tableaux | Remplacer l'unique `querySelector('table, [rowspan]:not([rowspan="1"])')` par un parcours des descendants ou par un `DOMXPath` local à la branche Masterminds ; même condition fonctionnelle : tableau imbriqué ou `rowspan` différent de `1`. Aucun composant Symfony requis. |
-| Chargement en production | Placer une copie de la version verrouillée de Masterminds (`src/` et licence MIT) dans `lib/masterminds-html5/`, suivie par Git et incluse dans le paquet SPIP. Un chargeur propre au plugin résout les classes `Masterminds\` depuis cet emplacement sur PHP 8.1–8.3. Ne pas dépendre du `vendor/` de développement ni d'un `composer install` effectué par l'administrateur du site. |
+| Sélection des tableaux | Remplacer l'unique `querySelector('table, [rowspan]:not([rowspan="1"])')` par un parcours des descendants, **commun aux deux parseurs** ; même condition fonctionnelle : tableau imbriqué ou `rowspan` différent de `1`. Pas de `DOMXPath`, sensible à l'espace de noms des éléments, ni de composant Symfony. |
+| Attributs | `wp2spip_html_ouvrante()` écrit le nom qualifié de l'attribut (`nodeName`), identique sur les deux parseurs ; un cas SVG avec `xlink:href` le vérifie. |
+| Chargement en production | Placer une copie de la version verrouillée de Masterminds (`src/` et licence MIT) dans `lib/masterminds-html5/`, suivie par Git et incluse dans le paquet SPIP. Un chargeur propre au plugin résout les classes `Masterminds\` depuis cet emplacement sur PHP 8.1–8.3. Ne pas dépendre du `vendor/` de développement ni d'un `composer install` effectué par l'administrateur du site. Si une autre copie de Masterminds est déjà chargée par le site ou un autre plugin, elle est utilisée telle quelle : sa version 2.x offre la même API ; la commande d'import l'indique en mode verbeux. |
+| Verrou Composer | `config.platform.php` fixé à `8.1` dans les trois `composer.json` : le verrou est résolu pour la cible basse quelle que soit la version de PHP qui lance `composer update`, et reste installable de 8.1 à 8.4. |
 
-Le script de copie `outils/preparer_spip.sh` doit garder `lib/masterminds-html5/`. La version copiée dans `lib/` et celle du verrou Composer doivent être identiques ; une vérification automatisée empêche leur divergence lors d'une mise à jour. Le plugin publié embarque ce dossier et sa notice de licence MIT.
+Le script de copie `outils/preparer_spip.sh` doit garder `lib/masterminds-html5/`. La version copiée dans `lib/` et celle du verrou Composer doivent être identiques ; un fichier `lib/masterminds-html5/VERSION` note la version copiée (les sources de Masterminds n’en exposent pas) ; un test PHPUnit la compare à celle du `composer.lock` et échoue en cas de divergence. Le plugin publié embarque ce dossier et sa notice de licence MIT.
 
 ## 5. Comportement attendu
 
@@ -65,12 +72,12 @@ Le script de copie `outils/preparer_spip.sh` doit garder `lib/masterminds-html5/
 
 - Abaisser à `>=8.1` les prérequis PHP de `wp2spip` dans `composer.json` et `paquet.xml`, puis aligner `wp2spip_acf` et `wp2spip_yoast` après validation de leurs sources et dépendances. Si PHP 8.1 ne peut pas être validé, retenir `>=8.2` et documenter précisément le blocage. Vérifier aussi les dépendances SPIP et le verrou Composer de chaque dépôt ; la compatibilité du cœur ne suffit pas à garantir celle de toute l'installation.
 - Ajouter Masterminds comme dépendance de production dans Composer pour la résolution et les tests, puis fournir sa version verrouillée dans l'artefact SPIP. Vérifier les trois parcours : copie par `outils/preparer_spip.sh`, plugin installé depuis un paquet publié et dépôt cloné pour le développement.
-- Adapter les suites à PHPUnit 10.5 et à ses dépendances de développement compatibles avec PHP 8.1. Les attributs `DataProvider`, les signatures des tests et la configuration XML sont vérifiés à l'exécution. La matrice CI exécute PHP 8.1, 8.2, 8.3 et 8.4 avec `ext-dom` et les extensions requises par SPIP et PHPUnit.
-- Mettre à jour README, documentation d'installation, de développement, de conversion et de dépannage qui annoncent aujourd'hui PHP 8.4 obligatoire. Les anciennes specs réalisées restent des archives de leur décision initiale ; cette spec documente l'évolution.
+- Adapter les suites à PHPUnit 10.5 et à ses dépendances de développement compatibles avec PHP 8.1. Les attributs `DataProvider`, les signatures des tests et la configuration XML sont vérifiés à l'exécution. La matrice PHP 8.1, 8.2, 8.3 et 8.4 s'exécute sur la machine de développement, où `php8.2` et `php8.3` sont installés avec `ext-dom`, `sqlite3` et les extensions requises par SPIP et PHPUnit, à côté des 8.1 et 8.4 présents. Mettre en place une intégration continue est hors périmètre ; elle reprendrait les mêmes commandes.
+- Mettre à jour le README et les pages du site documentaire qui annoncent aujourd'hui PHP 8.4 obligatoire : Prérequis, Installer le migrateur, Développer et tester, Conversion HTML et Dépanner. Les anciennes specs réalisées restent des archives de leur décision initiale ; cette spec documente l'évolution.
 
 ## 7. Validation et critères d'acceptation
 
-- Tous les cas de `tests/unit/HtmlTest.php` sont exécutés sur PHP 8.1 à 8.4. Les cas de HTML mal formé, listes non fermées, tableaux imbriqués, médias, entités et UTF-8 sont particulièrement comparés entre les deux parseurs.
+- Tous les cas de `tests/unit/HtmlTest.php` sont exécutés sur PHP 8.1 à 8.4. Les cas de HTML mal formé, listes non fermées, tableaux imbriqués, médias, entités et UTF-8 sont particulièrement comparés entre les deux parseurs. Masterminds n'applique pas tout l'algorithme de construction d'arbre HTML5 : ajouter des fixtures pour les balises de mise en forme mal imbriquées (`<b><i></b></i>`), le contenu égaré dans un tableau et les fins de balise implicites, et un cas SVG avec attribut à préfixe.
 - `tests/integration/HtmlSpipTest.php`, les tests des blocs, des extensions et l'import complet passent sur les quatre versions, dans la mesure où les dépendances de test prennent en charge ces versions. Si une dépendance de test empêche une version, résoudre ce blocage avant de déclarer la compatibilité.
 - Un essai d'installation SPIP sans `vendor/` de développement, sous PHP 8.1 à 8.3, confirme que Masterminds se charge et qu'un article contenant HTML5 et médias s'importe. Un essai sous 8.4 confirme l'utilisation du parseur natif.
 - Comparer sur un corpus WordPress représentatif les sorties 8.1–8.3 à la référence 8.4, classer chaque différence et vérifier qu'aucun texte ni attribut nécessaire aux traitements suivants n'est perdu.
@@ -81,7 +88,7 @@ Le script de copie `outils/preparer_spip.sh` doit garder `lib/masterminds-html5/
 
 ## 8. Hors périmètre
 
-Modifier les règles de conversion HTML → SPIP, réintroduire Sale, ajouter une option de sélection manuelle du parseur ou promettre une compatibilité PHP 7.4 ou 8.0.
+Modifier les règles de conversion HTML → SPIP, réintroduire Sale, mettre en place une intégration continue, ajouter une option de sélection manuelle du parseur ou promettre une compatibilité PHP 7.4 ou 8.0.
 
 ## Références
 
