@@ -2,7 +2,9 @@
 
 Date : 2026-10-09
 Spec d'ensemble : `2026-10-08-wp2spip-ensemble-design.md`, § 6, sous-projet 9.
-Statut : design décidé seul (mandat de réalisation autonome), à relire à la revue finale ; à planifier.
+Statut : réalisé (dépôt local `wp2spip_acf`, non publié) ; décisions prises seul, à relire à la revue finale.
+
+Écarts décidés pendant la réalisation : les plugins requis dépendent des champs importables et non des valeurs (sinon un site aux champs définis mais encore vides échouerait à la garde du § 4.2) ; les groupes non publiés (désactivés) sont ignorés sans être comptés.
 
 ## 1. Constat
 
@@ -38,7 +40,7 @@ Côté SPIP, **Champs Extras** (`cextras`) ajoute des colonnes aux tables des ob
 `paquet.xml` : préfixe `wp2spip_acf`, version `1.0.0`, compatibilité `[4.2.0;4.4.*]`, `<necessite nom="wp2spip" compatibilite="[3.0.0;]" />`, `<utilise nom="iextras" compatibilite="[4.0.0;]" />`. Pipelines :
 
 - `wp2spip_traitements` : ajoute `importer_acf` à la fin ;
-- `wp2spip_plugins_requis` : si au moins un champ importable (§ 3.2, § 3.3) a une valeur non vide sur un contenu importé, ajoute `cextras` (`'table' => ''`) puis `iextras` (`'nom' => 'Champs Extras Interface'`), raison `N champs ACF` ; SVP télécharge leurs dépendances avec eux ;
+- `wp2spip_plugins_requis` : si au moins un champ importable (§ 3.2, § 3.3) n'est pas couvert par une correspondance (§ 2), ajoute `cextras` (`'table' => ''`) puis `iextras` (`'nom' => 'Champs Extras Interface'`), raison `N champs ACF` ; SVP télécharge leurs dépendances avec eux ;
 - `wp2spip_acf_correspondances` (nouveau) : `data` = tableau nom ACF → colonne de `spip_articles`, vide par défaut.
 
 ### 3.2 Champs retenus
@@ -52,7 +54,7 @@ Côté SPIP, **Champs Extras** (`cextras`) ajoute des colonnes aux tables des ob
 | ACF | Saisie | SQL | Valeur |
 |---|---|---|---|
 | `text`, `email`, `url`, `number`, `range` | `input` | `text DEFAULT '' NOT NULL` | telle quelle, entités décodées |
-| `textarea` | `textarea` (traitement raccourcis) | `text DEFAULT '' NOT NULL` | passée par sale |
+| `textarea` | `textarea`, 5 lignes (traitement raccourcis) | `text DEFAULT '' NOT NULL` | passée par sale, retours à la ligne simples en sauts de ligne SPIP (`_ `) |
 | `wysiwyg` | `textarea`, 10 lignes (traitement raccourcis) | `text DEFAULT '' NOT NULL` | passée par sale, liens vers le site convertis comme dans les textes (`wp2spip_chercher_lien()`) |
 | `select` (simple), `radio`, `button_group` | `selection` / `radio`, avec les choix | `text DEFAULT '' NOT NULL` | la clé choisie |
 | `select` multiple, `checkbox` | `selection_multiple` / `checkbox`, avec les choix | `text DEFAULT '' NOT NULL` | clés séparées par des virgules (stockage de Champs Extras) |
@@ -69,7 +71,7 @@ Libellé de la saisie : le libellé ACF ; groupes ACF rendus par une saisie `fie
 3. **Définitions** : saisies ajoutées à la méta `champs_extras_spip_articles` (identifiants donnés par `saisies_identifier()`), sans retoucher les saisies existantes ; une saisie dont le nom existe déjà dans la méta est gardée telle quelle ; puis `champs_extras_creer('spip_articles', $nouvelles)`. Les champs déclarés par `wp2spip_acf_correspondances` ne sont pas créés ; leur colonne doit exister, sinon échec.
 4. **Contrôle** : chaque colonne attendue existe (`sql_showtable`) ; sinon échec.
 5. **Valeurs** : pour chaque contenu importé (article SPIP de même identifiant), chaque champ retenu dont la métadonnée a la bonne clé et une valeur non vide : conversion (§ 3.3) puis `sql_updateq()` de la colonne si elle est vide (ni l'API ni les dates de l'article ne sont touchées) ; non vide : gardée, comptée. Un contenu WordPress avec des valeurs mais sans article SPIP : échec.
-6. Bilan : `C champs ACF créés en champs extras (articles), V valeurs importées, K déjà présentes ; non importés : T types non pris en charge, S sous-champs, G groupes hors articles, M médias absents.` (détail des noms en mode verbeux).
+6. Bilan : `C champs ACF créés en champs extras (articles), V valeurs importées, K déjà présentes ; non importés : T champs (type non pris en charge, nom invalide ou en double), S sous-champs, G groupes hors articles, M médias absents.` (détail des noms en mode verbeux). Contenus `acf` d'ACF 4 présents : une ligne avant le bilan.
 
 ## 5. Tests
 
