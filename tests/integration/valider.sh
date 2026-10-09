@@ -30,8 +30,9 @@ if [ "$code" -ne 0 ]; then
 fi
 
 (cd "$spip" && "$spip_cli" --no-ansi php:eval "include '$racine/tests/integration/verifier_identifiants.php';") >"$travail/verification.txt" 2>&1
-if [ "$(tail -n 1 "$travail/verification.txt")" != OK ]; then
-	echo "ECHEC : vérificateur (sortie $travail/verification.txt)"
+code=$?
+if [ "$code" -ne 0 ] || [ "$(tail -n 1 "$travail/verification.txt")" != OK ]; then
+	echo "ECHEC : vérificateur (code $code, sortie $travail/verification.txt)"
 	exit 1
 fi
 
