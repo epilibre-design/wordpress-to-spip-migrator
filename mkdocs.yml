@@ -8,7 +8,6 @@ site_dir: site
 theme:
   name: material
   language: fr
-  custom_dir: docs/site/overrides
   font: false
   icon:
     logo: material/database-arrow-right-outline
@@ -82,21 +81,15 @@ validation:
     unrecognized_links: warn
     anchors: warn
     absolute_links: warn
-exclude_docs: |
-  /overrides/
 extra_javascript:
   - assets/javascripts/mermaid.min.js
 extra_css:
   - stylesheets/extra.css
 extra:
-  documented_commit: dc1963eb54b317e7e9e7b445bfee81199a7804bb
-  documented_branch: main
-  reviewed_on: 2026-10-09
   generator: false
 nav:
   - Accueil:
       - Vue d’ensemble: index.md
-      - État du projet: etat-projet.md
   - Installer:
       - Prérequis: installer/prerequis.md
       - Installer le migrateur: installer/installation.md

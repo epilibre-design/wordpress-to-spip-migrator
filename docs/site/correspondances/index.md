@@ -2,8 +2,6 @@
 
 Le moteur convertit des objets **et leurs relations**. Les structures SQL des deux CMS ne sont pas copiées à l’identique : une taxonomie devient une rubrique, une page devient un article particulier, une galerie devient un album.
 
-Lire [l’état du projet](../etat-projet.md) pour les règles de validation et de mise à jour.
-
 | Fonction native WordPress | Stockage source | Équivalent SPIP | Remarques |
 |---|---|---|---|
 | Options générales | `options` | Métas du site | Sélection de réglages |

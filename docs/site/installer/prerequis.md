@@ -9,7 +9,7 @@
 | Préparer un SPIP automatiquement | Bash, PHP CLI, SPIP-Cli corrigé, client MySQL pour lire le WordPress, accès aux bases et téléchargements |
 | Construire ce site documentaire | Python 3.11 ou ultérieur et `requirements-docs.txt` ; aucun SPIP ni WordPress requis |
 
-La plage WordPress souhaitée est **4–7**. La spec d’ensemble cible **4.9 à 7.x** : les versions 4.0–4.8 demandent une qualification supplémentaire. Voir la [matrice de couverture](../wordpress/compatibilite.md).
+La plage WordPress visée est **4.9 à 7.x** : les versions 4.0–4.8 demandent une qualification supplémentaire. Voir la [matrice de couverture](../wordpress/compatibilite.md).
 
 ## Accès aux données source
 

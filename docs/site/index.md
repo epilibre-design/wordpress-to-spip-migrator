@@ -43,10 +43,10 @@ Un article appartenant à deux catégories devient un article SPIP lié à une r
 Ces correspondances ont des conséquences éditoriales : un rôle WordPress et un statut SPIP ne donnent pas nécessairement les mêmes droits ; un bloc enregistré et un bloc calculé ne se convertissent pas de la même manière.
 
 !!! info "Une version à qualifier sur votre site"
-    Cette documentation décrit le code au commit affiché en bas de chaque page. Le moteur importe désormais les étiquettes et convertit le HTML avec son propre analyseur, sans Sale ; des extensions séparées ajoutent Yoast SEO et ACF. Le paquet reste en état **test** : consulter la [couverture](wordpress/compatibilite.md) et valider un import représentatif avant la bascule.
+    Le moteur importe les étiquettes et convertit le HTML avec son propre analyseur ; des extensions séparées ajoutent Yoast SEO et ACF. Le paquet est en état **test** : consulter la [couverture](wordpress/compatibilite.md) et valider un import représentatif avant la bascule.
 
 ## Ce qui reste à reconstruire
 
 Le thème WordPress ne devient pas un squelette SPIP. Les menus, widgets, modèles de thème, types personnalisés et extensions demandent un inventaire et une stratégie distincts. Préserver les relations des données aide à reconstruire le rendu ; cela ne garantit pas une apparence identique.
 
-[Voir l’état du projet](etat-projet.md) · [Installer le migrateur](installer/installation.md) · [Lire les sources](comprendre/sources.md)
+[Voir les correspondances](correspondances/index.md) · [Installer le migrateur](installer/installation.md) · [Lire les sources](comprendre/sources.md)

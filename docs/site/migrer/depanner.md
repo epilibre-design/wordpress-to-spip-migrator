@@ -28,4 +28,4 @@ Ne pas utiliser un script de remise à zéro sur une installation réelle sans v
 
 Une extension PHP absente, une connexion refusée ou un plugin non actif est un prérequis à corriger. Une relation erronée malgré les prérequis corrects peut être un défaut du moteur : consigner version exacte, commit, scénario minimal et sortie, sans modifier les références de tests pour cacher le problème.
 
-[Tests](../installer/developpement.md) · [État du projet](../etat-projet.md) · [Commande et erreurs](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/spip-cli/WordpressImporter.php).
+[Tests](../installer/developpement.md) · [Commande et erreurs](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/spip-cli/WordpressImporter.php).
