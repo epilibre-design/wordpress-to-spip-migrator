@@ -21,7 +21,7 @@ final class EnvironnementTest extends TestCase
 
 	public static function plugins(): array
 	{
-		return array_map(fn($prefixe) => array($prefixe), array('wp2spip', 'sale', 'pages', 'polyhier', 'albums', 'a2a', 'accesrestreint'));
+		return array_map(fn($prefixe) => array($prefixe), array('wp2spip', 'pages', 'polyhier', 'albums', 'a2a', 'accesrestreint'));
 	}
 
 	public function testAucuneTableManquante(): void

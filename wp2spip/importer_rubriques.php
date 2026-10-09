@@ -30,7 +30,7 @@ function wp2spip_importer_rubriques_dist($command) {
 		include_spip('action/editer_objet');
 		include_spip('inc/autoriser');
 		include_spip('inc/filtres');
-		include_spip('sale_fonctions');
+		include_spip('inc/wp2spip_html');
 		include_spip('inc/wp2spip');
 		
 		// On arrange le tableau pour gérer la hiérarchie
@@ -66,8 +66,8 @@ function wp2spip_importer_rubriques_dist($command) {
 			$rubrique = array(
 				'id_parent' => $id_parent,
 				'confirme_deplace' => 'oui',
-				'titre' => wp2spip_decoder_entites(sale($wp_category['titre'])),
-				'texte' => wp2spip_decoder_entites(sale($wp_category['description'])),
+				'titre' => wp2spip_decoder_entites(wp2spip_html_spip($wp_category['titre'])),
+				'texte' => wp2spip_html_spip($wp_category['description']),
 			);
 			
 			// Créée avec l'identifiant de la catégorie et son id_wordpress, en une seule insertion :

@@ -49,7 +49,7 @@ function wp2spip_importer_commentaires_dist($command) {
 	}
 	$wp_comments = array_column($wp_comments, null, 'comment_ID');
 
-	include_spip('sale_fonctions');
+	include_spip('inc/wp2spip_html');
 
 	// Correspondances Wordpress => SPIP déjà connues
 	$articles = array_column(sql_allfetsel('id_article, id_wordpress', 'spip_articles', 'id_wordpress > 0'), 'id_article', 'id_wordpress');
@@ -83,7 +83,7 @@ function wp2spip_importer_commentaires_dist($command) {
 			'objet' => 'article',
 			'id_objet' => $id_article,
 			'date_heure' => $wp_comment['comment_date'],
-			'texte' => sale($wp_comment['comment_content']),
+			'texte' => wp2spip_html_spip($wp_comment['comment_content']),
 			'auteur' => $wp_comment['comment_author'],
 			'email_auteur' => $wp_comment['comment_author_email'],
 			'url_site' => $wp_comment['comment_author_url'],

@@ -6,7 +6,7 @@ Ce plugin fournit des outils en ligne de commande pour importer le contenu d'un 
 ## Installation
 Tout est basé sur une commande [SPIP-Cli](https://contrib.spip.net/SPIP-Cli) `wordpress:importer`, il faut donc l'installer au préalable.
 
-Afin d'importer le même type de fonctionnalités que dans Wordpress, il nécessite aussi Polyhiérarchie et Pages uniques, ainsi que la librairie Sale pour transformer au mieux le HTML en syntaxe SPIP.
+Afin d'importer le même type de fonctionnalités que dans Wordpress, il nécessite aussi Polyhiérarchie et Pages uniques. Il demande PHP 8.4 : le HTML de Wordpress est analysé par l'analyseur HTML5 de PHP (`Dom\HTMLDocument`) pour être converti en raccourcis SPIP (voir « Conversion du HTML »).
 
 Il faut ensuite déclarer la base de données SQL du Wordpress en tant que base externe dans l'admin de SPIP (le nom "wordpress" étant reconnu par défaut, sinon il faudra le préciser dans les options).
 
@@ -42,7 +42,7 @@ Help:
 ```
 
 ## Préparer un SPIP
-Depuis un dossier vide, `outils/preparer_spip.sh` télécharge et installe SPIP, ajoute sale, pages, polyhier et wp2spip, déclare la base du Wordpress comme base externe, et peut lancer l'import :
+Depuis un dossier vide, `outils/preparer_spip.sh` télécharge et installe SPIP, ajoute pages, polyhier et wp2spip, déclare la base du Wordpress comme base externe, et peut lancer l'import :
 
 ``` bash
 $ SPIP_ADMIN_PASS='…' outils/preparer_spip.sh --spip /chemin/du/spip --wordpress /chemin/du/wordpress --importer
@@ -54,6 +54,11 @@ Il faut SPIP-Cli avec les correctifs de `plugins:svp:telecharger` (sélection du
 
 ## Préfixe des tables
 L'import lit le préfixe des tables Wordpress (`$table_prefix`) dans le `wp-config.php` du dossier fourni, sans l'exécuter. S'il y est absent, calculé ou affecté plusieurs fois, l'option `--prefixe` est exigée ; elle remplace aussi un préfixe lu. Avant tout traitement, l'import vérifie le format du préfixe et la présence des tables qu'il lit, puis le note dans le SPIP : un SPIP importé depuis un préfixe refuse d'importer depuis un autre (le remettre à zéro). `outils/preparer_spip.sh` transmet le préfixe lu à l'import.
+
+## Conversion du HTML
+Le HTML de Wordpress (contenus, commentaires, descriptions, légendes) est converti en raccourcis SPIP par wp2spip lui-même (`inc/wp2spip_html.php`), à partir de l'arbre que construit l'analyseur HTML5 de PHP : paragraphes, sauts de ligne, gras et italique, intertitres, liens, listes imbriquées, tableaux, citations, code (`<cadre>`, `<code>`), texte préformaté (`<poesie>`), filets ; le reste du HTML (images, lecteurs, blocs de mise en page, `<sup>`, `<span>`…) est gardé tel quel. Les retours à la ligne suivent Wordpress : pour l'éditeur classique, les commentaires et les descriptions, une ligne vide sépare deux paragraphes et un retour simple devient un saut de ligne ; pour les contenus à blocs, ils sont sans effet.
+
+Un texte que Wordpress affiche tel quel l'est aussi par SPIP : les caractères des raccourcis SPIP (`{`, `}`, `[`, `]`, `|`, `~`, un `-` ou un `_` en début de ligne) et du HTML (`<`, `>`, `&`) y sont écrits en entités. Une page Wordpress qui documente les raccourcis de SPIP les montre donc toujours, sans qu'ils soient interprétés.
 
 ## Blocs de l'éditeur et galeries
 Les blocs de l'éditeur Wordpress sont convertis : images en `<imgN>` avec leur alignement (la légende devient le descriptif du document), médias en `<docN>`, mise en page (colonnes, groupes, couvertures, boutons…) gardée avec ses seules classes `wp-block-…`, que le squelette peut styler, contenus embarqués en URL seule sur sa ligne (le plugin oEmbed en fait un lecteur). Chaque galerie (bloc ou raccourci `[gallery]`) devient un album du plugin Albums, inséré par `<albumN>`. Les blocs dynamiques (derniers articles, recherche…), qui n'enregistrent rien dans le contenu, sont retirés. Le bilan de `importer_articles` détaille ces conversions.

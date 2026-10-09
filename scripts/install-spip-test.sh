@@ -7,8 +7,8 @@ racine=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 spip_racine="$racine/vendor/spip/spip"
 spip_cli="$racine/vendor/bin/spip"
 depot=https://plugins.spip.net/depots/principal.xml
-# Dépendances de wp2spip (sale, pages, polyhier), puis plugins requis par les contenus des tests
-plugins="sale pages polyhier albums a2a accesrestreint"
+# Dépendances de wp2spip (pages, polyhier), puis plugins requis par les contenus des tests
+plugins="pages polyhier albums a2a accesrestreint"
 
 erreur() {
 	echo "ERREUR : $*" >&2

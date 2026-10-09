@@ -9,7 +9,7 @@ aide() {
 	cat <<'AIDE'
 Usage : preparer_spip.sh --spip <dossier> --wordpress <dossier WordPress> [options]
 
-Prépare un SPIP depuis un dossier vide : téléchargement, installation, plugins sale, pages,
+Prépare un SPIP depuis un dossier vide : téléchargement, installation, plugins pages,
 polyhier et wp2spip, base du WordPress déclarée comme base externe ; puis peut lancer l'import.
 
 Options :
@@ -126,7 +126,7 @@ case "$base_spip" in sqlite|mysql:?*) ;; *) erreur "--base-spip : sqlite ou mysq
 spip=$(realpath -m "$spip")
 wordpress=$(realpath -m "$wordpress")
 # Liste réservée aux tests (simuler un plugin introuvable)
-read -r -a plugins_svp <<<"${PREPARER_SPIP_PLUGINS_SVP:-sale pages polyhier}"
+read -r -a plugins_svp <<<"${PREPARER_SPIP_PLUGINS_SVP:-pages polyhier}"
 
 etape "Contrôles préalables"
 spip_cli_trouve=$(command -v "$spip_cli_exe") || erreur "SPIP-Cli introuvable : $spip_cli_exe"

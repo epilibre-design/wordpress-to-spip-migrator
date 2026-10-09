@@ -73,14 +73,14 @@ fi
 
 # Préparations complètes
 
-# sale, pages et polyhier sous plugins/auto ; ces trois plugins et wp2spip actifs
+# pages et polyhier sous plugins/auto ; ces deux plugins et wp2spip actifs
 plugins_prets() { # plugins_prets <dossier SPIP>
 	local prefixe actifs
 	actifs=$(cd "$1" && "$SPIP_CLI" --no-ansi plugins:lister --short --raw --no-dist) || return 1
-	for prefixe in sale pages polyhier; do
+	for prefixe in pages polyhier; do
 		grep -rqs --include=paquet.xml "prefix=\"$prefixe\"" "$1/plugins/auto" || return 1
 	done
-	for prefixe in sale pages polyhier wp2spip; do
+	for prefixe in pages polyhier wp2spip; do
 		grep -qx "[[:space:]]*$prefixe" <<<"$actifs" || return 1
 	done
 }
@@ -109,7 +109,7 @@ vider_base_essais() {
 # Plugin introuvable sur le dépôt : arrêt après l'installation de SPIP, avec un message qui le dit
 spip="$ESSAIS/spip-plugin-introuvable"
 rm -rf "$spip"
-PREPARER_SPIP_PLUGINS_SVP="sale prefixe_inexistant_wp2spip" "$preparer" --spip "$spip" --wordpress "$WP6" --spip-cli "$SPIP_CLI" >"$ESSAIS/plugin-introuvable.log" 2>&1
+PREPARER_SPIP_PLUGINS_SVP="pages prefixe_inexistant_wp2spip" "$preparer" --spip "$spip" --wordpress "$WP6" --spip-cli "$SPIP_CLI" >"$ESSAIS/plugin-introuvable.log" 2>&1
 code=$?
 [ "$code" -eq 1 ] && grep -qF "Le SPIP est déjà installé dans $spip" "$ESSAIS/plugin-introuvable.log" && [ -f "$spip/config/connect.php" ]
 resultat "plugin introuvable : code 1, SPIP installé et signalé (code $code)" $?

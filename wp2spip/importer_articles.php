@@ -30,7 +30,7 @@ function wp2spip_importer_articles_dist($command) {
 		include_spip('action/editer_objet');
 		include_spip('inc/autoriser');
 		include_spip('inc/filtres');
-		include_spip('sale_fonctions');
+		include_spip('inc/wp2spip_html');
 		include_spip('inc/config');
 		include_spip('action/editer_liens');
 		include_spip('inc/wp2spip');
@@ -100,10 +100,11 @@ function wp2spip_importer_articles_dist($command) {
 			
 			// TODO si pas de rubrique, il faudrait en créer une par défaut ?
 			
-			// Les blocs de l'éditeur et les galeries sont convertis avant sale(), qui ne voit pas ce qu'ils produisent en raccourcis SPIP
+			// Les blocs de l'éditeur et les galeries sont convertis avant le HTML, qui ne voit pas ce qu'ils produisent en raccourcis SPIP
 			$contexte_blocs = wp2spip_contexte_blocs($command, $wp_post, $url_wordpress);
 			$texte = wp2spip_convertir_blocs($wp_post['post_content'], $contexte_blocs);
-			$texte = wp2spip_restaurer_blocs(sale($texte), $contexte_blocs);
+			// Wordpress n'applique wpautop() qu'aux contenus sans blocs
+			$texte = wp2spip_restaurer_blocs(wp2spip_html_spip($texte, array('autop' => !str_contains($wp_post['post_content'], '<!-- wp:'))), $contexte_blocs);
 			$bilan_blocs = wp2spip_cumuler_bilan_blocs($bilan_blocs, $contexte_blocs);
 			if ($command->output->isVerbose() and $contexte_blocs['bilan']['inconnus']) {
 				$command->output->writeln("\nArticle Wordpress $id_wordpress : blocs inconnus, contenu gardé : " . join(', ', array_keys($contexte_blocs['bilan']['inconnus'])));
@@ -186,7 +187,8 @@ function wp2spip_importer_articles_dist($command) {
 						
 						// On en profite pour mettre à jour le document lui-même avec la légende plus détaillée trouvée dans ce caption
 						$contenu_caption = preg_replace('#\[caption[^\]]*?\](.*?)\[/caption\]#', '\1', $caption);
-						$contenu_caption = supprimer_tags(preg_replace(array('#\[.*?\]#', '#\n-#'), '', sale($contenu_caption)));
+						// Contenu déjà converti en raccourcis avec le texte : liens et balises retirés
+						$contenu_caption = trim(supprimer_tags(preg_replace(array('#\[.*?\]#', '#\n-#'), '', $contenu_caption)));
 						sql_updateq('spip_documents', array('descriptif' => $contenu_caption, 'titre' => ''), 'id_document = '.$id_document);
 						
 						// On remplace le shortcode [caption] complet par le doc SPIP

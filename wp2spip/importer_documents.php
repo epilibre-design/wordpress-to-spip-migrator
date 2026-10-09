@@ -32,7 +32,7 @@ function wp2spip_importer_documents_dist($command) {
 		include_spip('action/editer_objet');
 		include_spip('inc/autoriser');
 		include_spip('inc/filtres');
-		include_spip('sale_fonctions');
+		include_spip('inc/wp2spip_html');
 		include_spip('action/ajouter_documents');
 		include_spip('inc/distant');
 		include_spip('inc/flock');
@@ -74,7 +74,7 @@ function wp2spip_importer_documents_dist($command) {
 				// On compose le document SPIP
 				$document = array(
 					'titre' => $wp_attachment['post_title'],
-					'descriptif' => sale($wp_attachment['post_content'] ?: $wp_attachment['post_excerpt']),
+					'descriptif' => wp2spip_html_spip($wp_attachment['post_content'] ?: $wp_attachment['post_excerpt']),
 					'date' => $wp_attachment['post_date'],
 					'maj' => $wp_attachment['post_modified'],
 				);

@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 /**
  * Conversion des blocs de l'éditeur et des galeries (inc/wp2spip_blocs.php), sur les médias du WordPress de test
  *
- * Chaque cas : contenu Wordpress, texte attendu après conversion, sale et réinsertion des marqueurs (<albumN> pour
+ * Chaque cas : contenu Wordpress, texte attendu après conversion des blocs, du HTML et réinsertion des marqueurs (<albumN> pour
  * un album créé), albums créés, légendes devenues descriptifs, bilan. Albums, légendes et statuts des documents sont rétablis après chaque cas.
  */
 final class BlocsTest extends WordpressTestCase
@@ -21,7 +21,6 @@ final class BlocsTest extends WordpressTestCase
 	{
 		parent::setUpBeforeClass();
 		include_spip('inc/wp2spip_blocs');
-		include_spip('sale_fonctions');
 	}
 
 	protected function setUp(): void
@@ -54,7 +53,7 @@ final class BlocsTest extends WordpressTestCase
 		);
 		$url_wordpress = sql_getfetsel('option_value', wp2spip_table('options'), 'option_name = "siteurl"', '', '', '', '', self::BASE);
 		$contexte = wp2spip_contexte_blocs(self::commande(), $wp_post, $url_wordpress);
-		$obtenu = trim(wp2spip_restaurer_blocs(sale(wp2spip_convertir_blocs($test['contenu'], $contexte)), $contexte));
+		$obtenu = trim(wp2spip_restaurer_blocs(wp2spip_html_spip(wp2spip_convertir_blocs($test['contenu'], $contexte), array('autop' => !str_contains($test['contenu'], '<!-- wp:'))), $contexte));
 		$this->albums = $contexte['albums'];
 
 		$this->assertSame($test['attendu'], preg_replace('/<album\d+>/', '<albumN>', $obtenu), 'texte converti');
@@ -210,7 +209,7 @@ HTML,
 <figure class="wp-block-table is-style-regular"><table><tbody><tr><td>a</td><td>b</td></tr></tbody></table><figcaption class="wp-element-caption">Table caption</figcaption></figure>
 <!-- /wp:table -->
 HTML,
-				'attendu' => "<figure class=\"wp-block-table\">\n\n|  a | b |\n\n<figcaption>Table caption</figcaption>\n\n</figure>",
+				'attendu' => "<figure class=\"wp-block-table\">\n\n| a | b |\n\n<figcaption>Table caption</figcaption>\n\n</figure>",
 			),
 			array(
 				'nom' => 'bouton : lien SPIP dans la balise du bouton',
@@ -249,7 +248,7 @@ HTML,
 			array(
 				'nom' => 'bloc dynamique qui a du contenu enregistré : contenu gardé',
 				'contenu' => "<!-- wp:query {\"queryId\":2} -->\n<div class=\"wp-block-query\"><!-- wp:post-title /-->\n\n<!-- wp:query-no-results -->\n<!-- wp:paragraph -->\n<p>Aucun résultat</p>\n<!-- /wp:paragraph -->\n<!-- /wp:query-no-results --></div>\n<!-- /wp:query -->",
-				'attendu' => "<div class=\"wp-block-query\">\n\nAucun résultat\n\n</div>",
+				'attendu' => "<div class=\"wp-block-query\">Aucun résultat</div>",
 			),
 			array(
 				'nom' => 'bloc réutilisable (wp:block) : traité comme un bloc inconnu',
@@ -258,9 +257,9 @@ HTML,
 				'inconnus' => array('core/block' => 1),
 			),
 			array(
-				'nom' => 'bloc inconnu : contenu gardé, passé par sale',
+				'nom' => 'bloc inconnu : contenu gardé, HTML converti',
 				'contenu' => "<!-- wp:mon-extension/encart {\"couleur\":\"rouge\"} -->\n<div class=\"encart\"><p>Un encart</p></div>\n<!-- /wp:mon-extension/encart -->",
-				'attendu' => "<div class=\"encart\">Un encart\n\n</div>",
+				'attendu' => "<div class=\"encart\">Un encart</div>",
 			),
 			array(
 				'nom' => 'contenu sans bloc : inchangé',

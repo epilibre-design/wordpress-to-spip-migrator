@@ -32,7 +32,7 @@ function wp2spip_importer_mots_dist($command) {
 	include_spip('action/editer_objet');
 	include_spip('action/editer_liens');
 	include_spip('inc/meta');
-	include_spip('sale_fonctions');
+	include_spip('inc/wp2spip_html');
 
 	if (!$id_groupe = wp2spip_groupe_etiquettes($command)) {
 		return false;
@@ -58,7 +58,7 @@ function wp2spip_importer_mots_dist($command) {
 			'id_mot' => $id_mot,
 			'id_wordpress' => $id_mot,
 			'titre' => wp2spip_decoder_entites($etiquette['name']),
-			'descriptif' => ($etiquette['description'] !== '') ? trim(sale($etiquette['description'])) : '',
+			'descriptif' => ($etiquette['description'] !== '') ? wp2spip_html_spip($etiquette['description']) : '',
 		);
 		if (objet_inserer('mot', $id_groupe, $set) != $id_mot) {
 			return wp2spip_erreur_insertion($command, 'mot', $id_mot);

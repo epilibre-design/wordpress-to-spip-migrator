@@ -24,7 +24,7 @@ function wp2spip_importer_metas_dist($command) {
 		$command->base
 	)) {
 		include_spip('inc/config');
-		include_spip('sale_fonctions');
+		include_spip('inc/wp2spip_html');
 		
 		foreach ($options as $cle => $option) {
 			$options[$option['option_name']] = $option['option_value'];
@@ -53,7 +53,7 @@ function wp2spip_importer_metas_dist($command) {
 		
 		// dans Wordpress (wp-admin/options-general.php) il est indiqué Slogan du site qui est donc stocké dans blogdescription. On le met donc dans le slogan SPIP et pas le descriptif
 		if (!empty($options['blogdescription'])) {
-			$options['blogdescription'] = sale($options['blogdescription']);
+			$options['blogdescription'] = wp2spip_html_spip($options['blogdescription']);
 			$command->output->writeln('* <comment>Slogan du site</comment> : ' . $options['blogdescription']);
 			ecrire_config('slogan_site', $options['blogdescription']);
 		}

@@ -110,7 +110,7 @@ Un plugin peut donc surcharger un traitement, ou en fournir une variante pour un
 
 | Plugin | Lien | Rôle |
 |---|---|---|
-| sale (≥ 1.0.0) | `necessite` | conversion du HTML WordPress en raccourcis SPIP |
+| PHP (≥ 8.4) | `necessite` | conversion du HTML WordPress en raccourcis SPIP par `Dom\HTMLDocument` (`inc/wp2spip_html.php`, sous-projet 11 ; sale jusque-là) |
 | pages (≥ 2.0.0) | `necessite` | pages WordPress → pages uniques |
 | polyhier (≥ 4.0.0) | `necessite` | catégories multiples → rubriques secondaires |
 | forum | `utilise` ; activé par wp2spip si le WordPress a des commentaires à importer (sous-projet 3, spec des blocs § 4) | commentaires → messages de forum |
@@ -126,7 +126,7 @@ Un plugin peut donc surcharger un traitement, ou en fournir une variante pour un
 | `siteurl` | `adresse_site` |
 | `blogname` | `nom_site` |
 | `admin_email` | `email_webmaster` |
-| `blogdescription` (passé par sale) | `slogan_site` |
+| `blogdescription` (HTML converti) | `slogan_site` |
 
 Limite : l'adresse du site SPIP est écrasée par celle du WordPress, ce qui est gênant pour un site de test local (§ 6, sous-projet 2).
 
@@ -150,7 +150,7 @@ Limite : l'adresse du site SPIP est écrasée par celle du WordPress, ce qui est
 ### 3.3 `importer_rubriques`
 
 - Taxonomies `category` et `link_category` → rubriques, en conservant la hiérarchie (les parents sont créés avant leurs enfants), avec `id_rubrique` = identifiant de la catégorie.
-- Titre et description passés par sale, sans entités HTML (`é` et non `&#233;`), sauf `&lt;`, `&gt;` et `&amp;`, gardées pour ne pas créer de balise.
+- Titre et description convertis du HTML, sans entités HTML (`é` et non `&#233;`), sauf `&lt;`, `&gt;` et `&amp;`, gardées pour ne pas créer de balise.
 
 ### 3.4 `importer_documents`
 
@@ -182,7 +182,7 @@ Limite : l'adresse du site SPIP est écrasée par celle du WordPress, ce qui est
 
 **Autres champs** : dates de création, de rédaction et de modification WordPress conservées ; forum ouvert selon `comment_status` ; URL propre d'après le slug ; auteur principal rattaché ; médias dont le contenu est le parent WordPress liés à l'article.
 
-**Conversion du texte** (après passage par sale) :
+**Conversion du texte** (après la conversion du HTML) :
 
 | Élément WordPress | Résultat SPIP |
 |---|---|
@@ -235,7 +235,7 @@ Une zone dont les accès sont gérés compte par compte doit avoir l'option « t
 - Forum est activé par la commande dès qu'il y a des commentaires à importer (sous-projet 3). S'il n'est pas actif malgré tout : arrêt en échec (code `1`).
 - Commentaires de type vide (WordPress < 5.5) ou `comment` (≥ 5.5) ; trackbacks, pingbacks, spam et corbeille exclus.
 - Approuvé → publié ; en attente → proposé.
-- Texte passé par sale ; auteur, email, site, adresse IP, date repris ; un commentateur ayant un compte WordPress est relié à son auteur SPIP.
+- Texte converti du HTML ; auteur, email, site, adresse IP, date repris ; un commentateur ayant un compte WordPress est relié à son auteur SPIP.
 - **Fils de discussion** : `id_parent` = message auquel on répond, `id_thread` = premier message du fil, y compris quand une réponse est traitée avant son parent ; un parent non importé fait commencer un nouveau fil. `date_thread` = date du dernier message publié du fil.
 - Un commentaire dont le contenu n'a pas été importé est ignoré.
 - Chaque message garde son `id_wordpress` : pas de doublon à la ré-exécution.
@@ -326,7 +326,7 @@ Chaque sous-projet aura sa propre spec, puis son plan de réalisation.
 | 8 | `wp2spip_yoast` — **réalisé** (dépôt local) | extension | catégorie principale Yoast comme rubrique principale (traitement inséré après `importer_articles`, avant `importer_polyhierarchie`) ; ensuite, titre SEO et méta-description |
 | 9 | `wp2spip_acf` — **réalisé** (dépôt local) | extension | champs ACF → Champs Extras (vraisemblablement via Champs Extras Interface, à vérifier), d'après leurs définitions (`acf-field`) ; correspondances vers des champs natifs quand elles existent (lien hypertexte de l'article, mot-clé technique) |
 | 10 | Signalements aux plugins tiers — **brouillons rédigés** (non publiés) | amont | sale : `extraire_images()` parcourt une portion de texte de trop (warning PHP 8, sans effet sur le résultat) ; Polyhiérarchie configurable : pipeline `objet_compte_enfants` non déclaré, champ `date` codé en dur dans `calculer_rubriques` |
-| 11 | Convertisseur HTML → SPIP sans sale | cœur | arbre HTML5 (`Dom\HTMLDocument`, PHP 8.4) au lieu des expressions régulières de sale, qui perdent des textes entiers (spec `2026-10-09-wp2spip-convertisseur-html-design.md`) |
+| 11 | Convertisseur HTML → SPIP sans sale — **réalisé** | cœur | arbre HTML5 (`Dom\HTMLDocument`, PHP 8.4) au lieu des expressions régulières de sale, qui perdent des textes entiers (spec `2026-10-09-wp2spip-convertisseur-html-design.md`) |
 
 ## 7. Questions ouvertes
 

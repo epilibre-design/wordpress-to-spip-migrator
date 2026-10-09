@@ -54,8 +54,8 @@ Côté SPIP, **Champs Extras** (`cextras`) ajoute des colonnes aux tables des ob
 | ACF | Saisie | SQL | Valeur |
 |---|---|---|---|
 | `text`, `email`, `url`, `number`, `range` | `input` | `text DEFAULT '' NOT NULL` | telle quelle, entités décodées |
-| `textarea` | `textarea`, 5 lignes (traitement raccourcis) | `text DEFAULT '' NOT NULL` | passée par sale, retours à la ligne simples en sauts de ligne SPIP (`_ `) |
-| `wysiwyg` | `textarea`, 10 lignes (traitement raccourcis) | `text DEFAULT '' NOT NULL` | passée par sale, liens vers le site convertis comme dans les textes (`wp2spip_chercher_lien()`) |
+| `textarea` | `textarea`, 5 lignes (traitement raccourcis) | `text DEFAULT '' NOT NULL` | HTML converti par wp2spip (`wpautop()` : retours à la ligne simples en sauts de ligne SPIP `_ `) |
+| `wysiwyg` | `textarea`, 10 lignes (traitement raccourcis) | `text DEFAULT '' NOT NULL` | HTML converti par wp2spip, liens vers le site convertis comme dans les textes (`wp2spip_chercher_lien()`) |
 | `select` (simple), `radio`, `button_group` | `selection` / `radio`, avec les choix | `text DEFAULT '' NOT NULL` | la clé choisie |
 | `select` multiple, `checkbox` | `selection_multiple` / `checkbox`, avec les choix | `text DEFAULT '' NOT NULL` | clés séparées par des virgules (stockage de Champs Extras) |
 | `true_false` | `oui_non` | `varchar(3) DEFAULT '' NOT NULL` | `1` → `on`, sinon vide |

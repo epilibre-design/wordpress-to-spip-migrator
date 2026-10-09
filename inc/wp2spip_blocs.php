@@ -3,9 +3,9 @@
 /**
  * Conversion des blocs de l'éditeur Wordpress (Gutenberg) et des galeries
  *
- * wp2spip_convertir_blocs() reçoit le contenu brut, avant sale : les blocs sont convertis d'après leurs
+ * wp2spip_convertir_blocs() reçoit le contenu brut, avant la conversion du HTML (wp2spip_html_spip()) : les blocs sont convertis d'après leurs
  * commentaires <!-- wp:… --> et leurs attributs JSON. Ce qui est déjà au format SPIP (raccourcis, balises
- * de structure gardées) est remplacé par un marqueur wp2spipbloc<N> le temps du passage par sale,
+ * de structure gardées) est remplacé par un marqueur wp2spipbloc<N> le temps de cette conversion,
  * puis réinséré par wp2spip_restaurer_blocs().
  */
 
@@ -15,6 +15,7 @@ if (!defined('_ECRIRE_INC_VERSION')) {
 
 include_spip('inc/filtres');
 include_spip('inc/wp2spip');
+include_spip('inc/wp2spip_html');
 
 /**
  * Contexte de conversion d'un contenu Wordpress
@@ -43,11 +44,11 @@ function wp2spip_contexte_blocs($command, $wp_post, $url_wordpress) {
 }
 
 /**
- * Convertit les blocs et les galeries d'un contenu Wordpress, avant sale
+ * Convertit les blocs et les galeries d'un contenu Wordpress, avant la conversion du HTML
  *
  * @param string $contenu
  * @param array $contexte de wp2spip_contexte_blocs(), complété (marqueurs, albums créés, bilan)
- * @return string texte à passer à sale, puis à wp2spip_restaurer_blocs()
+ * @return string texte à passer à wp2spip_html_spip(), puis à wp2spip_restaurer_blocs()
  */
 function wp2spip_convertir_blocs($contenu, &$contexte) {
 	if (strpos($contenu, '<!-- wp:') !== false) {
@@ -60,7 +61,7 @@ function wp2spip_convertir_blocs($contenu, &$contexte) {
 }
 
 /**
- * Réinsère ce que les marqueurs protégeaient, après sale
+ * Réinsère ce que les marqueurs protégeaient, après la conversion du HTML
  *
  * @param string $texte
  * @param array $contexte
@@ -372,7 +373,7 @@ function wp2spip_bloc_legende($html, $classe = '') {
  */
 function wp2spip_bloc_legender($id_document, $legende) {
 	if ($legende !== '') {
-		sql_updateq('spip_documents', array('descriptif' => trim(sale($legende))), 'id_document = ' . intval($id_document));
+		sql_updateq('spip_documents', array('descriptif' => wp2spip_html_spip($legende, array('autop' => false))), 'id_document = ' . intval($id_document));
 	}
 }
 
@@ -425,7 +426,7 @@ function wp2spip_bloc_gallery_images($bloc, $contexte) {
 function wp2spip_bloc_gallery($bloc, &$contexte) {
 	$images = wp2spip_bloc_gallery_images($bloc, $contexte);
 	$legende = wp2spip_bloc_legende(wp2spip_bloc_html($bloc), 'blocks-gallery-caption');
-	if ($id_album = wp2spip_creer_album($images, ($legende !== '') ? trim(sale($legende)) : '', $contexte)) {
+	if ($id_album = wp2spip_creer_album($images, ($legende !== '') ? wp2spip_html_spip($legende, array('autop' => false)) : '', $contexte)) {
 		return wp2spip_proteger("<album$id_album>", $contexte);
 	}
 	$contexte['bilan']['medias_introuvables']++;
@@ -606,7 +607,7 @@ function wp2spip_bloc_embed($bloc, &$contexte) {
 	if (!$url) {
 		return $html;
 	}
-	// L'URL seule sur sa ligne : oEmbed en fait un lecteur, sinon SPIP en fait un lien ; la légende passera par sale
+	// L'URL seule sur sa ligne : oEmbed en fait un lecteur, sinon SPIP en fait un lien ; la légende passera par la conversion du HTML
 	$legende = wp2spip_bloc_legende($html);
 	return wp2spip_proteger($url, $contexte) . ($legende !== '' ? "\n\n$legende\n\n" : '');
 }
