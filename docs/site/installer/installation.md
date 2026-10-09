@@ -7,10 +7,7 @@ Sur une machine de développement :
 ```bash
 git clone --branch main https://github.com/epilibre-design/wordpress-to-spip-migrator.git
 cd wordpress-to-spip-migrator
-git rev-parse HEAD
 ```
-
-Comparer le SHA obtenu à la révision affichée sur ce site. La branche peut avoir avancé : pour reproduire exactement la version décrite, utiliser un checkout propre au commit documenté. Ne pas réinitialiser un dossier contenant des modifications locales.
 
 ## Installation dans un SPIP existant
 
@@ -50,4 +47,4 @@ Le script [install-spip-test.sh](https://github.com/epilibre-design/wordpress-to
 
 ## Avant le premier import
 
-Vérifier les accès à la base source, les fichiers médias, les plugins et le préfixe. Préparer un plan pour les fonctions [non implémentées](../etat-projet.md), puis suivre [l’audit](../migrer/audit.md).
+Vérifier les accès à la base source, les fichiers médias, les plugins et le préfixe. Préparer un plan pour les données [non converties](../correspondances/index.md), puis suivre [l’audit](../migrer/audit.md).

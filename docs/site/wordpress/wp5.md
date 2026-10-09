@@ -16,7 +16,7 @@ Le migrateur analyse cette représentation avant son convertisseur HTML5 et prop
 
 ## Blocs réutilisables
 
-Le type `wp_block` conserve un contenu réutilisable, référencé depuis un autre contenu. Copier seulement l’article porteur de la référence peut perdre le texte du bloc réutilisé. La révision documentée n’importe pas `wp_block` comme un objet autonome et ne garantit pas l’expansion de ses références.
+Le type `wp_block` conserve un contenu réutilisable, référencé depuis un autre contenu. Copier seulement l’article porteur de la référence peut perdre le texte du bloc réutilisé. wp2spip n’importe pas `wp_block` comme un objet autonome et ne garantit pas l’expansion de ses références.
 
 Prévoir un inventaire des références et un traitement d’expansion ou une reconstruction adaptée.
 

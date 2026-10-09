@@ -58,6 +58,6 @@ Le pipeline propre à l’extension `wp2spip_acf_correspondances` permet d’ass
 | `wp2spip_bloc` | Ajouter/remplacer la conversion d’un bloc |
 | `wp2spip_plugins_requis` | Compléter les dépendances détectées avant import |
 
-Un développement doit fournir son code, ses dépendances et ses validations. Les suites des extensions sont exécutées dans leurs propres dépôts ; les essais rapportés dans les specs ne remplacent pas une recette sur votre source.
+Un développement doit fournir son code, ses dépendances et ses validations. Les suites des extensions sont exécutées dans leurs propres dépôts ; leurs essais ne remplacent pas une recette sur votre source.
 
-[État du projet](../etat-projet.md) · [Architecture du moteur](traitements.md).
+[Architecture du moteur](traitements.md).

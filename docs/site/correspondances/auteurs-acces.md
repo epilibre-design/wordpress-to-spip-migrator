@@ -1,6 +1,6 @@
 # Auteurs et accès
 
-**État : implémenté**, avec une transformation des droits. L’identité éditoriale et l’autorisation de lire ou de modifier sont deux sujets distincts.
+Les droits WordPress sont transformés en statuts SPIP. L’identité éditoriale et l’autorisation de lire ou de modifier sont deux sujets distincts.
 
 ## Utilisateurs → auteurs
 

@@ -1,6 +1,6 @@
 # Liens, slugs et adresse du site
 
-**État : implémenté avec limites.** Distinguer la conversion d’un lien dans le texte, l’enregistrement d’un slug et la redirection d’une ancienne URL publique.
+Distinguer la conversion d’un lien dans le texte, l’enregistrement d’un slug et la redirection d’une ancienne URL publique.
 
 ## Liens dans les contenus
 

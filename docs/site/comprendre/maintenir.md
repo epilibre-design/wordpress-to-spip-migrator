@@ -71,16 +71,4 @@ Les fichiers `.en.md` de cet exemple sont des futurs fichiers, pas des traductio
 
 Le repli `fallback_to_default: true` fournit une page française quand sa traduction manque. Pour une publication partielle, expliquer ce repli aux lecteurs ; il ne faut pas présenter ces pages comme traduites. Les liens internes gardent leurs noms canoniques (par exemple `installation.md`) : le plugin les adapte à la langue. Une ancre française peut changer dans le texte anglais ; vérifier chaque lien de section.
 
-## Réviser les états après synchronisation
-
-1. Relever le nouveau SHA du **code du dépôt** et sa branche de référence ; examiner son diff avec la révision documentée précédente.
-2. Vérifier chaque fonction de [l’état du projet](../etat-projet.md) contre le code, l’orchestration et les tests.
-3. Réviser les pages concernées et leurs références, sans confondre spec et implémentation.
-4. Mettre à jour `extra.documented_commit`, `extra.documented_branch`, la date de revue, les permaliens et le tableau ensemble ; vérifier aussi `repo_url` et `repo_name` si le dépôt change.
-5. Construire et contrôler le site avant de publier.
-
-Le commit documenté est celui du code analysé, pas nécessairement le commit ajoutant ou publiant la documentation. Si la revue n’est pas terminée, garder la révision précédente affichée. La même politique s’appliquera aux traductions anglaises ; signaler toute traduction devenue obsolète.
-
-Pour les extensions publiées dans d’autres dépôts, examiner aussi leurs README, traitements, prérequis et tests. Ne pas présenter une ancienne mention de dépôt local ou de fonction future dans un plan comme leur état actuel ; vérifier les indications de publication et l’état du code correspondant.
-
 Références : [configuration MkDocs](https://www.mkdocs.org/user-guide/configuration/), [validation](https://www.mkdocs.org/user-guide/configuration/#validation), [mkdocs-static-i18n](https://ultrabug.github.io/mkdocs-static-i18n/).
