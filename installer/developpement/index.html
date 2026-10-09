@@ -1522,7 +1522,7 @@
 
 
 <h1 id="developper-et-tester">Développer et tester<a class="headerlink" href="#developper-et-tester" title="Permanent link">&para;</a></h1>
-<p>Les dépendances de développement sont définies dans Composer. Le plugin demande PHP <strong>≥ 8.4</strong> pour <code>Dom\HTMLDocument</code> ; le verrou documenté contient PHPUnit 13.4.1, qui impose <strong>PHP ≥ 8.4.1</strong> pour les tests.</p>
+<p>Les dépendances de développement sont définies dans Composer. Le plugin demande PHP <strong>≥ 8.1</strong> ; le verrou est résolu pour PHP 8.1 et contient PHPUnit 10.5. <code>composer tests-matrice</code> rejoue les suites et l’import complet avec chaque PHP de 8.1 à 8.4 installé.</p>
 <h2 id="depuis-la-racine-du-checkout">Depuis la racine du checkout<a class="headerlink" href="#depuis-la-racine-du-checkout" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>composer<span class="w"> </span>install<span class="w"> </span>--no-interaction<span class="w"> </span>--prefer-dist
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>composer<span class="w"> </span>tests-unit
