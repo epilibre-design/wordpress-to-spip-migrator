@@ -15,7 +15,7 @@ polyhier et wp2spip, base du WordPress déclarée comme base externe ; puis peut
 Options :
   --spip <dossier>          dossier du SPIP à créer, vide ou absent (requis)
   --wordpress <dossier>     dossier du WordPress (requis)
-  --version-spip <X.Y[.Z]>  version de SPIP (défaut : 4.4, dernière publiée)
+  --version-spip <X.Y[.Z]>  version de SPIP (défaut : 4.4, branche stable) ; X.Y.Z pour une autre branche
   --base-spip <base>        sqlite (défaut) ou mysql:<base>, base existante
   --base-partagee           autorise mysql:<base> à être la base même du WordPress
   --sql-hote <hôte>         hôte MySQL de SPIP, sans port (défaut : celui de wp-config.php)
@@ -60,8 +60,11 @@ spip_cli() {
 }
 
 # Téléchargement depuis le dossier parent, pour que SPIP-Cli ne charge pas un SPIP voisin
+# SPIP-Cli 2.0.1 ignore la release (-R) et prend la branche stable : une version X.Y.Z est demandée par son tag
 telecharger_spip() {
-	(cd "$(dirname "$spip")" && "$spip_cli_exe" --no-ansi core:telecharger spip -R "$version_spip" -d "$spip")
+	local source=(-R "$version_spip")
+	[[ $version_spip =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && source=(-b "v$version_spip")
+	(cd "$(dirname "$spip")" && "$spip_cli_exe" --no-ansi core:telecharger spip "${source[@]}" -d "$spip")
 }
 
 # Requête MySQL : mysql_requete <hôte> <port> <login> <mot de passe> <base> <requête>
@@ -198,6 +201,9 @@ etape "Téléchargement de SPIP $version_spip"
 mkdir -p "$(dirname "$spip")"
 lancer telecharger_spip
 [ -f "$spip/ecrire/inc_version.php" ] || erreur "SPIP absent de $spip après core:telecharger"
+version_obtenue=$(grep -oE "spip_version_branche = '[^']+'" "$spip/ecrire/inc_version.php" | cut -d"'" -f2)
+[[ $version_obtenue == "$version_spip" || $version_obtenue == "$version_spip".* ]] \
+	|| erreur "SPIP $version_obtenue téléchargé au lieu de $version_spip : donner la version complète (X.Y.Z)"
 lancer spip_cli core:preparer --auto --droits "$droits"
 [ -d "$spip/plugins/auto" ] && [ -w "$spip/plugins/auto" ] || erreur "plugins/auto absent ou non accessible en écriture après core:preparer --auto"
 

@@ -12,7 +12,7 @@ Les sources françaises sont dans `docs/site/`. La préparation anglaise utilise
 ## Installation
 Tout est basé sur une commande [SPIP-Cli](https://contrib.spip.net/SPIP-Cli) `wordpress:importer`, il faut donc l'installer au préalable.
 
-Afin d'importer le même type de fonctionnalités que dans Wordpress, il nécessite aussi Polyhiérarchie et Pages uniques. Il demande PHP 8.4 : le HTML de Wordpress est analysé par l'analyseur HTML5 de PHP (`Dom\HTMLDocument`) pour être converti en raccourcis SPIP (voir « Conversion du HTML »).
+Afin d'importer le même type de fonctionnalités que dans Wordpress, il nécessite aussi Polyhiérarchie et Pages uniques. Il demande PHP 8.1 ou plus récent, avec l'extension DOM : le HTML de Wordpress est analysé en arbre HTML5 pour être converti en raccourcis SPIP (voir « Conversion du HTML »), par l'analyseur de PHP (`Dom\HTMLDocument`) à partir de PHP 8.4, et avant par la bibliothèque Masterminds HTML5-PHP livrée dans `lib/` (licence MIT).
 
 Il faut ensuite déclarer la base de données SQL du Wordpress en tant que base externe dans l'admin de SPIP (le nom "wordpress" étant reconnu par défaut, sinon il faudra le préciser dans les options).
 
@@ -119,7 +119,7 @@ Des plugins séparés ajoutent leurs traitements à l'import ; installés et act
 - [wp2spip_acf](https://git.spip.net/technova69/wp2spip_acf) : champs ACF (Advanced Custom Fields) des articles et des pages vers des champs extras (Champs Extras Interface).
 
 ## Tests
-Les tests demandent PHP 8.4 et Composer. Depuis la racine du dépôt :
+Les tests demandent PHP 8.1 ou plus récent et Composer ; le verrou est résolu pour PHP 8.1 (PHPUnit 10.5). `composer tests-matrice` lance les suites et l'import complet avec chaque PHP de 8.1 à 8.4 installé (`php8.1` à `php8.4`). Après une mise à jour de `masterminds/html5`, `outils/copier_masterminds.sh` recopie la bibliothèque dans `lib/`. Depuis la racine du dépôt :
 
 ``` bash
 $ composer install

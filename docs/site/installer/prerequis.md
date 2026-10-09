@@ -4,8 +4,8 @@
 
 | Usage | Prérequis |
 |---|---|
-| Utiliser le plugin | SPIP 4.2 à 4.4 d’après le manifeste ; **PHP ≥ 8.4**, avec l’extension DOM et `Dom\HTMLDocument` pour la conversion HTML5 |
-| Exécuter les tests verrouillés | PHP **≥ 8.4.1**, Composer, extensions demandées par PHPUnit et SQLite pour l’intégration |
+| Utiliser le plugin | SPIP 4.2 à 4.4 d’après le manifeste ; **PHP ≥ 8.1**, avec l’extension DOM ; l’arbre HTML5 vient de `Dom\HTMLDocument` à partir de PHP 8.4, et avant de la bibliothèque Masterminds HTML5-PHP livrée avec le plugin. SPIP 4.2 et 4.3 acceptent PHP jusqu’à 8.3 |
+| Exécuter les tests verrouillés | PHP **≥ 8.1** (PHPUnit 10.5), Composer, extensions demandées par PHPUnit et SQLite pour l’intégration |
 | Préparer un SPIP automatiquement | Bash, PHP CLI, SPIP-Cli corrigé, client MySQL pour lire le WordPress, accès aux bases et téléchargements |
 | Construire ce site documentaire | Python 3.11 ou ultérieur et `requirements-docs.txt` ; aucun SPIP ni WordPress requis |
 

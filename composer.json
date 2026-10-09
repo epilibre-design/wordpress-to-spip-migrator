@@ -4,10 +4,12 @@
     "type": "spip-plugin",
     "license": "GPL-3.0-or-later",
     "require": {
-        "php": ">=8.4"
+        "php": ">=8.1",
+        "ext-dom": "*",
+        "masterminds/html5": "^2.10"
     },
     "require-dev": {
-        "phpunit/phpunit": "^13.0",
+        "phpunit/phpunit": "^10.5",
         "spip/spip-cli": "dev-master",
         "spip/tests": "dev-master"
     },
@@ -33,10 +35,14 @@
         "install-spip-test": "bash scripts/install-spip-test.sh",
         "tests-unit": "phpunit --testsuite unit",
         "tests-integration": "phpunit --testsuite integration --bootstrap tests/bootstrap_integration.php",
-        "tests-import": "bash -c 'source tests/integration/environnement.sh && tests/integration/valider.sh \"$WP6\" && tests/integration/valider.sh \"$WP7\"'"
+        "tests-import": "bash -c 'source tests/integration/environnement.sh && tests/integration/valider.sh \"$WP6\" && tests/integration/valider.sh \"$WP7\"'",
+        "tests-matrice": "bash tests/matrice_php.sh --import"
     },
     "config": {
         "sort-packages": true,
-        "process-timeout": 0
+        "process-timeout": 0,
+        "platform": {
+            "php": "8.1.0"
+        }
     }
 }

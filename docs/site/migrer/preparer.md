@@ -44,7 +44,7 @@ spip plugins:lister --short --raw --no-dist
 spip wordpress:importer /chemin/vers/wordpress-fige --info
 ```
 
-Confirmer Pages uniques, Polyhiérarchie et wp2spip actifs, avec PHP 8.4 et DOM. Sale n’est plus installé ni requis. Les autres plugins requis par le contenu seront détectés avant les traitements. La source est lisible et le préfixe correspond aux tables attendues.
+Confirmer Pages uniques, Polyhiérarchie et wp2spip actifs, avec PHP 8.1 ou plus récent et l’extension DOM. Sale n’est plus installé ni requis. Les autres plugins requis par le contenu seront détectés avant les traitements. La source est lisible et le préfixe correspond aux tables attendues.
 
 Pour reprendre les données Yoast ou ACF, installer et activer les [extensions du migrateur](../comprendre/extensions.md) dans ce SPIP avant l’import ; elles ne sont pas ajoutées par ce script. Préparer alors sans `--importer`, puis vérifier les traitements avec `--info`.
 

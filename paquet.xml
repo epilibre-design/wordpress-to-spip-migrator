@@ -23,8 +23,8 @@
 	<pipeline nom="wp2spip_bloc" action="" />
 	<pipeline nom="wp2spip_plugins_requis" action="" />
 	
-	<!-- Conversion du HTML par Dom\HTMLDocument (inc/wp2spip_html.php) -->
-	<necessite nom="php" compatibilite="[8.4.0;]" />
+	<!-- Conversion du HTML : Dom\HTMLDocument (PHP 8.4), sinon Masterminds HTML5-PHP de lib/ (inc/wp2spip_html_arbre.php) -->
+	<necessite nom="php" compatibilite="[8.1.0;]" />
 	<necessite nom="pages" compatibilite="[2.0.0;]" />
 	<necessite nom="polyhier" compatibilite="[4.0.0;]" />
 	<utilise nom="forum" />

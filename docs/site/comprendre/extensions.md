@@ -4,7 +4,7 @@ Yoast SEO et ACF sont pris en charge par **deux plugins séparés publiés**. Le
 
 ## Installer les extensions du migrateur
 
-Récupérer [wp2spip_yoast](https://git.spip.net/technova69/wp2spip_yoast) ou [wp2spip_acf](https://git.spip.net/technova69/wp2spip_acf), les placer dans `plugins/` du SPIP de destination et les activer à côté de wp2spip **avant l’import**. Consulter leurs README pour l’installation et les versions exactes. Les versions publiées demandent wp2spip ≥ 3.0.0 et PHP 8.4.
+Récupérer [wp2spip_yoast](https://git.spip.net/technova69/wp2spip_yoast) ou [wp2spip_acf](https://git.spip.net/technova69/wp2spip_acf), les placer dans `plugins/` du SPIP de destination et les activer à côté de wp2spip **avant l’import**. Consulter leurs README pour l’installation et les versions exactes. Les versions publiées demandent wp2spip ≥ 3.0.0 et PHP 8.1 ou plus récent.
 
 Depuis la racine de ce SPIP :
 
