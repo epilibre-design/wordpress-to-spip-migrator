@@ -35,7 +35,7 @@ php -r 'foreach (array(10, 20) as $n) { var_dump(preg_replace(",(\s*(<br( [^>]*)
 
 Résultat : `"a          b"` puis `NULL`, `Backtrack limit exhausted`.
 
-Sur les 103 contenus du jeu de test *Theme Unit Test* de WordPress 6.9, deux (« WP 6.1 Widgets block category » et « WP 6.1 Theme block category ») sont convertis en chaîne vide.
+Sur les 103 contenus du jeu de test *Theme Unit Test* importé dans un WordPress 6.9, deux (34 « WP 6.1 Widgets block category » et 51 « WP 6.1 Theme block category ») sont convertis en chaîne vide. Ces 103 textes, leur origine et la commande qui rejoue la vérification sont dans l'annexe [`sale-corpus-theme-unit-test.md`](sale-corpus-theme-unit-test.md).
 
 ### Correctif proposé
 
@@ -46,7 +46,7 @@ Même motif, sans imbrication, avec un quantificateur possessif (aucun retour ar
 +		",(?:\s|<br(?: [^>]*)?".'>)*+\\z,i' => '', //Saut de ligne en fin de texte
 ```
 
-Vérifié : les 103 contenus du jeu de test convertis avant et après le correctif ; seuls les deux textes perdus changent (ils sont désormais convertis), les 101 autres sont identiques à l'octet. Tous les autres motifs de `correspondances_standards()` ont été essayés sur de longues suites d'espaces, de retours à la ligne et de `<br>` : aucun autre n'échoue.
+Vérifié : les 103 contenus de l'annexe convertis avant et après le correctif ; seuls les deux textes perdus changent (ils sont désormais convertis), les 101 autres sont identiques à l'octet. Tous les autres motifs de `correspondances_standards()` ont été essayés sur de longues suites d'espaces, de retours à la ligne et de `<br>` : aucun autre n'échoue.
 
 ## 2. `extraire_images()` : avertissements PHP 8 pour chaque image
 
@@ -71,7 +71,7 @@ spip php:eval 'error_reporting(E_ALL); include_spip("sale_fonctions"); echo sale
 
 Résultat : 8 avertissements (4 `Warning` ligne 317, puis `Deprecated` ligne 15), puis `Texte <img src="a.jpg" alt=""> suite`.
 
-Sur les 103 contenus du jeu de test : 120 avertissements de ce type.
+Sur les 103 contenus de l'annexe : 96 avertissements de ce type.
 
 ### Correctif proposé
 
@@ -85,11 +85,11 @@ Parcourir les balises trouvées ; l'assemblage qui suit est inchangé (`implode(
  			}
 ```
 
-Vérifié : même texte converti, sans avertissement, pour la reproduction, pour un texte à deux images et un `<object>`, et pour les 103 contenus du jeu de test (identiques à l'octet, hormis les deux textes du point 1 quand les deux correctifs sont appliqués).
+Vérifié : même texte converti, sans avertissement, pour la reproduction, pour un texte à deux images et un `<object>`, et pour les 103 contenus de l'annexe (identiques à l'octet ; restent 2 avertissements, ceux des deux textes perdus du point 1).
 
 ## Correctif complet
 
-Les deux correctifs, appliqués ensemble : 0 avertissement sur les 103 contenus (122 avant).
+Les deux correctifs, appliqués ensemble : 0 avertissement et aucun texte perdu sur les 103 contenus de l'annexe (avant : 98 avertissements, dont 2 `Deprecated` ligne 421 dus aux deux textes perdus, et 2 textes perdus).
 
 ```diff
 --- a/sale_fonctions.php
