@@ -2,7 +2,7 @@
 
 Date : 2026-10-09
 Spec d'ensemble : `2026-10-08-wp2spip-ensemble-design.md`, § 6, sous-projet 9.
-Statut : réalisé (dépôt local `wp2spip_acf`, non publié) ; décisions prises seul, à relire à la revue finale.
+Statut : réalisé (dépôt [`wp2spip_acf`](https://git.spip.net/technova69/wp2spip_acf), publié le 2026-10-09) ; décisions prises seul, à relire à la revue finale.
 
 Écarts décidés pendant la réalisation : les plugins requis dépendent des champs importables et non des valeurs (sinon un site aux champs définis mais encore vides échouerait à la garde du § 4.2) ; les groupes non publiés (désactivés) sont ignorés sans être comptés.
 
@@ -23,7 +23,7 @@ Côté SPIP, **Champs Extras** (`cextras`) ajoute des colonnes aux tables des ob
 
 | Sujet | Décision |
 |---|---|
-| Forme | plugin séparé `wp2spip_acf`, dépôt local `wp2spip_acf`, comme `wp2spip_yoast` (sous-projet 8) ; nécessite wp2spip `[3.0.0;]` |
+| Forme | plugin séparé `wp2spip_acf`, dépôt [`wp2spip_acf`](https://git.spip.net/technova69/wp2spip_acf), comme `wp2spip_yoast` (sous-projet 8) ; nécessite wp2spip `[3.0.0;]` |
 | Plugins cibles | **Champs Extras Interface** (`iextras`, avec `cextras` et leurs dépendances) : les champs créés restent modifiables dans l'espace privé ; déclarés par `wp2spip_plugins_requis` seulement s'il y a des champs à importer |
 | Objets | les champs des groupes qui s'appliquent aux articles ou aux pages WordPress → colonnes de `spip_articles` ; les autres groupes (taxonomies, utilisateurs, options, commentaires, médias, menus) sont hors périmètre, comptés au bilan |
 | Nom des colonnes | `acf_<nom>` (nom ACF en minuscules) : jamais de collision avec une colonne de SPIP ou d'un plugin, et lisible dans les squelettes (`#ACF_<NOM>`) ; un nom qui ne donne pas un identifiant SQL valide (`^[a-z0-9_]+$`, 64 caractères au plus avec le préfixe) n'est pas importé, compté |

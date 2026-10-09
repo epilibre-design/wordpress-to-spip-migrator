@@ -2,7 +2,7 @@
 
 Date : 2026-10-09
 Spec d'ensemble : `2026-10-08-wp2spip-ensemble-design.md`, § 6, sous-projet 8.
-Statut : réalisé (dépôt local `wp2spip_yoast`, non publié).
+Statut : réalisé (dépôt [`wp2spip_yoast`](https://git.spip.net/technova69/wp2spip_yoast), publié le 2026-10-09).
 
 ## 1. Constat
 

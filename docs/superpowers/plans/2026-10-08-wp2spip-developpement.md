@@ -1697,13 +1697,13 @@ Chacun suit le cycle de la spec (§ 6) : spec détaillée, relecture, puis plan 
 ### Task 18 : sous-projet 8 — extension `wp2spip_yoast`
 
 - [x] Spec : `docs/superpowers/specs/2026-10-09-wp2spip-yoast-design.md` (catégorie principale → rubrique principale, après `importer_articles` ; titres, descriptions et indexation → plugin SEO, en dernier).
-- [x] Plan : `docs/superpowers/plans/2026-10-09-wp2spip-yoast.md` ; réalisation dans le dépôt local `wp2spip_yoast` (non publié).
+- [x] Plan : `docs/superpowers/plans/2026-10-09-wp2spip-yoast.md` ; réalisation dans le dépôt [`wp2spip_yoast`](https://git.spip.net/technova69/wp2spip_yoast) (publié le 2026-10-09).
 - [x] Validation : depuis un clone neuf, 16 tests unitaires et 7 d'intégration au vert, deux fois (sabotage du filtre des catégories supprimées détecté par 2 tests) ; site réel : SEO installé par l'import, 43 rubriques principales changées, 83 conformes, 33 métadonnées SEO (titres 4, descriptions 28, indexation 1), une catégorie supprimée ignorée, relance sans changement, export ne différant que par les 43 articles déplacés et leurs rubriques secondaires, vérificateur à OK ; WordPress 6.9 et 7.1 : export identique avec et sans l'extension.
 
 ### Task 19 : sous-projet 9 — extension `wp2spip_acf`
 
 - [x] Spec : `docs/superpowers/specs/2026-10-09-wp2spip-acf-design.md` (champs des groupes d'articles et de pages → colonnes `acf_<nom>` de `spip_articles`, saisies de Champs Extras Interface ; correspondances vers des colonnes existantes par le pipeline `wp2spip_acf_correspondances`).
-- [x] Plan : `docs/superpowers/plans/2026-10-09-wp2spip-acf.md` ; réalisation dans le dépôt local `wp2spip_acf` (non publié).
+- [x] Plan : `docs/superpowers/plans/2026-10-09-wp2spip-acf.md` ; réalisation dans le dépôt [`wp2spip_acf`](https://git.spip.net/technova69/wp2spip_acf) (publié le 2026-10-09).
 - [x] Validation : depuis un clone neuf, 53 tests unitaires et 8 d'intégration au vert, deux fois ; deux sabotages détectés ; site réel : Champs Extras Interface installé par l'import, 30 champs créés en 3 groupes, 483 valeurs (autant que sur la base WordPress), relance sans changement, export de wp2spip identique, vérificateur à OK ; WordPress 6.9 et 7.1 : sans effet.
 
 ### Task 20 : sous-projet 10 — signalements amont

@@ -106,6 +106,12 @@ Les pages Wordpress deviennent des pages uniques (plugin Pages), sans rubrique. 
 
 Le type `sous_page` est ajouté à la configuration d'a2a ; il y reste après la désinstallation de wp2spip. Si une page manque dans SPIP, ou si a2a ne crée pas un lien (les deux pages déjà liées par un autre type, liaisons multiples désactivées), le traitement `importer_hierarchie_pages` échoue et la commande retourne le code de sortie 1.
 
+## Extensions
+Des plugins séparés ajoutent leurs traitements à l'import ; installés et actifs à côté de wp2spip, ils sont lancés par la même commande :
+
+- [wp2spip_yoast](https://git.spip.net/technova69/wp2spip_yoast) : catégorie principale, titres, descriptions et indexation de Yoast SEO (plugin SEO) ;
+- [wp2spip_acf](https://git.spip.net/technova69/wp2spip_acf) : champs ACF (Advanced Custom Fields) des articles et des pages vers des champs extras (Champs Extras Interface).
+
 ## Tests
 Les tests demandent PHP 8.4 et Composer. Depuis la racine du dépôt :
 
