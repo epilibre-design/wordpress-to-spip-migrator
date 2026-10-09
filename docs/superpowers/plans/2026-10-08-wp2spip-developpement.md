@@ -1706,13 +1706,7 @@ Chacun suit le cycle de la spec (§ 6) : spec détaillée, relecture, puis plan 
 - [x] Plan : `docs/superpowers/plans/2026-10-09-wp2spip-acf.md` ; réalisation dans le dépôt [`wp2spip_acf`](https://git.spip.net/technova69/wp2spip_acf) (publié le 2026-10-09).
 - [x] Validation : depuis un clone neuf, 53 tests unitaires et 8 d'intégration au vert, deux fois ; deux sabotages détectés ; site réel : Champs Extras Interface installé par l'import, 30 champs créés en 3 groupes, 483 valeurs (autant que sur la base WordPress), relance sans changement, export de wp2spip identique, vérificateur à OK ; WordPress 6.9 et 7.1 : sans effet.
 
-### Task 20 : sous-projet 10 — signalements amont
-
-- [x] Spec : `docs/superpowers/specs/2026-10-09-wp2spip-signalements-design.md`.
-- [x] sale : brouillon `docs/signalements/sale-extraire-images.md` — avertissements PHP 8 d'`extraire_images()`, et, trouvé en reproduisant, **texte entier perdu** (motif à retour arrière exponentiel, deux contenus du WordPress 6.9 convertis en chaîne vide) ; correctifs vérifiés sur le corpus du 6.9 (seuls les deux textes perdus changent, 0 avertissement). Non publié.
-- [x] Polyhiérarchie configurable : brouillon `docs/signalements/polyhierarchie-configurable.md` — pipeline non déclaré, alias `O` (erreur SQL puis erreur fatale PHP 8), champ `date` supposé (SPIP le déclare par défaut même absent) ; correctif vérifié sur une copie locale (mots-clés et articles). Non publié.
-
-### Task 20 bis : sous-projet 11 — convertisseur HTML → SPIP sans sale
+### Task 20 : sous-projet 11 — convertisseur HTML → SPIP sans sale
 
 - [x] Spec : `docs/superpowers/specs/2026-10-09-wp2spip-convertisseur-html-design.md` (demandé le 2026-10-09 ; PHP 8.4).
 - [x] Plan : `docs/superpowers/plans/2026-10-09-wp2spip-convertisseur-html.md` ; réalisation : `inc/wp2spip_html.php`, tous les appels à sale remplacés, PHP 8.4 minimum, sale retiré des dépendances (wp2spip et ses deux extensions).
@@ -1721,5 +1715,5 @@ Chacun suit le cycle de la spec (§ 6) : spec détaillée, relecture, puis plan 
 
 ### Task 21 : publication
 
-- [x] Décisions (spec § 7) : ordre des sous-projets 3 à 10, version 3.0.0. Décidé : `compat-spip-4.4` est la branche principale (branche par défaut du dépôt), sans fusion dans `master` ; pas de demande de fusion vers le dépôt d'origine, abandonné.
+- [x] Décisions (spec § 7) : ordre des sous-projets, version 3.0.0. Décidé : `compat-spip-4.4` est la branche principale (branche par défaut du dépôt), sans fusion dans `master` ; pas de demande de fusion vers le dépôt d'origine, abandonné.
 - [x] `compat-spip-4.4` branche par défaut du dépôt ; étiquette `v3.0.0`, push — demandés par le mainteneur le 2026-10-09.

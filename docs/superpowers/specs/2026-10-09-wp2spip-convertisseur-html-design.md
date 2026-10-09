@@ -6,7 +6,7 @@ Statut : réalisé. Demandé par le mainteneur le 2026-10-09 (« trop d'erreurs 
 
 ## 1. Constat
 
-wp2spip convertit le HTML de WordPress en raccourcis SPIP par le plugin **sale** 1.0.0 : une suite d'expressions régulières appliquées au texte entier. Défauts constatés (sous-projet 10, `docs/signalements/sale-extraire-images.md`) :
+wp2spip convertit le HTML de WordPress en raccourcis SPIP par le plugin **sale** 1.0.0 : une suite d'expressions régulières appliquées au texte entier. Défauts constatés pendant les essais :
 
 - **texte entier perdu** : un motif à retour arrière exponentiel fait échouer `preg_replace()` dès une vingtaine d'espaces consécutifs ; `sale()` rend alors une chaîne vide, sans erreur. Sur le WordPress de test 6.9, l'article « WP 6.1 Widgets block category » est importé avec un texte vide, et la référence de `composer tests-import` l'a enregistré ainsi ;
 - avertissements PHP 8 à chaque image (`extraire_images()`) ;
@@ -62,4 +62,3 @@ Sortie : paragraphes séparés par une ligne vide, sans blanc en fin de ligne, s
 ## 5. Hors périmètre
 
 - Conversion des images, légendes, lecteurs et liens internes dans le convertisseur (restent dans `importer_articles` ; possible ensuite, l'arbre étant disponible).
-- Publication des signalements à sale (le défaut reste à signaler à ses mainteneurs).
