@@ -1,0 +1,5 @@
+Mermaid 11.12.1
+Source: https://registry.npmjs.org/mermaid/-/mermaid-11.12.1.tgz
+Archive integrity: sha512-UlIZrRariB11TY1RtTgUWp65tphtBv4CSq7vyS2ZZ2TgoMjs2nloq+wFqxiwcxlhHUvs7DPGgMjs2aeQxz5h9g==
+mermaid.min.js SHA256: 198b19442f86f0b46a17e56d3abf744c3a28a3427e66fa8dada3b589a77babcc
+Licence MIT conservée dans MERMAID-LICENSE.txt.

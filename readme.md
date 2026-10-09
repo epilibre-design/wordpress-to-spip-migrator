@@ -3,6 +3,12 @@
 
 Ce plugin fournit des outils en ligne de commande pour importer le contenu d'un Wordpress dans un SPIP.
 
+## Site documentaire
+
+Le [site MkDocs](docs/site/index.md) explique les étapes de migration, les correspondances WordPress → SPIP, l'évolution des données de WordPress 4 à 7 et les limites de la révision documentée. Il distingue les fonctions implémentées des évolutions prévues par les specs.
+
+Les sources françaises sont dans `docs/site/`. La préparation anglaise utilise `mkdocs-static-i18n` et les futurs suffixes `.en.md` ; les traductions seront rédigées ultérieurement. Voir [les instructions de construction, maintenance et publication](docs/site/comprendre/maintenir.md).
+
 ## Installation
 Tout est basé sur une commande [SPIP-Cli](https://contrib.spip.net/SPIP-Cli) `wordpress:importer`, il faut donc l'installer au préalable.
 

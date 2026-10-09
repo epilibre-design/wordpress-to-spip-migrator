@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+  {{ super() }}
+  {% set english = config.theme.language == "en" %}
+  <aside class="documented-revision" aria-label="{{ 'Documented code version' if english else 'Version du code documentée' }}">
+    <strong>{{ 'Documented revision' if english else 'Révision documentée' }}</strong>
+    <a href="{{ config.repo_url }}/commit/{{ config.extra.documented_commit }}"><code>{{ config.extra.documented_commit }}</code></a>
+    <span>{{ 'Branch' if english else 'Branche' }} {{ config.extra.documented_branch }} · {{ 'Reviewed' if english else 'Revue du' }} {{ config.extra.reviewed_on }} · {{ 'Tool under development' if english else 'Outil en développement' }}</span>
+  </aside>
+{% endblock %}
