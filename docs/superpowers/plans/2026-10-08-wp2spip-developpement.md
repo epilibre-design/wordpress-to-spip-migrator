@@ -1715,7 +1715,9 @@ Chacun suit le cycle de la spec (§ 6) : spec détaillée, relecture, puis plan 
 ### Task 20 bis : sous-projet 11 — convertisseur HTML → SPIP sans sale
 
 - [x] Spec : `docs/superpowers/specs/2026-10-09-wp2spip-convertisseur-html-design.md` (demandé le 2026-10-09 ; PHP 8.4).
-- [ ] Plan, réalisation, validation (corpus comparés, différences classées, référence revue).
+- [x] Plan : `docs/superpowers/plans/2026-10-09-wp2spip-convertisseur-html.md` ; réalisation : `inc/wp2spip_html.php`, tous les appels à sale remplacés, PHP 8.4 minimum, sale retiré des dépendances (wp2spip et ses deux extensions).
+- [x] Validation : 132 tests unitaires et 82 d'intégration au vert ; sabotages détectés ; WordPress 6.9 et 7.1 : différences avec l'import par sale revues mot à mot (aucun mot perdu, un texte retrouvé), référence mise à jour ; site réel : import à code 0, vérificateur OK, aucun avertissement PHP, deux défauts trouvés par la revue et corrigés ; préparation complète à 0 échec ; extensions au vert depuis des clones neufs.
+- [x] Trouvé en revalidant `wp2spip_acf` sur le site réel : un plugin requis déjà présent mais aux dépendances inactives n'était pas activé, et le plugin qui l'utilise était désactivé sans que l'import échoue (champs ACF non importés, code 0) ; corrigé dans `verifier_plugins()` (activation par SVP, contrôle des plugins actifs dans la base), échec vérifié par sabotage. `remise_a_zero.sh` efface aussi `tmp/meta_cache.php`, qui réécrivait l'état précédent des plugins dans la base.
 
 ### Task 21 : publication
 
