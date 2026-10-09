@@ -2,7 +2,7 @@
 
 Date : 2026-10-09
 Spec d'ensemble : `2026-10-08-wp2spip-ensemble-design.md`, § 6, sous-projet 10.
-Statut : design décidé seul (mandat de réalisation autonome), à planifier.
+Statut : réalisé (brouillons non publiés) ; le ticket de sale comprend en plus la perte de textes entiers, trouvée en reproduisant (au-delà du § 5).
 
 ## 1. Constat
 
