@@ -14,6 +14,7 @@ class WordpressImporter extends Command {
 	public $wp_version = null;
 	public $base = 'wordpress';
 	public $garder_adresse = false;
+	public $prefixe = 'wp_';
 	// Exécutable SPIP-Cli en cours, pour lancer des sous-commandes
 	protected $spip_cli = '';
 	
@@ -47,6 +48,12 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 				'i',
 				InputOption::VALUE_OPTIONAL,
 				'Affiche la version du Wordpress et les traitements disponibles.'
+			)
+			->addOption(
+				'prefixe',
+				null,
+				InputOption::VALUE_REQUIRED,
+				'Préfixe des tables Wordpress, s’il diffère de celui de wp-config.php ou n’y est pas lisible.'
 			)
 			->addOption(
 				'garder-adresse',
@@ -90,6 +97,11 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 		include $fichier_version;
 		$this->wp_version = $wp_version;
 		
+		// Préfixe des tables Wordpress : lu dans wp-config.php ou donné par --prefixe, puis contrôlé
+		if (($code = $this->determiner_prefixe()) !== null) {
+			return $code;
+		}
+		
 		$traitements_disponibles = array(
 			'importer_metas',
 			'importer_auteurs',
@@ -111,6 +123,7 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 			'* <comment>Les contenus déjà importés ne sont pas ré-importés.</comment>',
 			'* <comment>Version</comment> : ' . $this->wp_version,
 			'* <comment>Base</comment> : ' . $this->base,
+			'* <comment>Préfixe des tables</comment> : ' . $this->prefixe,
 			'* <comment>Fichiers</comment> : ' . $this->dir_wordpress,
 			'* <comment>Traitements disponibles</comment> : ' . join(', ', $traitements_disponibles),
 			'',
@@ -120,6 +133,10 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 		if ($input->hasParameterOption(array('--info', '-i'))) {
 			return Command::SUCCESS;
 		}
+		
+		// Préfixe contrôlé : noté pour ce SPIP, tous les traitements le lisent (wp2spip_table())
+		include_spip('inc/meta');
+		ecrire_meta('wp2spip_prefixe_tables', $this->prefixe);
 		
 		// Peut-être qu'on veut lancer seulement certains traitements
 		if ($traitements_ok = $input->getOption('traitements')) {
@@ -150,6 +167,53 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 		}
 		
 		return Command::SUCCESS;
+	}
+	
+	/**
+	 * Préfixe des tables Wordpress : option --prefixe, sinon $table_prefix de wp-config.php, puis contrôles
+	 *
+	 * Format (règle de Wordpress), présence de toutes les tables lues par wp2spip, et cohérence avec un import
+	 * déjà commencé dans ce SPIP. Contrôlé avant tout traitement et avant la vérification des plugins requis,
+	 * qui lit déjà les tables.
+	 *
+	 * @return int|null null si le préfixe est utilisable, sinon le code de sortie de la commande
+	 */
+	protected function determiner_prefixe(): ?int {
+		include_spip('inc/wp2spip');
+		$fichier_config = $this->dir_wordpress . 'wp-config.php';
+		$source = is_readable($fichier_config) ? file_get_contents($fichier_config) : false;
+		$prefixe_config = ($source !== false) ? wp2spip_prefixe_wp_config($source) : null;
+		
+		if (($option = $this->input->getOption('prefixe')) !== null) {
+			$this->prefixe = $option;
+			$origine = 'option --prefixe' . (($prefixe_config !== null and $prefixe_config !== $option) ? " ; wp-config.php annonce $prefixe_config" : '');
+		}
+		elseif ($prefixe_config !== null) {
+			$this->prefixe = $prefixe_config;
+			$origine = 'wp-config.php';
+		}
+		else {
+			$this->output->writeln('<error>Préfixe des tables Wordpress introuvable dans wp-config.php : indiquer --prefixe.</error>');
+			return Command::FAILURE;
+		}
+		
+		if (!wp2spip_prefixe_valide($this->prefixe)) {
+			$this->output->writeln("<error>Préfixe des tables « {$this->prefixe} » invalide : lettres, chiffres et _ seulement.</error>");
+			return Command::FAILURE;
+		}
+		$this->output->writeln("Préfixe des tables : {$this->prefixe} ($origine).");
+		
+		if ($absentes = wp2spip_tables_wordpress_absentes($this->base, $this->prefixe)) {
+			$this->output->writeln('<error>Tables absentes de la base Wordpress « ' . $this->base . ' » : ' . join(', ', $absentes) . '. Vérifier le préfixe (option --prefixe).</error>');
+			return Command::FAILURE;
+		}
+		
+		$prefixe_importe = $GLOBALS['meta']['wp2spip_prefixe_tables'] ?? null;
+		if ($prefixe_importe !== null and $prefixe_importe !== $this->prefixe) {
+			$this->output->writeln("<error>Ce SPIP a été importé depuis les tables $prefixe_importe ; pour importer depuis {$this->prefixe}, remettre le SPIP à zéro.</error>");
+			return Command::FAILURE;
+		}
+		return null;
 	}
 	
 	protected function appliquer_traitement($traitement): bool {
