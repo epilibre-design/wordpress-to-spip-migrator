@@ -1,6 +1,6 @@
 # Articles et pages
 
-**État : implémenté**, pour les lignes `posts` de types `post` et `page`. Les révisions et types personnalisés ne font pas partie de cette sélection.
+Le moteur importe les lignes `posts` de types `post` et `page`. Les révisions et types personnalisés ne font pas partie de cette sélection.
 
 ## Objets et champs
 

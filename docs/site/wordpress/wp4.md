@@ -18,7 +18,7 @@ Une copie ancienne ou mise à niveau peut encore présenter des situations héri
 
 La table `termmeta` et les API de métadonnées de termes permettent d’associer des valeurs supplémentaires aux catégories et autres taxonomies. Le modèle de base conserve ses tables de termes et de relations ; cette nouvelle couche peut porter des données importantes pour le site.
 
-La révision documentée importe les catégories, les étiquettes, leurs descriptions et leurs relations aux contenus, mais n’effectue pas un transfert général de `termmeta`. Les valeurs propres au thème ou aux extensions demandent une stratégie dédiée.
+wp2spip importe les catégories, les étiquettes, leurs descriptions et leurs relations aux contenus, mais n’effectue pas un transfert général de `termmeta`. Les valeurs propres au thème ou aux extensions demandent une stratégie dédiée.
 
 ## Médias et shortcodes
 

@@ -2,7 +2,7 @@
 
 Une taxonomie relie des **termes** à des contenus. Son nom (`category`, `post_tag`…) est distinct de l’identifiant du terme et de celui de la relation taxonomique.
 
-## Catégories : implémenté
+## Catégories
 
 | Structure WordPress | Rôle | SPIP |
 |---|---|---|
@@ -28,7 +28,7 @@ flowchart LR
 
 Avec [wp2spip_yoast](../comprendre/extensions.md#yoast-seo) active, la catégorie principale choisie dans Yoast peut remplacer ce choix avant le calcul des rubriques secondaires. Le cœur seul conserve la règle ci-dessus.
 
-## Étiquettes : implémenté
+## Étiquettes
 
 Le traitement `importer_mots` suit les articles et la hiérarchie des pages. Il crée un groupe « Étiquettes », puis un mot-clé par terme `post_tag`.
 
@@ -45,7 +45,7 @@ Une collision d’identifiant, un mot issu d’une étiquette déplacé hors du 
 
 ## Autres taxonomies et métadonnées
 
-Formats d’article, taxonomies personnalisées et métadonnées de termes (`termmeta`) ne sont pas convertis de façon générale par cette révision. Leur présence dans la base n’implique pas qu’elles soient utilisées par le moteur.
+Formats d’article, taxonomies personnalisées et métadonnées de termes (`termmeta`) ne sont pas convertis de façon générale par wp2spip. Leur présence dans la base n’implique pas qu’elles soient utilisées par le moteur.
 
 ## Contrôler
 

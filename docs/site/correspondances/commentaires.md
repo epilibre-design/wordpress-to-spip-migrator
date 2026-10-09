@@ -1,6 +1,6 @@
 # Commentaires et fils de discussion
 
-**État : implémenté**, avec le plugin Forum SPIP. La conversion préserve l’association à l’article et les réponses entre messages ; les numéros de forum sont ceux de SPIP.
+Les commentaires sont importés avec le plugin Forum SPIP. La conversion préserve l’association à l’article et les réponses entre messages ; les numéros de forum sont ceux de SPIP.
 
 ## Données reprises
 

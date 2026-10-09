@@ -23,7 +23,7 @@ L’éditeur de blocs ne crée pas une table SQL par bloc. Un modèle du site pe
 | `comments`, `commentmeta` | Messages, parenté, état de modération et métadonnées |
 | `options` | Configuration, valeurs simples ou sérialisées |
 
-`wp_` est un préfixe par défaut, pas une partie fixe du modèle. Le moteur utilise le préfixe effectivement sélectionné. Toutes ces tables ne sont pas lues par la révision documentée : `termmeta` et `commentmeta`, par exemple, ne sont pas importées de façon générale.
+`wp_` est un préfixe par défaut, pas une partie fixe du modèle. Le moteur utilise le préfixe effectivement sélectionné. Toutes ces tables ne sont pas lues par wp2spip : `termmeta` et `commentmeta`, par exemple, ne sont pas importées de façon générale.
 
 ## Les liens sont les données
 

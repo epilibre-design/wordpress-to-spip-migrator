@@ -1,6 +1,6 @@
 # Médias, galeries et blocs
 
-**État : implémenté avec limites.** L’import du fichier et la conversion de sa référence dans un texte sont deux opérations différentes.
+L’import du fichier et la conversion de sa référence dans un texte sont deux opérations différentes.
 
 ## Médias → documents
 

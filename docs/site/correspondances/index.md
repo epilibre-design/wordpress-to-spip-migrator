@@ -2,24 +2,24 @@
 
 Le moteur convertit des objets **et leurs relations**. Les structures SQL des deux CMS ne sont pas copiées à l’identique : une taxonomie devient une rubrique, une page devient un article particulier, une galerie devient un album.
 
-Les états ci-dessous concernent uniquement le commit documenté. Lire [l’état du projet](../etat-projet.md) pour les règles de validation et de mise à jour.
+Lire [l’état du projet](../etat-projet.md) pour les règles de validation et de mise à jour.
 
-| Fonction native WordPress | Stockage source | Équivalent SPIP | État / limite |
+| Fonction native WordPress | Stockage source | Équivalent SPIP | Remarques |
 |---|---|---|---|
-| Options générales | `options` | Métas du site | Implémenté pour une sélection de réglages |
-| Articles | `posts` (`post`) | Articles | Implémenté ; textes convertis, dates et liens repris |
-| Pages | `posts` (`page`) | Articles du plugin Pages uniques | Implémenté ; modèle de page non repris |
-| Pages parentes/enfants | `post_parent`, `menu_order` | Liens a2a `sous_page` avec rang | Implémenté ; rendu à construire |
-| Catégories | `terms`, `term_taxonomy` | Rubriques | Implémenté ; hiérarchie conservée |
-| Catégories multiples | `term_relationships` | Rubrique principale et secondaires Polyhiérarchie | Implémenté |
-| Étiquettes | Taxonomie `post_tag` | Mots-clés du groupe « Étiquettes » | Implémenté ; identifiants, descriptions et liens repris, même sans contenu |
-| Utilisateurs et rôles | `users`, `usermeta` | Auteurs et statuts SPIP | Implémenté ; droits transformés, mots de passe non repris |
-| Privé/protégé | `post_status`, `post_password` | Zones Accès restreint | Implémenté ; règle d’accès différente |
-| Médias | `attachment`, `postmeta`, uploads | Documents et associations | Implémenté ; fichiers manquants/refusés possibles |
-| Galeries | Bloc `gallery` ou shortcode | Albums | Implémenté |
-| Blocs/HTML | `post_content` | Syntaxe SPIP, modèles et HTML conservé | Implémenté partiellement selon le type |
-| Commentaires | `comments` | Forums et fils de discussion | Implémenté ; spam, corbeille, pingbacks/trackbacks exclus |
-| Liens internes et slugs | Texte, `post_name` | Raccourcis et entrées d’URL | Implémenté avec limites ; redirections serveur à préparer |
+| Options générales | `options` | Métas du site | Sélection de réglages |
+| Articles | `posts` (`post`) | Articles | Textes convertis, dates et liens repris |
+| Pages | `posts` (`page`) | Articles du plugin Pages uniques | Modèle de page non repris |
+| Pages parentes/enfants | `post_parent`, `menu_order` | Liens a2a `sous_page` avec rang | Rendu à construire |
+| Catégories | `terms`, `term_taxonomy` | Rubriques | Hiérarchie conservée |
+| Catégories multiples | `term_relationships` | Rubrique principale et secondaires Polyhiérarchie | — |
+| Étiquettes | Taxonomie `post_tag` | Mots-clés du groupe « Étiquettes » | Identifiants, descriptions et liens repris, même sans contenu |
+| Utilisateurs et rôles | `users`, `usermeta` | Auteurs et statuts SPIP | Droits transformés, mots de passe non repris |
+| Privé/protégé | `post_status`, `post_password` | Zones Accès restreint | Règle d’accès différente |
+| Médias | `attachment`, `postmeta`, uploads | Documents et associations | Fichiers manquants/refusés possibles |
+| Galeries | Bloc `gallery` ou shortcode | Albums | — |
+| Blocs/HTML | `post_content` | Syntaxe SPIP, modèles et HTML conservé | Conversion partielle selon le type de bloc |
+| Commentaires | `comments` | Forums et fils de discussion | Spam, corbeille, pingbacks/trackbacks exclus |
+| Liens internes et slugs | Texte, `post_name` | Raccourcis et entrées d’URL | Redirections serveur à préparer |
 | Révisions/autosaves | `posts` (`revision`) | Pas d’import de l’historique | Hors périmètre |
 | Menus classiques ou à blocs | `nav_menu_item`, taxonomies, `wp_navigation` | Navigation des squelettes | À reconstruire |
 | Thèmes, widgets et modèles | Fichiers, options, types `wp_template`… | Squelettes, styles et configuration | À adapter |
