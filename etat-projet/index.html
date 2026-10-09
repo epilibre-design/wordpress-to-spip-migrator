@@ -1553,7 +1553,7 @@
 
 
 <h1 id="etat-du-projet">État du projet<a class="headerlink" href="#etat-du-projet" title="Permanent link">&para;</a></h1>
-<p><strong>Révision documentée : <code>dc1963eb54b317e7e9e7b445bfee81199a7804bb</code></strong>, branche de référence <code>main</code> du dépôt <code>epilibre-design/wordpress-to-spip-migrator</code>. Revue éditoriale : 9 octobre 2026. Le paquet déclare la version <strong>3.0.0</strong>, en état <strong>test</strong>. Les sous-projets de la feuille de route sont marqués réalisés dans la spec d’ensemble ; cela ne garantit pas l’équivalence de tous les sites WordPress.</p>
+<p><strong>Révision documentée : <code>dc1963eb54b317e7e9e7b445bfee81199a7804bb</code></strong>, branche de référence <code>main</code> du dépôt <code>epilibre-design/wordpress-to-spip-migrator</code>. Revue éditoriale : 9 octobre 2026. Le paquet déclare la version <strong>3.0.0</strong>, en état <strong>test</strong>. Cela ne garantit pas l’équivalence de tous les sites WordPress.</p>
 <h2 id="lire-les-etats">Lire les états<a class="headerlink" href="#lire-les-etats" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1566,14 +1566,6 @@
 <tr>
 <td>Implémenté</td>
 <td>Un traitement ou un mécanisme est présent dans cette révision ; ses limites restent applicables</td>
-</tr>
-<tr>
-<td>Extension publiée</td>
-<td>La conversion est fournie par un plugin séparé, à installer et activer avec wp2spip</td>
-</tr>
-<tr>
-<td>Signalement préparé</td>
-<td>Un diagnostic et une proposition de correctif sont documentés ; aucun envoi aux mainteneurs tiers n’est établi</td>
 </tr>
 <tr>
 <td>Hors périmètre / à adapter</td>
@@ -1624,28 +1616,8 @@
 </tr>
 <tr>
 <td>HTML → raccourcis SPIP</td>
-<td>Implémenté dans wp2spip, avec l’arbre HTML5 de PHP 8.4 ; Sale retiré des dépendances</td>
+<td>Implémenté dans wp2spip, avec l’arbre HTML5 de PHP 8.4</td>
 <td><a href="../comprendre/conversion/">Conversion</a></td>
-</tr>
-<tr>
-<td>Yoast → SEO et catégorie principale</td>
-<td>Extension publiée, séparée du moteur</td>
-<td><a href="https://git.spip.net/technova69/wp2spip_yoast">wp2spip_yoast</a></td>
-</tr>
-<tr>
-<td>ACF → Champs Extras</td>
-<td>Extension publiée, pour les types et groupes pris en charge</td>
-<td><a href="https://git.spip.net/technova69/wp2spip_acf">wp2spip_acf</a></td>
-</tr>
-<tr>
-<td>Ajustement du statut des documents après liaison</td>
-<td>Implémenté : recalcul par <code>document_instituer()</code></td>
-<td><a href="../correspondances/medias-blocs/">Médias et blocs</a></td>
-</tr>
-<tr>
-<td>Signalements à Sale et Polyhiérarchie configurable</td>
-<td>Brouillons et reproductions préparés, non envoyés ; aucune API de signalement ajoutée au moteur</td>
-<td><a href="../comprendre/extensions/#signalements-aux-plugins-tiers">Signalements</a></td>
 </tr>
 <tr>
 <td>Menus, thème, révisions, types personnalisés</td>
@@ -1655,7 +1627,7 @@
 </tbody>
 </table>
 <h2 id="mise-a-jour-a-chaque-synchronisation">Mise à jour à chaque synchronisation<a class="headerlink" href="#mise-a-jour-a-chaque-synchronisation" title="Permanent link">&para;</a></h2>
-<p>Le mainteneur du site doit examiner le nouveau commit du dépôt, revérifier <strong>chaque ligne</strong> de cette matrice contre le code et les tests, puis actualiser les pages métier, les permaliens et la date de revue. Le SHA affiché et la matrice sont mis à jour ensemble. Les extensions ont leur propre dépôt et leur propre historique : leurs évolutions doivent aussi être examinées.</p>
+<p>Le mainteneur du site doit examiner le nouveau commit du dépôt, revérifier <strong>chaque ligne</strong> de cette matrice contre le code et les tests, puis actualiser les pages métier, les permaliens et la date de revue. Le SHA affiché et la matrice sont mis à jour ensemble.</p>
 <p>Tant que la revue n’est pas achevée, le site conserve son ancien SHA : il décrit cette révision, même si le dépôt a avancé. Il n’affiche pas automatiquement un nouveau HEAD sous un tableau ancien. L’état d’une autre branche ne change pas la matrice publique.</p>
 <p><a href="../comprendre/maintenir/">Procédure de maintenance</a> · <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/paquet.xml">Manifeste du paquet</a></p>
 
