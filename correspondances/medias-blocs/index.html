@@ -984,9 +984,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#controler" class="md-nav__link">
+  <a href="#comment-verifier-les-medias-importes" class="md-nav__link">
     <span class="md-ellipsis">
-      Contrôler
+      Comment vérifier les médias importés
     </span>
   </a>
   
@@ -1512,9 +1512,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#controler" class="md-nav__link">
+  <a href="#comment-verifier-les-medias-importes" class="md-nav__link">
     <span class="md-ellipsis">
-      Contrôler
+      Comment vérifier les médias importés
     </span>
   </a>
   
@@ -1592,7 +1592,7 @@
 <h2 id="structure-enregistree-et-rendu-calcule">Structure enregistrée et rendu calculé<a class="headerlink" href="#structure-enregistree-et-rendu-calcule" title="Permanent link">&para;</a></h2>
 <p>Un bloc peut stocker son HTML entre commentaires ; un autre stocke seulement des attributs ou une référence. Une liste d’articles calculée par WordPress n’est pas une liste figée dans <code>post_content</code>. Une composition synchronisée référencée par <code>core/block</code> exige une résolution supplémentaire : le moteur documenté n’importe pas les objets <code>wp_block</code> et ne garantit pas leur expansion.</p>
 <p>Les blocs de couverture peuvent laisser des URL de fond pointant vers la source malgré l’import du document. Les bilans distinguent des médias absents de la médiathèque et des médias connus dont l’emplacement n’a pas de raccourci SPIP adapté.</p>
-<h2 id="controler">Contrôler<a class="headerlink" href="#controler" title="Permanent link">&para;</a></h2>
+<h2 id="comment-verifier-les-medias-importes">Comment vérifier les médias importés<a class="headerlink" href="#comment-verifier-les-medias-importes" title="Permanent link">&para;</a></h2>
 <p>Après association des pièces jointes à un article, <code>importer_articles</code> appelle <code>document_instituer()</code> pour recalculer leur statut, y compris pour les médias absents du texte. Un document joint à un article publié peut ainsi être publié sans modification manuelle de cet article. Les documents des contenus en préparation restent à contrôler selon les règles de SPIP et les traitements d’accès.</p>
 <p>Vérifier fichiers, légendes, galeries, alignements, liens, lectures audio/vidéo et fonds de blocs. Examiner les blocs inconnus et dynamiques. Contrôler le statut des documents et leur accès public, ainsi que les pièces jointes absentes du texte. La mise en page dépend des squelettes et du CSS SPIP.</p>
 <p>Sources : <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/wp2spip/importer_documents.php">documents</a>, <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/inc/wp2spip_blocs.php">blocs</a>, <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/wp2spip/importer_articles.php">index et associations</a>.</p>

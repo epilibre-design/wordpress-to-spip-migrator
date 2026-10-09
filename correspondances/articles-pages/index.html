@@ -915,9 +915,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#controler-apres-import" class="md-nav__link">
+  <a href="#ce-quil-faut-verifier-apres-limport" class="md-nav__link">
     <span class="md-ellipsis">
-      Contrôler après import
+      Ce qu’il faut vérifier après l’import
     </span>
   </a>
   
@@ -1512,9 +1512,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#controler-apres-import" class="md-nav__link">
+  <a href="#ce-quil-faut-verifier-apres-limport" class="md-nav__link">
     <span class="md-ellipsis">
-      Contrôler après import
+      Ce qu’il faut vérifier après l’import
     </span>
   </a>
   
@@ -1643,7 +1643,7 @@
 <p>Une page WordPress devient une <strong>page unique</strong>, article sans rubrique (<code>id_rubrique = -1</code>), avec un champ <code>page</code> tel que <code>wordpress_page_42</code>. Sa parenté ne devient pas une arborescence de rubriques.</p>
 <p>Pour la page enfant <code>51</code> de la page <code>42</code>, le moteur crée un lien a2a <code>sous_page</code> du parent vers l’enfant. Les enfants sont ordonnés par <code>menu_order</code>, titre puis identifiant ; leur position devient le rang du lien.</p>
 <p>Le squelette doit exploiter ces liens pour les sous-pages ou le fil d’Ariane. Le modèle WordPress <code>_wp_page_template</code> n’est pas repris. La <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/docs/superpowers/specs/2026-10-08-wp2spip-hierarchie-pages-design.md">spec de parenté</a> donne des exemples de boucles.</p>
-<h2 id="controler-apres-import">Contrôler après import<a class="headerlink" href="#controler-apres-import" title="Permanent link">&para;</a></h2>
+<h2 id="ce-quil-faut-verifier-apres-limport">Ce qu’il faut vérifier après l’import<a class="headerlink" href="#ce-quil-faut-verifier-apres-limport" title="Permanent link">&para;</a></h2>
 <p>Vérifier un article publié, un brouillon, un programmé, une page enfant, un article sans titre et un article avec extrait. Comparer dates, auteur et parenté ; tester le rendu des pages uniques et les URL hiérarchiques.</p>
 <p>Sources : <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/wp2spip/importer_articles.php">articles</a>, <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/wp2spip/importer_hierarchie_pages.php">hiérarchie</a>.</p>
 
