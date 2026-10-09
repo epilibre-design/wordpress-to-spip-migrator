@@ -109,6 +109,7 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 			'importer_documents',
 			'importer_articles',
 			'importer_hierarchie_pages',
+			'importer_mots',
 			'importer_acces',
 			'importer_polyhierarchie',
 			'importer_commentaires',
