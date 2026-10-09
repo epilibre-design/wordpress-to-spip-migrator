@@ -126,6 +126,6 @@ nav:
       - La chaîne de migration: comprendre/traitements.md
       - Identifiants et traçabilité: comprendre/identifiants.md
       - Conversion des contenus: comprendre/conversion.md
-      - Extensions et signalements: comprendre/extensions.md
+      - Extensions du migrateur: comprendre/extensions.md
       - Sources et méthode: comprendre/sources.md
       - Maintenir et publier ce site: comprendre/maintenir.md

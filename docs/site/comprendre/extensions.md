@@ -1,6 +1,6 @@
-# Extensions et signalements
+# Extensions du migrateur
 
-Le moteur de wp2spip 3.0.0 importe les étiquettes, recalcule le statut des documents joints et convertit le HTML sans Sale. Yoast SEO et ACF sont pris en charge par **deux plugins séparés publiés**, pas par des traitements inclus dans ce checkout.
+Yoast SEO et ACF sont pris en charge par **deux plugins séparés publiés**. Leurs traitements s’ajoutent à ceux du moteur wp2spip lorsqu’ils sont installés et actifs.
 
 ## Installer les extensions du migrateur
 
@@ -47,19 +47,6 @@ Champs Extras et son interface sont détectés selon les champs importables, mê
 Les groupes hors articles/pages, les définitions ACF 4 ou déclarées en PHP/JSON, les répéteurs, sous-champs, groupes imbriqués, galeries, relations et contenus flexibles ne sont pas importés par cette extension. Examiner le bilan des exclusions ; des champs extras importés demandent encore un usage explicite dans les squelettes.
 
 Le pipeline propre à l’extension `wp2spip_acf_correspondances` permet d’associer un nom ACF à une colonne **existante** de `spip_articles` au lieu de créer un champ extra. Voir [le périmètre et les essais rapportés](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/docs/superpowers/specs/2026-10-09-wp2spip-acf-design.md), puis la documentation du dépôt de l’extension pour son état actuel.
-
-## Correctif du statut des documents
-
-**Implémenté dans le moteur.** Après association des pièces jointes aux articles, `importer_articles` recalcule leur statut avec `document_instituer()`. Ce recalcul évite qu’un document joint à un article publié reste proposé uniquement parce qu’il n’apparaît pas dans le texte.
-
-Les tests d’intégration, le vérificateur et l’export comparatif prennent en compte ce comportement. La recette doit toujours contrôler publication et accès aux fichiers. [Lire le correctif et ses critères](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/docs/superpowers/specs/2026-10-09-wp2spip-statut-documents-design.md).
-
-## Signalements aux plugins tiers
-
-Le sous-projet de signalements a produit des **brouillons de tickets avec reproductions et correctifs proposés**, conservés dans `docs/signalements/`. Il n’ajoute pas un pipeline ou une API de signalement au migrateur et ne signifie pas que les tickets ont été envoyés ni les correctifs intégrés aux plugins tiers.
-
-- **Sale 1.0.0** : pertes de textes entiers et avertissements PHP 8. Le [brouillon](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/docs/signalements/sale-extraire-images.md) contient les reproductions ; son [corpus de 103 contenus](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/docs/signalements/sale-corpus-theme-unit-test.md) permet de vérifier le correctif proposé. wp2spip utilise désormais son [propre convertisseur](conversion.md).
-- **Polyhiérarchie configurable 1.2.0** : le [brouillon en deux parties indépendantes](https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/docs/signalements/polyhierarchie-configurable.md) traite le calcul des rubriques et le comptage des objets rangés. Ce plugin est distinct de Polyhiérarchie, dépendance du migrateur ; le signalement ne crée pas une dépendance supplémentaire.
 
 ## Points d’extension du moteur
 
