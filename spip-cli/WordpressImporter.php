@@ -276,6 +276,8 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 		foreach ($manquants as $prefixe => $plugin) {
 			$this->output->writeln("<info>Plugin requis : {$plugin['nom']} ($prefixe), pour {$plugin['raison']}.</info>");
 		}
+		// Plugins actifs avant : SPIP désactive un plugin qui utilise un plugin requis dont l'activation échoue
+		$actifs_avant = array_keys(@unserialize($GLOBALS['meta']['plugin'] ?? '') ?: array());
 		
 		// Pour télécharger, SVP demande le dossier plugins/auto et un dépôt : sur un SPIP qui ne les a pas
 		// (installé sans outils/preparer_spip.sh), on les prépare avec les commandes de SPIP-Cli
@@ -295,15 +297,62 @@ Lorsqu’un contenu est déjà importé (auteur, article, etc), une trace est ga
 			// est notée sans que ses tables soient créées. Effacée, elle fait installer le plugin par plugins:maj:bdd.
 			effacer_meta($prefixe . '_base_version');
 		}
+		if (($code = $this->activer_plugins($manquants)) !== null) {
+			return $code;
+		}
+		
+		// plugins:activer n'active pas les dépendances d'un plugin déjà présent (Champs Extras sans Saisies…) : SVP
+		// les active, en téléchargeant celles qui manquent
+		if ($inactifs = $this->plugins_inactifs(array_keys($manquants))) {
+			if (($code = $this->preparer_telechargement($manquants)) !== null) {
+				return $code;
+			}
+			foreach ($inactifs as $prefixe) {
+				$this->lancer_spip_cli(array('plugins:svp:telecharger', $prefixe, '-y'));
+			}
+			if (($code = $this->activer_plugins($manquants)) !== null) {
+				return $code;
+			}
+			if ($inactifs = $this->plugins_inactifs(array_keys($manquants))) {
+				return $this->echec_plugins($manquants, 'inactifs après plugins:activer et plugins:svp:telecharger : ' . join(', ', $inactifs));
+			}
+		}
+		if ($desactives = $this->plugins_inactifs($actifs_avant)) {
+			return $this->echec_plugins($manquants, 'plugins désactivés par l’activation : ' . strtolower(join(', ', $desactives)));
+		}
+		
+		$this->output->writeln("\n<info>Plugins requis installés : l’import est relancé.</info>\n");
+		return $this->lancer_spip_cli(array_slice($_SERVER['argv'], 1), array('WP2SPIP_RELANCE' => '1'));
+	}
+	
+	/**
+	 * Activation des plugins requis, puis installation de leurs tables
+	 *
+	 * @param array $manquants plugins requis non prêts
+	 * @return int|null null si les commandes ont réussi, sinon le code d'échec
+	 */
+	protected function activer_plugins(array $manquants): ?int {
 		if (
 			$this->lancer_spip_cli(array_merge(array('plugins:activer'), array_keys($manquants), array('-y'))) !== 0
 			or $this->lancer_spip_cli(array('plugins:maj:bdd')) !== 0
 		) {
 			return $this->echec_plugins($manquants, 'échec de plugins:activer ou de plugins:maj:bdd');
 		}
-		
-		$this->output->writeln("\n<info>Plugins requis installés : l’import est relancé.</info>\n");
-		return $this->lancer_spip_cli(array_slice($_SERVER['argv'], 1), array('WP2SPIP_RELANCE' => '1'));
+		return null;
+	}
+	
+	/**
+	 * Plugins inactifs selon la base : les commandes de SPIP-Cli, lancées dans d'autres processus, y notent les
+	 * plugins actifs (le code de sortie de plugins:activer ne dit pas si l'activation a réussi)
+	 *
+	 * @param array $prefixes
+	 * @return array préfixes des plugins inactifs
+	 */
+	protected function plugins_inactifs(array $prefixes): array {
+		include_spip('inc/meta');
+		lire_metas();
+		$actifs = @unserialize($GLOBALS['meta']['plugin'] ?? '') ?: array();
+		return array_values(array_filter($prefixes, fn($prefixe) => !isset($actifs[strtoupper($prefixe)])));
 	}
 	
 	/**

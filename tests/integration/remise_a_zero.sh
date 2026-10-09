@@ -28,5 +28,6 @@ case "$vierge" in
 		exit 1
 		;;
 esac
-rm -rf tmp/cache/*
+# Métas en cache (tmp/meta_cache.php) : lues par SPIP avant la base, elles y réécriraient l’état précédent
+rm -rf tmp/cache/* tmp/meta_cache.php
 echo "Site remis à zéro : $site"
