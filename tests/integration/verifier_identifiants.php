@@ -4,6 +4,7 @@
  *
  * - articles, rubriques et documents importés : identifiant SPIP = id_wordpress ;
  * - tous les contenus et catégories Wordpress sont importés ;
+ * - documents joints à un article publié : publiés (hors logos) ;
  * - liens internes : chaque [->articleN] désigne un article existant, et aucun lien
  *   ?p= ou ?page_id= vers le site d'origine ne reste dans les textes ;
  * - contenus privés ou protégés : jamais publiés hors d'une zone d'Accès restreint, et,
@@ -50,6 +51,15 @@ if ($manquants = array_diff($ids_wp, $ids_spip)) {
 }
 if ($en_trop = array_diff($ids_spip, $ids_wp)) {
 	$echecs[] = 'documents : ' . count($en_trop) . ' documents sans média Wordpress correspondant (' . join(', ', array_slice($en_trop, 0, 10)) . (count($en_trop) > 10 ? '…' : '') . ')';
+}
+// Documents joints à un article publié : publiés aussi, comme le fait le plugin medias (hors logos)
+$non_publies = array_column(sql_allfetsel(
+	'DISTINCT d.id_document',
+	'spip_documents as d join spip_documents_liens as l on l.id_document = d.id_document join spip_articles as a on a.id_article = l.id_objet',
+	array('l.objet = "article"', 'a.statut = "publie"', 'd.statut != "publie"', sql_in('d.mode', array('logoon', 'logooff'), 'NOT'))
+), 'id_document');
+if ($non_publies) {
+	$echecs[] = 'documents : ' . count($non_publies) . ' joints à un article publié mais non publiés (' . join(', ', array_slice($non_publies, 0, 10)) . (count($non_publies) > 10 ? '…' : '') . ')';
 }
 
 // Blocs de l'éditeur : plus de commentaire <!-- wp: hors des blocs de code, plus de classe de présentation

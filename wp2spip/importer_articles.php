@@ -677,6 +677,13 @@ function wp2spip_importer_articles_documents($command, $id_wordpress, $id_articl
 			
 			// On met tout ça en lien de l'article
 			objet_associer(array('document'=>$ids_documents), array('article'=>$id_article));
+			
+			// Le lien ne recalcule pas le statut des documents : celui de l'article publié, ou en cours de rédaction,
+			// est déjà fixé, sans quoi les médias absents du texte resteraient non publiés
+			include_spip('action/editer_document');
+			foreach ($ids_documents as $id_document) {
+				document_instituer($id_document);
+			}
 		}
 	}
 }

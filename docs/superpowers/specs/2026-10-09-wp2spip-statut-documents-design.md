@@ -2,7 +2,7 @@
 
 Date : 2026-10-09
 Spec d'ensemble : `2026-10-08-wp2spip-ensemble-design.md`, § 6 (défaut constaté pendant le prototype du sous-projet 8).
-Statut : design décidé seul (mandat de réalisation autonome), à planifier.
+Statut : réalisé (sans plan séparé : correctif d'un bloc). Validation : `DocumentsArticleTest` en échec sans le correctif ; vérificateur en échec sur un import d'avant le correctif (388 documents), à OK après ; référence : 1 document `prop` → `publie` ; site réel : 388 documents `prop` → `publie`, aucune autre différence.
 
 ## 1. Constat
 

@@ -1677,6 +1677,10 @@ Chacun suit le cycle de la spec (§ 6) : spec détaillée, relecture, puis plan 
 - [x] Spec : `docs/superpowers/specs/2026-10-09-wp2spip-etiquettes-design.md` (`post_tag` → mots-clés du groupe « Étiquettes », `id_mot` = `term_id` ; `importer_mots` entre `importer_hierarchie_pages` et `importer_acces`, après la création des articles ; échec si un contenu lié manque).
 - [ ] Plan, réalisation ; validation : 114 étiquettes du contenu de test, liens conformes à `wp_term_relationships`.
 
+### Correctif : statut des documents joints aux articles
+
+- [x] Spec : `docs/superpowers/specs/2026-10-09-wp2spip-statut-documents-design.md` ; réalisé (`document_instituer()` après les liens de documents d'un article ; vérificateur ; référence mise à jour).
+
 ### Task 16 : sous-projet 6 — préfixe des tables
 
 - [x] Spec : `docs/superpowers/specs/2026-10-09-wp2spip-prefixe-tables-design.md` (préfixe lu dans `wp-config.php`, `--prefixe` pour le remplacer, exigé s'il est introuvable ; tables contrôlées avant tout traitement ; SPIP amorcé avec un autre préfixe refusé).
