@@ -24,7 +24,7 @@
     
     
       
-        <title>Extensions et signalements - WordPress → SPIP</title>
+        <title>Extensions du migrateur - WordPress → SPIP</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#extensions-et-signalements" class="md-skip">
+        <a href="#extensions-du-migrateur" class="md-skip">
           Aller au contenu
         </a>
       
@@ -106,7 +106,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Extensions et signalements
+              Extensions du migrateur
             
           </span>
         </div>
@@ -1355,7 +1355,7 @@
   
   
   <span class="md-ellipsis">
-    Extensions et signalements
+    Extensions du migrateur
     
   </span>
   
@@ -1368,7 +1368,7 @@
   
   
   <span class="md-ellipsis">
-    Extensions et signalements
+    Extensions du migrateur
     
   </span>
   
@@ -1412,24 +1412,6 @@
   <a href="#advanced-custom-fields" class="md-nav__link">
     <span class="md-ellipsis">
       Advanced Custom Fields
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#correctif-du-statut-des-documents" class="md-nav__link">
-    <span class="md-ellipsis">
-      Correctif du statut des documents
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#signalements-aux-plugins-tiers" class="md-nav__link">
-    <span class="md-ellipsis">
-      Signalements aux plugins tiers
     </span>
   </a>
   
@@ -1560,24 +1542,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#correctif-du-statut-des-documents" class="md-nav__link">
-    <span class="md-ellipsis">
-      Correctif du statut des documents
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#signalements-aux-plugins-tiers" class="md-nav__link">
-    <span class="md-ellipsis">
-      Signalements aux plugins tiers
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#points-dextension-du-moteur" class="md-nav__link">
     <span class="md-ellipsis">
       Points d’extension du moteur
@@ -1606,8 +1570,8 @@
   
 
 
-<h1 id="extensions-et-signalements">Extensions et signalements<a class="headerlink" href="#extensions-et-signalements" title="Permanent link">&para;</a></h1>
-<p>Le moteur de wp2spip 3.0.0 importe les étiquettes, recalcule le statut des documents joints et convertit le HTML sans Sale. Yoast SEO et ACF sont pris en charge par <strong>deux plugins séparés publiés</strong>, pas par des traitements inclus dans ce checkout.</p>
+<h1 id="extensions-du-migrateur">Extensions du migrateur<a class="headerlink" href="#extensions-du-migrateur" title="Permanent link">&para;</a></h1>
+<p>Yoast SEO et ACF sont pris en charge par <strong>deux plugins séparés publiés</strong>. Leurs traitements s’ajoutent à ceux du moteur wp2spip lorsqu’ils sont installés et actifs.</p>
 <h2 id="installer-les-extensions-du-migrateur">Installer les extensions du migrateur<a class="headerlink" href="#installer-les-extensions-du-migrateur" title="Permanent link">&para;</a></h2>
 <p>Récupérer <a href="https://git.spip.net/technova69/wp2spip_yoast">wp2spip_yoast</a> ou <a href="https://git.spip.net/technova69/wp2spip_acf">wp2spip_acf</a>, les placer dans <code>plugins/</code> du SPIP de destination et les activer à côté de wp2spip <strong>avant l’import</strong>. Consulter leurs README pour l’installation et les versions exactes. Les versions publiées demandent wp2spip ≥ 3.0.0 et PHP 8.4.</p>
 <p>Depuis la racine de ce SPIP :</p>
@@ -1676,15 +1640,6 @@
 <p>Champs Extras et son interface sont détectés selon les champs importables, même quand leurs valeurs sont encore vides. Les règles de groupe permettent de retenir les définitions applicables aux contenus ; elles ne sont pas reproduites comme des conditions d’affichage de formulaire SPIP.</p>
 <p>Les groupes hors articles/pages, les définitions ACF 4 ou déclarées en PHP/JSON, les répéteurs, sous-champs, groupes imbriqués, galeries, relations et contenus flexibles ne sont pas importés par cette extension. Examiner le bilan des exclusions ; des champs extras importés demandent encore un usage explicite dans les squelettes.</p>
 <p>Le pipeline propre à l’extension <code>wp2spip_acf_correspondances</code> permet d’associer un nom ACF à une colonne <strong>existante</strong> de <code>spip_articles</code> au lieu de créer un champ extra. Voir <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/docs/superpowers/specs/2026-10-09-wp2spip-acf-design.md">le périmètre et les essais rapportés</a>, puis la documentation du dépôt de l’extension pour son état actuel.</p>
-<h2 id="correctif-du-statut-des-documents">Correctif du statut des documents<a class="headerlink" href="#correctif-du-statut-des-documents" title="Permanent link">&para;</a></h2>
-<p><strong>Implémenté dans le moteur.</strong> Après association des pièces jointes aux articles, <code>importer_articles</code> recalcule leur statut avec <code>document_instituer()</code>. Ce recalcul évite qu’un document joint à un article publié reste proposé uniquement parce qu’il n’apparaît pas dans le texte.</p>
-<p>Les tests d’intégration, le vérificateur et l’export comparatif prennent en compte ce comportement. La recette doit toujours contrôler publication et accès aux fichiers. <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/docs/superpowers/specs/2026-10-09-wp2spip-statut-documents-design.md">Lire le correctif et ses critères</a>.</p>
-<h2 id="signalements-aux-plugins-tiers">Signalements aux plugins tiers<a class="headerlink" href="#signalements-aux-plugins-tiers" title="Permanent link">&para;</a></h2>
-<p>Le sous-projet de signalements a produit des <strong>brouillons de tickets avec reproductions et correctifs proposés</strong>, conservés dans <code>docs/signalements/</code>. Il n’ajoute pas un pipeline ou une API de signalement au migrateur et ne signifie pas que les tickets ont été envoyés ni les correctifs intégrés aux plugins tiers.</p>
-<ul>
-<li><strong>Sale 1.0.0</strong> : pertes de textes entiers et avertissements PHP 8. Le <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/docs/signalements/sale-extraire-images.md">brouillon</a> contient les reproductions ; son <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/docs/signalements/sale-corpus-theme-unit-test.md">corpus de 103 contenus</a> permet de vérifier le correctif proposé. wp2spip utilise désormais son <a href="../conversion/">propre convertisseur</a>.</li>
-<li><strong>Polyhiérarchie configurable 1.2.0</strong> : le <a href="https://github.com/epilibre-design/wordpress-to-spip-migrator/blob/dc1963eb54b317e7e9e7b445bfee81199a7804bb/docs/signalements/polyhierarchie-configurable.md">brouillon en deux parties indépendantes</a> traite le calcul des rubriques et le comptage des objets rangés. Ce plugin est distinct de Polyhiérarchie, dépendance du migrateur ; le signalement ne crée pas une dépendance supplémentaire.</li>
-</ul>
 <h2 id="points-dextension-du-moteur">Points d’extension du moteur<a class="headerlink" href="#points-dextension-du-moteur" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
