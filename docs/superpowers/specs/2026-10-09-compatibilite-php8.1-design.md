@@ -1,4 +1,4 @@
-# wp2spip — compatibilité PHP 8.2 et étude de PHP 8.1
+# wp2spip — compatibilité PHP 8.1
 
 Date : 2026-10-09
 
