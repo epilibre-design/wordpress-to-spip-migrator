@@ -18,15 +18,15 @@ Les versions directes et transitives sont verrouillées. Le site se construit in
 
 ## Publier sur GitHub Pages
 
-Pour une publication par branche, utiliser le dépôt GitHub qui héberge ce site et un compte autorisé à y pousser. Après revue des sources et construction stricte, la commande suivante construit et pousse le site sur la branche `gh-pages` du remote `origin` :
+Pour une publication par branche, utiliser le dépôt GitHub qui héberge ce site et un compte autorisé à y pousser. Après revue des sources et construction stricte, la commande suivante construit et pousse le site sur la branche `gh-pages` du remote `epilibre` :
 
 ```bash
-python -m mkdocs gh-deploy --strict --remote-name origin --remote-branch gh-pages
+python -m mkdocs gh-deploy --strict --remote-name epilibre --remote-branch gh-pages
 ```
 
 Cette commande est une **publication distante**, contrairement à `build` ; l’exécuter seulement quand les changements sont prêts à être publiés. Dans les paramètres **Pages** du dépôt GitHub, sélectionner la publication depuis la branche `gh-pages`, dossier racine. Si Pages utilise déjà un workflow GitHub Actions, conserver cette méthode et y reprendre la construction stricte plutôt que configurer deux modes de publication.
 
-`repo_url` et `repo_name` désignent le dépôt du code documenté. `site_url` reste à définir selon l’adresse publique effectivement retenue : URL de projet GitHub Pages ou domaine personnalisé. Vérifier après publication les chemins sous le préfixe du projet, les liens, la recherche et les diagrammes. Les changements documentaires et un build local ne prouvent pas que la publication a eu lieu.
+`repo_url` et `repo_name` désignent le dépôt du code documenté. `site_url` vaut `https://epilibre-design.github.io/wordpress-to-spip-migrator/` : ce préfixe est nécessaire aux liens du sélecteur de langue sur GitHub Pages. Vérifier après publication les chemins sous le préfixe du projet, les liens, la recherche et les diagrammes. Les changements documentaires et un build local ne prouvent pas que la publication a eu lieu.
 
 ## Diagrammes locaux
 
@@ -48,27 +48,12 @@ validation:
 
 Avec MkDocs 1.6, le niveau d’ancres par défaut est `info` ; il faut `warn` pour qu’une ancre introuvable fasse échouer `--strict`. Les liens externes ne sont pas vérifiés par ce contrôle interne. Utiliser des permaliens GitHub vers le commit exact pour le code et les specs exclus du site.
 
-## Préparation multilingue
+## Versions française et anglaise
 
-Le plugin **mkdocs-static-i18n** utilise la structure par **suffixe**. Le français est la version par défaut, sans suffixe ; l’anglais est déclaré mais sa construction est désactivée tant que les traductions ne sont pas rédigées.
+Le plugin **mkdocs-static-i18n** utilise la structure par **suffixe**. Le français est la version par défaut à la racine ; les traductions anglaises sont dans les fichiers `.en.md` de mêmes chemins et sont publiées sous `/en/`. Les deux versions sont activées dans `mkdocs.yml`.
 
-```text
-mkdocs.yml
-docs/site/
-├── index.md
-├── index.en.md                  # À créer pour la version anglaise
-└── installer/
-    ├── installation.md
-    └── installation.en.md      # À créer pour la version anglaise
-```
+Pour modifier une page, mettre à jour son équivalent dans l'autre langue, conserver les liens relatifs vers les noms canoniques (par exemple `installation.md`) et vérifier les ancres des titres traduits. `nav_translations` traduit les intitulés de navigation. Après une modification, lancer `mkdocs build --strict` et contrôler les pages et la recherche dans les deux langues.
 
-Les fichiers `.en.md` de cet exemple sont des futurs fichiers, pas des traductions déjà livrées. Pour la publication anglaise :
-
-1. Créer les traductions par suffixe, en conservant les mêmes chemins et concepts.
-2. Traduire les intitulés dans `languages.en.nav_translations` et les contenus, exemples et renvois éditoriaux.
-3. Passer `build: false` à `build: true` pour `locale: en`, puis construire avec `--strict`.
-4. Vérifier les URL sous `/en/`, le sélecteur de langue, les ancres de titres traduits et la recherche anglaise.
-
-Le repli `fallback_to_default: true` fournit une page française quand sa traduction manque. Pour une publication partielle, expliquer ce repli aux lecteurs ; il ne faut pas présenter ces pages comme traduites. Les liens internes gardent leurs noms canoniques (par exemple `installation.md`) : le plugin les adapte à la langue. Une ancre française peut changer dans le texte anglais ; vérifier chaque lien de section.
+Le repli `fallback_to_default: true` permet de servir une page française quand sa traduction manque. Avant publication, vérifier que chaque page française possède sa traduction anglaise afin qu'aucune page du parcours anglais ne dépende de ce repli.
 
 Références : [configuration MkDocs](https://www.mkdocs.org/user-guide/configuration/), [validation](https://www.mkdocs.org/user-guide/configuration/#validation), [mkdocs-static-i18n](https://ultrabug.github.io/mkdocs-static-i18n/).

@@ -1,4 +1,5 @@
 site_name: WordPress → SPIP
+site_url: https://epilibre-design.github.io/wordpress-to-spip-migrator/
 site_description: Migrer les données, préserver les relations et comprendre les transformations.
 site_author: tech-nova
 repo_url: https://github.com/epilibre-design/wordpress-to-spip-migrator
@@ -47,14 +48,49 @@ plugins:
           build: true
         - locale: en
           name: English
-          build: false
+          build: true
+          site_description: Migrate data, preserve relationships, and understand the transformations.
+          theme:
+            palette:
+              - toggle:
+                  name: Switch to dark mode
+              - toggle:
+                  name: Switch to light mode
           nav_translations:
             Accueil: Home
+            Vue d’ensemble: Overview
             Installer: Install
+            Prérequis: Requirements
+            Installer le migrateur: Install the migrator
+            Développer et tester: Develop and test
             Migrer: Migrate
+            Auditer et sauvegarder: Audit and back up
+            Préparer SPIP: Prepare SPIP
+            Lancer l’import: Run the import
+            Valider et basculer: Validate and switch over
+            Dépanner: Troubleshoot
             Correspondances: Mappings
+            Matrice générale: General matrix
+            Articles et pages: Posts and pages
+            Catégories et étiquettes: Categories and tags
+            Auteurs et accès: Authors and access
+            Médias et blocs: Media and blocks
+            Commentaires: Comments
+            Liens et adresses: Links and URLs
             WordPress 4–7: WordPress 4–7
+            Le modèle de données: Data model
+            WordPress 4: WordPress 4
+            WordPress 5: WordPress 5
+            WordPress 6: WordPress 6
+            WordPress 7: WordPress 7
+            Couverture et compatibilité: Coverage and compatibility
             Comprendre: Understand
+            La chaîne de migration: Migration workflow
+            Identifiants et traçabilité: IDs and traceability
+            Conversion des contenus: Content conversion
+            Extensions du migrateur: Migrator extensions
+            Sources et méthode: Sources and methodology
+            Maintenir et publier ce site: Maintain and publish this site
 markdown_extensions:
   - admonition
   - attr_list
