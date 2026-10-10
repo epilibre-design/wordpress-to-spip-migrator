@@ -12,6 +12,8 @@
         <meta name="author" content="tech-nova">
       
       
+        <link rel="canonical" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/comprendre/maintenir/">
+      
       
         <link rel="prev" href="../sources/">
       
@@ -140,6 +142,32 @@
     
       <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Sélectionner la langue">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="fr" class="md-select__link">
+              Français
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../en/comprendre/maintenir/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
     
     
       
@@ -1441,9 +1469,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#preparation-multilingue" class="md-nav__link">
+  <a href="#versions-francaise-et-anglaise" class="md-nav__link">
     <span class="md-ellipsis">
-      Préparation multilingue
+      Versions française et anglaise
     </span>
   </a>
   
@@ -1528,9 +1556,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#preparation-multilingue" class="md-nav__link">
+  <a href="#versions-francaise-et-anglaise" class="md-nav__link">
     <span class="md-ellipsis">
-      Préparation multilingue
+      Versions française et anglaise
     </span>
   </a>
   
@@ -1567,11 +1595,11 @@
 </code></pre></div>
 <p>Les versions directes et transitives sont verrouillées. Le site se construit indépendamment de PHP et des bases de migration. <code>serve</code> sert à la lecture locale ; <code>build</code> produit les fichiers statiques à publier sur l’hébergeur choisi. Aucun déploiement distant n’est implicite.</p>
 <h2 id="publier-sur-github-pages">Publier sur GitHub Pages<a class="headerlink" href="#publier-sur-github-pages" title="Permanent link">&para;</a></h2>
-<p>Pour une publication par branche, utiliser le dépôt GitHub qui héberge ce site et un compte autorisé à y pousser. Après revue des sources et construction stricte, la commande suivante construit et pousse le site sur la branche <code>gh-pages</code> du remote <code>origin</code> :</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python<span class="w"> </span>-m<span class="w"> </span>mkdocs<span class="w"> </span>gh-deploy<span class="w"> </span>--strict<span class="w"> </span>--remote-name<span class="w"> </span>origin<span class="w"> </span>--remote-branch<span class="w"> </span>gh-pages
+<p>Pour une publication par branche, utiliser le dépôt GitHub qui héberge ce site et un compte autorisé à y pousser. Après revue des sources et construction stricte, la commande suivante construit et pousse le site sur la branche <code>gh-pages</code> du remote <code>epilibre</code> :</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python<span class="w"> </span>-m<span class="w"> </span>mkdocs<span class="w"> </span>gh-deploy<span class="w"> </span>--strict<span class="w"> </span>--remote-name<span class="w"> </span>epilibre<span class="w"> </span>--remote-branch<span class="w"> </span>gh-pages
 </code></pre></div>
 <p>Cette commande est une <strong>publication distante</strong>, contrairement à <code>build</code> ; l’exécuter seulement quand les changements sont prêts à être publiés. Dans les paramètres <strong>Pages</strong> du dépôt GitHub, sélectionner la publication depuis la branche <code>gh-pages</code>, dossier racine. Si Pages utilise déjà un workflow GitHub Actions, conserver cette méthode et y reprendre la construction stricte plutôt que configurer deux modes de publication.</p>
-<p><code>repo_url</code> et <code>repo_name</code> désignent le dépôt du code documenté. <code>site_url</code> reste à définir selon l’adresse publique effectivement retenue : URL de projet GitHub Pages ou domaine personnalisé. Vérifier après publication les chemins sous le préfixe du projet, les liens, la recherche et les diagrammes. Les changements documentaires et un build local ne prouvent pas que la publication a eu lieu.</p>
+<p><code>repo_url</code> et <code>repo_name</code> désignent le dépôt du code documenté. <code>site_url</code> vaut <code>https://epilibre-design.github.io/wordpress-to-spip-migrator/</code> : ce préfixe est nécessaire aux liens du sélecteur de langue sur GitHub Pages. Vérifier après publication les chemins sous le préfixe du projet, les liens, la recherche et les diagrammes. Les changements documentaires et un build local ne prouvent pas que la publication a eu lieu.</p>
 <h2 id="diagrammes-locaux">Diagrammes locaux<a class="headerlink" href="#diagrammes-locaux" title="Permanent link">&para;</a></h2>
 <p>Mermaid 11.12.1 est servi depuis <code>assets/javascripts/mermaid.min.js</code>, sans chargement depuis un CDN. Sa licence MIT et la provenance (archive NPM, intégrité SHA512 de l’archive et SHA256 du JavaScript) sont conservées à côté du fichier. Pour une mise à jour, vérifier l’intégrité du nouveau paquet et refaire le contrôle du rendu des trois diagrammes ; remplacer ensemble fichier, licence et provenance. Les polices utilisent celles du système.</p>
 <h2 id="liens-et-ancres">Liens et ancres<a class="headerlink" href="#liens-et-ancres" title="Permanent link">&para;</a></h2>
@@ -1585,24 +1613,10 @@
 <a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="nt">absolute_links</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">warn</span>
 </code></pre></div>
 <p>Avec MkDocs 1.6, le niveau d’ancres par défaut est <code>info</code> ; il faut <code>warn</code> pour qu’une ancre introuvable fasse échouer <code>--strict</code>. Les liens externes ne sont pas vérifiés par ce contrôle interne. Utiliser des permaliens GitHub vers le commit exact pour le code et les specs exclus du site.</p>
-<h2 id="preparation-multilingue">Préparation multilingue<a class="headerlink" href="#preparation-multilingue" title="Permanent link">&para;</a></h2>
-<p>Le plugin <strong>mkdocs-static-i18n</strong> utilise la structure par <strong>suffixe</strong>. Le français est la version par défaut, sans suffixe ; l’anglais est déclaré mais sa construction est désactivée tant que les traductions ne sont pas rédigées.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mkdocs.yml
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>docs/site/
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>├── index.md
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>├── index.en.md                  # À créer pour la version anglaise
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>└── installer/
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    ├── installation.md
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    └── installation.en.md      # À créer pour la version anglaise
-</code></pre></div>
-<p>Les fichiers <code>.en.md</code> de cet exemple sont des futurs fichiers, pas des traductions déjà livrées. Pour la publication anglaise :</p>
-<ol>
-<li>Créer les traductions par suffixe, en conservant les mêmes chemins et concepts.</li>
-<li>Traduire les intitulés dans <code>languages.en.nav_translations</code> et les contenus, exemples et renvois éditoriaux.</li>
-<li>Passer <code>build: false</code> à <code>build: true</code> pour <code>locale: en</code>, puis construire avec <code>--strict</code>.</li>
-<li>Vérifier les URL sous <code>/en/</code>, le sélecteur de langue, les ancres de titres traduits et la recherche anglaise.</li>
-</ol>
-<p>Le repli <code>fallback_to_default: true</code> fournit une page française quand sa traduction manque. Pour une publication partielle, expliquer ce repli aux lecteurs ; il ne faut pas présenter ces pages comme traduites. Les liens internes gardent leurs noms canoniques (par exemple <code>installation.md</code>) : le plugin les adapte à la langue. Une ancre française peut changer dans le texte anglais ; vérifier chaque lien de section.</p>
+<h2 id="versions-francaise-et-anglaise">Versions française et anglaise<a class="headerlink" href="#versions-francaise-et-anglaise" title="Permanent link">&para;</a></h2>
+<p>Le plugin <strong>mkdocs-static-i18n</strong> utilise la structure par <strong>suffixe</strong>. Le français est la version par défaut à la racine ; les traductions anglaises sont dans les fichiers <code>.en.md</code> de mêmes chemins et sont publiées sous <code>/en/</code>. Les deux versions sont activées dans <code>mkdocs.yml</code>.</p>
+<p>Pour modifier une page, mettre à jour son équivalent dans l'autre langue, conserver les liens relatifs vers les noms canoniques (par exemple <code>installation.md</code>) et vérifier les ancres des titres traduits. <code>nav_translations</code> traduit les intitulés de navigation. Après une modification, lancer <code>mkdocs build --strict</code> et contrôler les pages et la recherche dans les deux langues.</p>
+<p>Le repli <code>fallback_to_default: true</code> permet de servir une page française quand sa traduction manque. Avant publication, vérifier que chaque page française possède sa traduction anglaise afin qu'aucune page du parcours anglais ne dépende de ce repli.</p>
 <p>Références : <a href="https://www.mkdocs.org/user-guide/configuration/">configuration MkDocs</a>, <a href="https://www.mkdocs.org/user-guide/configuration/#validation">validation</a>, <a href="https://ultrabug.github.io/mkdocs-static-i18n/">mkdocs-static-i18n</a>.</p>
 
 

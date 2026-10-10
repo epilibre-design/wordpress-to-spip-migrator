@@ -1,171 +1,395 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
     <url>
-        <loc>None./</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="None"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/"/>
     </url>
     <url>
-        <loc>Nonecomprendre/conversion/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/comprendre/conversion/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonecomprendre/conversion/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/comprendre/conversion/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/comprendre/conversion/"/>
     </url>
     <url>
-        <loc>Nonecomprendre/extensions/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/comprendre/extensions/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonecomprendre/extensions/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/comprendre/extensions/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/comprendre/extensions/"/>
     </url>
     <url>
-        <loc>Nonecomprendre/identifiants/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/comprendre/identifiants/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonecomprendre/identifiants/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/comprendre/identifiants/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/comprendre/identifiants/"/>
     </url>
     <url>
-        <loc>Nonecomprendre/maintenir/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/comprendre/maintenir/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonecomprendre/maintenir/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/comprendre/maintenir/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/comprendre/maintenir/"/>
     </url>
     <url>
-        <loc>Nonecomprendre/sources/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/comprendre/sources/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonecomprendre/sources/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/comprendre/sources/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/comprendre/sources/"/>
     </url>
     <url>
-        <loc>Nonecomprendre/traitements/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/comprendre/traitements/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonecomprendre/traitements/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/comprendre/traitements/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/comprendre/traitements/"/>
     </url>
     <url>
-        <loc>Nonecorrespondances/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonecorrespondances/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/"/>
     </url>
     <url>
-        <loc>Nonecorrespondances/articles-pages/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/articles-pages/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonecorrespondances/articles-pages/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/articles-pages/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/articles-pages/"/>
     </url>
     <url>
-        <loc>Nonecorrespondances/auteurs-acces/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/auteurs-acces/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonecorrespondances/auteurs-acces/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/auteurs-acces/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/auteurs-acces/"/>
     </url>
     <url>
-        <loc>Nonecorrespondances/commentaires/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/commentaires/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonecorrespondances/commentaires/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/commentaires/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/commentaires/"/>
     </url>
     <url>
-        <loc>Nonecorrespondances/liens/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/liens/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonecorrespondances/liens/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/liens/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/liens/"/>
     </url>
     <url>
-        <loc>Nonecorrespondances/medias-blocs/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/medias-blocs/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonecorrespondances/medias-blocs/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/medias-blocs/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/medias-blocs/"/>
     </url>
     <url>
-        <loc>Nonecorrespondances/taxonomies/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/taxonomies/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonecorrespondances/taxonomies/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/taxonomies/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/taxonomies/"/>
     </url>
     <url>
-        <loc>Noneinstaller/developpement/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/installer/developpement/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Noneinstaller/developpement/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/installer/developpement/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/installer/developpement/"/>
     </url>
     <url>
-        <loc>Noneinstaller/installation/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/installer/installation/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Noneinstaller/installation/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/installer/installation/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/installer/installation/"/>
     </url>
     <url>
-        <loc>Noneinstaller/prerequis/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/installer/prerequis/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Noneinstaller/prerequis/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/installer/prerequis/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/installer/prerequis/"/>
     </url>
     <url>
-        <loc>Nonemigrer/audit/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/migrer/audit/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonemigrer/audit/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/migrer/audit/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/migrer/audit/"/>
     </url>
     <url>
-        <loc>Nonemigrer/depanner/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/migrer/depanner/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonemigrer/depanner/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/migrer/depanner/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/migrer/depanner/"/>
     </url>
     <url>
-        <loc>Nonemigrer/importer/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/migrer/importer/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonemigrer/importer/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/migrer/importer/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/migrer/importer/"/>
     </url>
     <url>
-        <loc>Nonemigrer/preparer/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/migrer/preparer/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonemigrer/preparer/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/migrer/preparer/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/migrer/preparer/"/>
     </url>
     <url>
-        <loc>Nonemigrer/valider/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/migrer/valider/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonemigrer/valider/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/migrer/valider/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/migrer/valider/"/>
     </url>
     <url>
-        <loc>Nonewordpress/compatibilite/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/wordpress/compatibilite/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonewordpress/compatibilite/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/wordpress/compatibilite/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/wordpress/compatibilite/"/>
     </url>
     <url>
-        <loc>Nonewordpress/modele/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/wordpress/modele/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonewordpress/modele/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/wordpress/modele/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/wordpress/modele/"/>
     </url>
     <url>
-        <loc>Nonewordpress/wp4/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/wordpress/wp4/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonewordpress/wp4/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/wordpress/wp4/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/wordpress/wp4/"/>
     </url>
     <url>
-        <loc>Nonewordpress/wp5/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/wordpress/wp5/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonewordpress/wp5/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/wordpress/wp5/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/wordpress/wp5/"/>
     </url>
     <url>
-        <loc>Nonewordpress/wp6/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/wordpress/wp6/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonewordpress/wp6/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/wordpress/wp6/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/wordpress/wp6/"/>
     </url>
     <url>
-        <loc>Nonewordpress/wp7/</loc>
-        <lastmod>2026-10-09</lastmod>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/wordpress/wp7/</loc>
+        <lastmod>2026-10-10</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="fr" href="Nonewordpress/wp7/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/wordpress/wp7/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/wordpress/wp7/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/comprendre/conversion/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/comprendre/conversion/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/comprendre/conversion/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/comprendre/extensions/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/comprendre/extensions/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/comprendre/extensions/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/comprendre/identifiants/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/comprendre/identifiants/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/comprendre/identifiants/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/comprendre/maintenir/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/comprendre/maintenir/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/comprendre/maintenir/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/comprendre/sources/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/comprendre/sources/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/comprendre/sources/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/comprendre/traitements/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/comprendre/traitements/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/comprendre/traitements/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/articles-pages/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/articles-pages/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/articles-pages/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/auteurs-acces/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/auteurs-acces/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/auteurs-acces/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/commentaires/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/commentaires/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/commentaires/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/liens/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/liens/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/liens/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/medias-blocs/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/medias-blocs/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/medias-blocs/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/taxonomies/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/correspondances/taxonomies/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/correspondances/taxonomies/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/installer/developpement/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/installer/developpement/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/installer/developpement/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/installer/installation/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/installer/installation/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/installer/installation/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/installer/prerequis/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/installer/prerequis/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/installer/prerequis/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/migrer/audit/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/migrer/audit/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/migrer/audit/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/migrer/depanner/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/migrer/depanner/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/migrer/depanner/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/migrer/importer/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/migrer/importer/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/migrer/importer/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/migrer/preparer/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/migrer/preparer/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/migrer/preparer/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/migrer/valider/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/migrer/valider/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/migrer/valider/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/wordpress/compatibilite/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/wordpress/compatibilite/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/wordpress/compatibilite/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/wordpress/modele/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/wordpress/modele/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/wordpress/modele/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/wordpress/wp4/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/wordpress/wp4/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/wordpress/wp4/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/wordpress/wp5/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/wordpress/wp5/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/wordpress/wp5/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/wordpress/wp6/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/wordpress/wp6/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/wordpress/wp6/"/>
+    </url>
+    <url>
+        <loc>https://epilibre-design.github.io/wordpress-to-spip-migrator/en/wordpress/wp7/</loc>
+        <lastmod>2026-10-10</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/en/wordpress/wp7/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://epilibre-design.github.io/wordpress-to-spip-migrator/wordpress/wp7/"/>
     </url>
 </urlset>
