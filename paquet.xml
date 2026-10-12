@@ -12,6 +12,7 @@
 	<!-- Importer un blog Wordpress dans un site SPIP local vide -->
 
 	<auteur lien="https://www.mukt.fr">Mukt</auteur>
+	<auteur lien="https://github.com/epilibre-design">Gilles</auteur>
 	
 	<pipeline nom="declarer_tables_objets_sql" inclure="wp2spip_pipelines.php" />
 	
