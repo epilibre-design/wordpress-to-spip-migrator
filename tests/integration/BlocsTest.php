@@ -170,7 +170,7 @@ HTML,
 <div class="wp-block-cover has-background-dim alignleft" style="background-image:url(http://wordpress.test/wp-content/uploads/2008/06/dsc20050102_192118_51.jpg)"><p class="wp-block-cover-text">This is a left aligned cover block.</p></div>
 <!-- /wp:cover -->
 HTML,
-				'attendu' => "<div class=\"wp-block-cover\">\n\n<doc761>\n\nThis is a left aligned cover block.\n\n</div>",
+				'attendu' => "<div class=\"wp-block-cover\">\n\n<doc761|masquer=legende>\n\nThis is a left aligned cover block.\n\n</div>",
 			),
 			array(
 				'nom' => 'couverture, format actuel : texte dans un bloc enfant',
@@ -181,7 +181,29 @@ HTML,
 <!-- /wp:paragraph --></div></div>
 <!-- /wp:cover -->
 HTML,
-				'attendu' => "<div class=\"wp-block-cover\">\n\n<doc761>\n\nCover {{block}}\n\n</div>",
+				'attendu' => "<div class=\"wp-block-cover\">\n\n<doc761|masquer=legende>\n\nCover {{block}}\n\n</div>",
+			),
+			array(
+				'nom' => 'couverture vidéo : document sans légende, avec son lecteur',
+				'contenu' => <<<'HTML'
+<!-- wp:cover {"url":"http://wordpress.test/wp-content/uploads/2013/12/2014-slider-mobile-behavior.mov","id":1690,"backgroundType":"video"} -->
+<div class="wp-block-cover"><video class="wp-block-cover__video-background" autoplay muted loop playsinline src="http://wordpress.test/wp-content/uploads/2013/12/2014-slider-mobile-behavior.mov"></video><div class="wp-block-cover__inner-container"><!-- wp:paragraph -->
+<p>Vidéo</p>
+<!-- /wp:paragraph --></div></div>
+<!-- /wp:cover -->
+HTML,
+				'attendu' => "<div class=\"wp-block-cover\">\n\n<doc1690|masquer=legende>\n\nVidéo\n\n</div>",
+			),
+			array(
+				'nom' => 'média et texte : document sans légende, comme dans Wordpress',
+				'contenu' => <<<'HTML'
+<!-- wp:media-text {"mediaId":757,"mediaType":"image"} -->
+<div class="wp-block-media-text is-stacked-on-mobile"><figure class="wp-block-media-text__media"><img src="http://wordpress.test/wp-content/uploads/2008/06/dsc04563.jpg" alt="" class="wp-image-757 size-full"/></figure><div class="wp-block-media-text__content"><!-- wp:paragraph -->
+<p>Texte</p>
+<!-- /wp:paragraph --></div></div>
+<!-- /wp:media-text -->
+HTML,
+				'attendu' => "<div class=\"wp-block-media-text\">\n\n<doc757|masquer=legende>\n\nTexte\n\n</div>",
 			),
 			array(
 				'nom' => 'colonnes : structure gardée, classes de présentation retirées',
