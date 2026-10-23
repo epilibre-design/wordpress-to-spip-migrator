@@ -22,7 +22,7 @@ Options :
   --sql-login <login>       login MySQL de SPIP (défaut : celui de wp-config.php)
   --admin-login <login>     premier administrateur (défaut : admin)
   --admin-email <email>     son email (défaut : admin_email du WordPress)
-  --adresse <url>           adresse du site SPIP (défaut : siteurl du WordPress)
+  --adresse <url>           adresse du site SPIP, gardée par l'import (défaut : siteurl du WordPress)
   --wp2spip copie|lien      copie de wp2spip, ou lien symbolique pour le développer (défaut : copie)
   --spip-cli <exécutable>   SPIP-Cli (défaut : spip du PATH)
   --droits <droits>         droits des dossiers d'écriture de SPIP (défaut : 775)
@@ -168,6 +168,8 @@ wp_siteurl=$(wp_requete "select option_value from ${prefixe_wp}options where opt
 wp_admin_email=$(wp_requete "select option_value from ${prefixe_wp}options where option_name = 'admin_email'") \
 	|| erreur "base du WordPress ${wp[DB_NAME]} illisible avec les accès de wp-config.php"
 admin_email=${admin_email:-$wp_admin_email}
+# Adresse choisie : l'import ne doit pas la remplacer par celle du WordPress
+garder_adresse=${adresse:+--garder-adresse}
 adresse=${adresse:-$wp_siteurl}
 
 etape "Contrôle de la base de SPIP"
@@ -285,7 +287,8 @@ siteurl_lue=$(export WP2SPIP_PREFIXE=$prefixe_wp; spip_cli php:eval 'echo sql_ge
 code=0
 if [ -n "$importer" ]; then
 	etape "Import du WordPress"
-	spip_cli wordpress:importer "$wordpress" --prefixe "$prefixe_wp" || code=$?
+	# shellcheck disable=SC2086
+	spip_cli wordpress:importer "$wordpress" --prefixe "$prefixe_wp" $garder_adresse || code=$?
 fi
 
 etape "Bilan"
@@ -301,6 +304,6 @@ fi
 if [ -n "$importer" ]; then
 	echo "Import : code $code"
 else
-	printf 'Import : cd %q && %q wordpress:importer %q --prefixe %q\n' "$spip" "$spip_cli_exe" "$wordpress" "$prefixe_wp"
+	printf 'Import : cd %q && %q wordpress:importer %q --prefixe %q%s\n' "$spip" "$spip_cli_exe" "$wordpress" "$prefixe_wp" "${garder_adresse:+ $garder_adresse}"
 fi
 exit "$code"

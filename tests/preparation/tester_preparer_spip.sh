@@ -118,7 +118,7 @@ rm -rf "$spip"
 # SQLite, WordPress 6.9, dossier vide existant, wp2spip en lien, mot de passe généré
 spip="$ESSAIS/spip-sqlite"
 rm -rf "$spip" && mkdir -p "$spip"
-"$preparer" --spip "$spip" --wordpress "$WP6" --spip-cli "$SPIP_CLI" --wp2spip lien --importer >"$ESSAIS/sqlite.log" 2>&1
+"$preparer" --spip "$spip" --wordpress "$WP6" --spip-cli "$SPIP_CLI" --wp2spip lien --adresse http://localhost:8499/ --importer >"$ESSAIS/sqlite.log" 2>&1
 code=$?
 [ "$code" -eq 0 ]
 resultat "SQLite, WordPress 6.9 : code 0 (code $code, journal $ESSAIS/sqlite.log)" $?
@@ -126,6 +126,8 @@ plugins_prets "$spip"
 resultat "SQLite : plugins sous plugins/auto et actifs" $?
 [ "$(readlink "$spip/plugins/wp2spip")" = "$WP2SPIP" ]
 resultat "SQLite : plugins/wp2spip est un lien vers le dépôt" $?
+[ "$(cd "$spip" && "$SPIP_CLI" php:eval 'echo $GLOBALS["meta"]["adresse_site"];' 2>/dev/null)" = "http://localhost:8499" ]
+resultat "SQLite : adresse donnée par --adresse gardée après l'import" $?
 pass_genere=$(sed -n 's/^Mot de passe : \(.*\) (généré)$/\1/p' "$ESSAIS/sqlite.log")
 [ -n "$pass_genere" ] && admin_authentifie "$spip" "$pass_genere" && ! admin_authentifie "$spip" adminadmin
 resultat "SQLite : administrateur authentifié avec le mot de passe généré, affiché au bilan, pas avec adminadmin" $?
