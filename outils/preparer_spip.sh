@@ -304,6 +304,6 @@ fi
 if [ -n "$importer" ]; then
 	echo "Import : code $code"
 else
-	printf 'Import : cd %q && %q wordpress:importer %q --prefixe %q\n' "$spip" "$spip_cli_exe" "$wordpress" "$prefixe_wp"
+	printf 'Import : cd %q && %q wordpress:importer %q --prefixe %q%s\n' "$spip" "$spip_cli_exe" "$wordpress" "$prefixe_wp" "${garder_adresse:+ $garder_adresse}"
 fi
 exit "$code"
