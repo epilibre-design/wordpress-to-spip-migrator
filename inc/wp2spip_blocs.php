@@ -523,7 +523,8 @@ function wp2spip_lier_albums($contexte, $id_article) {
 }
 
 /**
- * Bloc couverture ou média et texte : le document du média, sans légende, puis le texte du bloc, dans la balise du bloc
+ * Bloc couverture ou média et texte : le document du média, sans légende, puis le texte du bloc, chacun dans
+ * son conteneur, dans la balise du bloc
  *
  * @param array $bloc
  * @param array $contexte
@@ -546,9 +547,19 @@ function wp2spip_bloc_avec_media($bloc, &$contexte, $url, $id_wordpress) {
 		wp2spip_blocs_interieur($bloc, $contexte)
 	);
 	$classe = 'wp-block-' . preg_replace('#^core/#', '', $bloc['nom']);
+	// Le texte reste dans le conteneur du bloc (wp-block-cover__inner-container, wp-block-media-text__content),
+	// le média dans le sien pour le bloc média et texte : les styles de ces blocs s'y appliquent comme dans Wordpress
+	if (trim($texte) !== '') {
+		$interieur = $classe . ($classe === 'wp-block-cover' ? '__inner-container' : '__content');
+		$texte = wp2spip_proteger("<div class=\"$interieur\">", $contexte) . $texte . wp2spip_proteger('</div>', $contexte);
+	}
 	if ($id_document = wp2spip_bloc_document($url, $id_wordpress, $contexte)) {
 		// Sans légende : Wordpress n'affiche ni le titre ni la légende du média de ces blocs
-		$texte = wp2spip_proteger("<doc$id_document|masquer=legende>", $contexte) . $texte;
+		$media = wp2spip_proteger("<doc$id_document|masquer=legende>", $contexte);
+		if ($classe === 'wp-block-media-text') {
+			$media = wp2spip_proteger('<div class="wp-block-media-text__media">', $contexte) . $media . wp2spip_proteger('</div>', $contexte);
+		}
+		$texte = $media . $texte;
 	}
 	elseif ($url or $id_wordpress) {
 		$contexte['bilan']['medias_introuvables']++;

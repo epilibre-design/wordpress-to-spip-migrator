@@ -170,10 +170,10 @@ HTML,
 <div class="wp-block-cover has-background-dim alignleft" style="background-image:url(http://wordpress.test/wp-content/uploads/2008/06/dsc20050102_192118_51.jpg)"><p class="wp-block-cover-text">This is a left aligned cover block.</p></div>
 <!-- /wp:cover -->
 HTML,
-				'attendu' => "<div class=\"wp-block-cover\">\n\n<doc761|masquer=legende>\n\nThis is a left aligned cover block.\n\n</div>",
+				'attendu' => "<div class=\"wp-block-cover\">\n\n<doc761|masquer=legende>\n\n<div class=\"wp-block-cover__inner-container\">\n\nThis is a left aligned cover block.\n\n</div>\n\n</div>",
 			),
 			array(
-				'nom' => 'couverture, format actuel : texte dans un bloc enfant',
+				'nom' => 'couverture, format actuel : texte dans un bloc enfant, dans le conteneur du bloc',
 				'contenu' => <<<'HTML'
 <!-- wp:cover {"url":"http://wordpress.test/wp-content/uploads/2008/06/dsc20050102_192118_51.jpg","id":761,"dimRatio":50} -->
 <div class="wp-block-cover"><span aria-hidden="true" class="wp-block-cover__background has-background-dim"></span><img class="wp-block-cover__image-background wp-image-761" alt="Wind Farm" src="http://wordpress.test/wp-content/uploads/2008/06/dsc20050102_192118_51.jpg" data-object-fit="cover"/><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","fontSize":"large"} -->
@@ -181,7 +181,7 @@ HTML,
 <!-- /wp:paragraph --></div></div>
 <!-- /wp:cover -->
 HTML,
-				'attendu' => "<div class=\"wp-block-cover\">\n\n<doc761|masquer=legende>\n\nCover {{block}}\n\n</div>",
+				'attendu' => "<div class=\"wp-block-cover\">\n\n<doc761|masquer=legende>\n\n<div class=\"wp-block-cover__inner-container\">\n\nCover {{block}}\n\n</div>\n\n</div>",
 			),
 			array(
 				'nom' => 'couverture vidéo : document sans légende, avec son lecteur',
@@ -192,10 +192,10 @@ HTML,
 <!-- /wp:paragraph --></div></div>
 <!-- /wp:cover -->
 HTML,
-				'attendu' => "<div class=\"wp-block-cover\">\n\n<doc1690|masquer=legende>\n\nVidéo\n\n</div>",
+				'attendu' => "<div class=\"wp-block-cover\">\n\n<doc1690|masquer=legende>\n\n<div class=\"wp-block-cover__inner-container\">\n\nVidéo\n\n</div>\n\n</div>",
 			),
 			array(
-				'nom' => 'média et texte : document sans légende, comme dans Wordpress',
+				'nom' => 'média et texte : média et texte chacun dans son conteneur, document sans légende',
 				'contenu' => <<<'HTML'
 <!-- wp:media-text {"mediaId":757,"mediaType":"image"} -->
 <div class="wp-block-media-text is-stacked-on-mobile"><figure class="wp-block-media-text__media"><img src="http://wordpress.test/wp-content/uploads/2008/06/dsc04563.jpg" alt="" class="wp-image-757 size-full"/></figure><div class="wp-block-media-text__content"><!-- wp:paragraph -->
@@ -203,7 +203,7 @@ HTML,
 <!-- /wp:paragraph --></div></div>
 <!-- /wp:media-text -->
 HTML,
-				'attendu' => "<div class=\"wp-block-media-text\">\n\n<doc757|masquer=legende>\n\nTexte\n\n</div>",
+				'attendu' => "<div class=\"wp-block-media-text\">\n\n<div class=\"wp-block-media-text__media\">\n\n<doc757|masquer=legende>\n\n</div>\n\n<div class=\"wp-block-media-text__content\">\n\nTexte\n\n</div>\n\n</div>",
 			),
 			array(
 				'nom' => 'colonnes : structure gardée, classes de présentation retirées',
